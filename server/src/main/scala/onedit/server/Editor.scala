@@ -25,16 +25,16 @@ case class Editor(stage: Option[Stage]) extends Plan {
   def intent = {
     case POST(Path("/open") & MultiPart(req)) => {
       MultiPartParams.Streamed(req).files("file") match {
-	case Seq(file, _*) if !file.name.isEmpty => {
-	  ResponseString(file.stream(t => scala.io.Source.fromInputStream(t).mkString)) ~> Ok
-	}
+        case Seq(file, _*) if !file.name.isEmpty => {
+          ResponseString(file.stream(t => scala.io.Source.fromInputStream(t).mkString)) ~> Ok
+        }
       }
     }
     case POST(Path("/quit")) => {
       stage foreach (_.close())
       ResponseString("Bye") ~> Ok
     }
-    case req@GET(Path("/")) => Scalate(req, "index.jade", "text" -> "") ~> Ok
+    case req@GET(Path("/")) => Scalate(req, "index.jade") ~> Ok
     case GET(Path("/test")) => ResponseString("geso") ~> Ok
   }
 

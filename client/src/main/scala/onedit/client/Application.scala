@@ -11,14 +11,11 @@ import onedit.server.Editor
 
 class Application extends javafx.application.Application {
 
-  lazy val (server, url) = Editor.local()
-
-  lazy val root: BorderPane = FXMLLoader.load(getClass.getResource("/root.fxml"), Resource(url))
-
   def start(stage: Stage) {
+    val server = Editor(stage, 3460)
     actor(server.run())
     stage.setTitle("onedit")
-    stage.setScene(new Scene(root))
+    stage.setScene(new Scene(FXMLLoader.load(getClass.getResource("/root.fxml"), Resource(server.url))))
     stage.show()
   }
 

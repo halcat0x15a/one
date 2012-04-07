@@ -11,7 +11,15 @@ object EditorBuild extends Build {
       "Local Maven Repository" at "file://" + Path.userHome + "/.m2/repository",
       "Sonatype Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
     ),
-    libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0-SNAPSHOT"
+    libraryDependencies ++= Seq(
+      "org.scalaz" %% "scalaz-core" % "7.0-SNAPSHOT",
+      "net.databinder" %% "unfiltered-filter" % "0.6.1",
+      "net.databinder" %% "unfiltered-jetty" % "0.6.1",
+      "net.databinder" %% "unfiltered-uploads" % "0.6.1",
+      "org.slf4j" % "slf4j-nop" % "1.6.4",
+      "org.mozilla" % "rhino" % "1.7R3",
+      "com.oracle" % "javafx-runtime" % "2.2-beta"
+    )
   )
 
   lazy val root = Project(
@@ -23,16 +31,7 @@ object EditorBuild extends Build {
   lazy val server = Project(
     id = "onedit-server",
     base = file("server"),
-    settings = buildSettings ++ Seq(
-      libraryDependencies ++= Seq(
-	"net.databinder" %% "unfiltered-filter" % "0.6.1",
-	"net.databinder" %% "unfiltered-jetty" % "0.6.1",
-	"net.databinder" %% "unfiltered-uploads" % "0.6.1",
-        "org.slf4j" % "slf4j-nop" % "1.6.4",
-	"org.mozilla" % "rhino" % "1.7R3",
-	"com.oracle" % "javafx-runtime" % "2.2-beta"
-      )
-    )
+    settings = buildSettings
   ) dependsOn uri("git://github.com/unfiltered/unfiltered-scalate")
 
   lazy val client = Project(
