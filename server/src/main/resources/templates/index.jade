@@ -1,0 +1,33 @@
+!!!
+html
+  head
+    meta(http-equiv="Content-Type" content="text/html;charset=UTF-8")
+    title onedit
+    link(type="text/css" rel="stylesheet" href="public/bootstrap/css/bootstrap.css")
+    script(type="application/javascript" src="public/jquery-1.7.1.min.js")
+    script(type="application/javascript" src="public/bootstrap/js/bootstrap.js")
+    :coffeescript
+      $('.dropdown-toggle').dropdown()
+  body
+    .navbar
+      .navbar-inner
+        .container
+          a.brand(href="#") onedit
+          .nav-collapse
+            ul.nav
+              li.dropdown
+                a.dropdown-toggle(href="#" data-toggle="dropdown")
+                  | File
+                  b.caret
+                ul.dropdown-menu
+                  li
+                    a(id="open" href="#") Open
+                    :coffeescript
+                      $('#open').click => $('#file').click()
+                    form.hide(method="post" action="/open")
+                      input(id="file" type="file" required=true)
+                  li
+                    a(id="quit" href="#") Quit
+                    :coffeescript
+                      $('#quit').click => $.post('/quit')
+    textarea.span12(name="buffer")
