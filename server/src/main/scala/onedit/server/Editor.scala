@@ -9,20 +9,33 @@ import unfiltered.response._
 import unfiltered.filter._
 import unfiltered.jetty._
 import unfiltered.scalate.Scalate
+import unfiltered.util.{ Port, Browser }
+
+import javafx.stage.Stage
 
 import scalaz._
 import Scalaz._
 
-class Editor extends Plan {
+case class Editor(stage: Option[Stage]) extends Plan {
 
   val templates = Editor.resource("/templates").toURI
 
   implicit val engine = new TemplateEngine(new File(templates) :: Nil, "production")
 
   def intent = {
-    case POST(Path("/quit")) => ResponseString("hoge")
-    case req@GET(Path("/")) => Ok ~> Scalate(req, "index.jade")
-    case GET(Path("/test")) => Ok ~> ResponseString("geso")
+    case POST(Path("/open") & MultiPart(req)) => {
+      MultiPartParams.Streamed(req).files("file") match {
+	case Seq(file, _*) if !file.name.isEmpty => {
+	  ResponseString(file.stream(t => scala.io.Source.fromInputStream(t).mkString)) ~> Ok
+	}
+      }
+    }
+    case POST(Path("/quit")) => {
+      stage foreach (_.close())
+      ResponseString("Bye") ~> Ok
+    }
+    case req@GET(Path("/")) => Scalate(req, "index.jade", "text" -> "") ~> Ok
+    case GET(Path("/test")) => ResponseString("geso") ~> Ok
   }
 
 }
@@ -31,13 +44,15 @@ object Editor {
 
   lazy val resource = getClass.getResource _
 
-  def local(port: Int = 3460) = {
-    val http = Http(port)
-    (http.context("/public")(_.resources(resource("/public"))).filter(new Editor), http.url)
-  }
+  private def apply(stage: Option[Stage], port: Int): Server = Http.local(port).context("/public")(_.resources(resource("/public"))).filter(Editor(stage))
+
+  def apply(port: Int): Server = Editor(None, port)
+
+  def apply(stage: Stage, port: Int): Server = Editor(Some(stage), port)
 
   def main(args: Array[String]) {
-    local().fold((server, url) => server.run(_ => unfiltered.util.Browser.open(url)))
+    val server = Editor(Port.any)
+    server.run(_ => Browser.open(server.url))
   }
 
 }

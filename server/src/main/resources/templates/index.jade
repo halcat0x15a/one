@@ -1,4 +1,4 @@
-!!!
+-@ val text: String
 html
   head
     meta(http-equiv="Content-Type" content="text/html;charset=UTF-8")
@@ -22,12 +22,16 @@ html
                 ul.dropdown-menu
                   li
                     a(id="open" href="#") Open
+                    iframe(id="upload_target" name="upload_target")
+                    form.hide(method="post" action="/open" enctype="multipart/form-data" target="upload_target")
+                      input(id="file" name="file" type="file" required=true)
+                      input(id="submit" type="submit")
                     :coffeescript
                       $('#open').click => $('#file').click()
-                    form.hide(method="post" action="/open")
-                      input(id="file" type="file" required=true)
+                      $('#file').change => $('#submit').click()
+                      $('#upload_target').load => $('#buffer').append($('#upload_target').contents().text())
                   li
                     a(id="quit" href="#") Quit
                     :coffeescript
                       $('#quit').click => $.post('/quit')
-    textarea.span12(name="buffer")
+    textarea.span12(id="buffer")= text

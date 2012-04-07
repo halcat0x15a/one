@@ -11,7 +11,7 @@ import onedit.server.Editor
 
 class Application extends javafx.application.Application {
 
-  lazy val (server, url) = Editor.local
+  lazy val (server, url) = Editor.local()
 
   lazy val root: BorderPane = FXMLLoader.load(getClass.getResource("/root.fxml"), Resource(url))
 

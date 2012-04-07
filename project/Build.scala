@@ -27,6 +27,7 @@ object EditorBuild extends Build {
       libraryDependencies ++= Seq(
 	"net.databinder" %% "unfiltered-filter" % "0.6.1",
 	"net.databinder" %% "unfiltered-jetty" % "0.6.1",
+	"net.databinder" %% "unfiltered-uploads" % "0.6.1",
         "org.slf4j" % "slf4j-nop" % "1.6.4",
 	"org.mozilla" % "rhino" % "1.7R3",
 	"com.oracle" % "javafx-runtime" % "2.2-beta"
