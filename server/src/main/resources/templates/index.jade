@@ -2,13 +2,21 @@ html
   head
     meta(http-equiv="Content-Type" content="text/html;charset=UTF-8")
     title onedit
-    link(type="text/css" rel="stylesheet" href="public/bootstrap/css/bootstrap.css")
-    script(type="application/javascript" src="public/jquery-1.7.1.min.js")
-    script(type="application/javascript" src="public/bootstrap/js/bootstrap.js")
+    link(type="text/css" rel="stylesheet" href="public/bootstrap/css/bootstrap.min.css")
+    link(type="text/css" rel="stylesheet" href="public/bootstrap/css/bootstrap-responsive.min.css")
+    link(type="text/css" rel="stylesheet" href="public/syntaxhighlighter_3.0.83/styles/shCoreDefault.css")
+    :sass
+      body
+        padding-top: 60px
+    script(type="text/javascript" src="public/jquery-1.7.1.min.js")
+    script(type="text/javascript" src="public/bootstrap/js/bootstrap.js")
+    script(type="text/javascript" src="public/syntaxhighlighter_3.0.83/scripts/shCore.js")
+    script(type="text/javascript" src="public/syntaxhighlighter_3.0.83/scripts/shBrushJScript.js")
+    script(type="text/javascript" src="public/syntaxhighlighter_3.0.83/scripts/shBrushScala.js")
     :coffeescript
       $('.dropdown-toggle').dropdown()
   body
-    .navbar
+    .navbar.navbar-fixed-top
       .navbar-inner
         .container
           a.brand(href="#") onedit
@@ -20,17 +28,56 @@ html
                   b.caret
                 ul.dropdown-menu
                   li
-                    a(id="open" href="#") Open
-                    iframe(id="upload_target" name="upload_target")
-                    form.hide(method="post" action="/open" enctype="multipart/form-data" target="upload_target")
-                      input(id="file" name="file" type="file" required=true)
-                      input(id="submit" type="submit")
+                    a#open(href="#") Open
+                    iframe#upload-target.hide(name="upload-target")
+                    form.hide(method="post" action="/open" enctype="multipart/form-data" target="upload-target")
+                      input#file(name="file" type="file" required=true)
+                      input#submit(type="submit")
                     :coffeescript
                       $('#open').click => $('#file').click()
                       $('#file').change => $('#submit').click()
-                      $('#upload_target').load => $('#buffer').append($('#upload_target').contents().text())
+                      $('#upload-target').load => $('#buffer').append $('#upload-target').contents().text()
                   li
-                    a(id="quit" href="#") Quit
+                    a#save-local(href="#") Save Local
+                    :coffeescript
+                      $('#save-local').click => window.localStorage.buffer = $('#buffer').val()
+                  li
+                    a#quit(href="#") Quit
                     :coffeescript
                       $('#quit').click => $.post('/quit')
-    textarea.span12(id="buffer")
+              li.dropdown
+                a.dropdown-toggle(href="#" data-toggle="dropdown")
+                  | Language
+                  b.caret
+                ul.dropdown-menu
+                  li
+                    a.lang(href="#" brush="Plain") Plain
+                    a.lang(href="#" brush="JScript") JavaScript
+                    a.lang(href="#" brush="Scala") Scala
+                    :coffeescript
+                      $('.lang').click (event) =>
+                        key = $(event.target).attr 'brush'
+                        window.localStorage.brush = key
+                        if key != 'Plain'
+                          brush = new SyntaxHighlighter.brushes[key]
+                          brush.init()
+                          $('#mirror').html brush.getHtml $('#buffer').val()
+                        else
+                          $('#mirror').text $('#buffer').val()
+    .container-fluid
+      .row-fluid
+        textarea#buffer.span6(cols="64" rows="32")
+        .span6
+          pre#mirror
+        :coffeescript
+          mirror = =>
+            if window.localStorage.brush and window.localStorage.brush != 'Plain'
+              brush = new SyntaxHighlighter.brushes[window.localStorage.brush]
+              brush.init()
+              $('#mirror').html brush.getHtml $('#buffer').val()
+            else
+              $('#mirror').text $('#buffer').val()
+          $('#buffer').keyup mirror
+          if window.localStorage.buffer
+            $('#buffer').append window.localStorage.buffer
+            mirror()

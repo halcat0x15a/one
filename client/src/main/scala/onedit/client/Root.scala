@@ -18,10 +18,15 @@ class Root extends Initializable {
   }
 
   def initialize(location: URL, resources: ResourceBundle) {
-    web.getEngine.setOnStatusChanged(statusChanged)
+    val engine = web.getEngine
+    engine.setOnStatusChanged(statusChanged)
     val url = resources.getString("url")
     println(url)
-    web.getEngine.load(url)
+    engine.load(url)
+    val worker = engine.getLoadWorker
+    while (worker.isRunning) {
+      println(worker.getMessage, worker.getProgress, worker.getState)
+    }
 //    web.getEngine.load("http://www.google.com")
   }
 
