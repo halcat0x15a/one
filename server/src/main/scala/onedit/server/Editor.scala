@@ -3,6 +3,8 @@ package onedit.server
 import java.io.File
 
 import org.fusesource.scalate.TemplateEngine
+import org.fusesource.scalate.filter.ScalaMarkdownFilter
+import org.fusesource.scalate.support.DummyRenderContext
 
 import unfiltered.request._
 import unfiltered.response._
@@ -30,9 +32,8 @@ case class Editor(stage: Option[Stage]) extends Plan {
         }
       }
     }
-    case POST(Path("/quit")) => {
-      stage foreach (_.close())
-      ResponseString("Bye") ~> Ok
+    case POST(Path("/markdown") & Params(Content(content))) => {
+      ResponseString(ScalaMarkdownFilter.filter(new DummyRenderContext("", engine, null), content)) ~> Ok
     }
     case req@GET(Path("/")) => Scalate(req, "index.jade") ~> Ok
     case GET(Path("/test")) => ResponseString("geso") ~> Ok

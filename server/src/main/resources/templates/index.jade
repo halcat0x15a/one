@@ -4,17 +4,42 @@ html
     title onedit
     link(type="text/css" rel="stylesheet" href="public/bootstrap/css/bootstrap.min.css")
     link(type="text/css" rel="stylesheet" href="public/bootstrap/css/bootstrap-responsive.min.css")
-    link(type="text/css" rel="stylesheet" href="public/syntaxhighlighter_3.0.83/styles/shCoreDefault.css")
-    :sass
-      body
-        padding-top: 60px
+    link(type="text/css" rel="stylesheet" href="public/shjs-0.6/sh_style.min.css")
     script(type="text/javascript" src="public/jquery-1.7.1.min.js")
     script(type="text/javascript" src="public/bootstrap/js/bootstrap.js")
-    script(type="text/javascript" src="public/syntaxhighlighter_3.0.83/scripts/shCore.js")
-    script(type="text/javascript" src="public/syntaxhighlighter_3.0.83/scripts/shBrushJScript.js")
-    script(type="text/javascript" src="public/syntaxhighlighter_3.0.83/scripts/shBrushScala.js")
+    script(type="text/javascript" src="public/shjs-0.6/sh_main.min.js")
+    :css
+      body {
+        padding-top: 60px;
+      }
     :coffeescript
       $('.dropdown-toggle').dropdown()
+      highlight = -> sh_highlightDocument('public/shjs-0.6/lang/', '.min.js')
+      syntax = (sh) ->
+        window.localStorage.sh = sh
+        $('#buffer').attr 'class', sh
+      buffer = -> $('#buffer').text()
+      view = (data) -> $('#view').html data
+      $(document).ready ->
+        $('#open').click -> $('#file').click()
+        $('#file').change ->
+          name = $('#file').val()
+          syntax 'sh_' + name.substr(name.lastIndexOf('.') + 1)
+          $('#submit').click()
+        $('#upload-target').load ->
+          $('#buffer').text $('#upload-target').contents().text()
+          highlight()
+        $('#save-local').click -> window.localStorage.buffer = buffer()
+        $('.lang').click (event) ->
+          sh = $(event.target).attr 'sh'
+          syntax sh
+          highlight()
+        $('#view-markup').click -> view buffer()
+        $('#compile-markdown').click ->
+          $.post 'markdown', { content: buffer() }, view, 'text'
+        $('#buffer').blur -> highlight()
+        if window.localStorage.buffer
+          $('#buffer').append window.localStorage.buffer
   body
     .navbar.navbar-fixed-top
       .navbar-inner
@@ -33,51 +58,43 @@ html
                     form.hide(method="post" action="/open" enctype="multipart/form-data" target="upload-target")
                       input#file(name="file" type="file" required=true)
                       input#submit(type="submit")
-                    :coffeescript
-                      $('#open').click => $('#file').click()
-                      $('#file').change => $('#submit').click()
-                      $('#upload-target').load => $('#buffer').append $('#upload-target').contents().text()
                   li
                     a#save-local(href="#") Save Local
-                    :coffeescript
-                      $('#save-local').click => window.localStorage.buffer = $('#buffer').val()
                   li
                     a#quit(href="#") Quit
-                    :coffeescript
-                      $('#quit').click => $.post('/quit')
               li.dropdown
                 a.dropdown-toggle(href="#" data-toggle="dropdown")
                   | Language
                   b.caret
                 ul.dropdown-menu
                   li
-                    a.lang(href="#" brush="Plain") Plain
-                    a.lang(href="#" brush="JScript") JavaScript
-                    a.lang(href="#" brush="Scala") Scala
-                    :coffeescript
-                      $('.lang').click (event) =>
-                        key = $(event.target).attr 'brush'
-                        window.localStorage.brush = key
-                        if key != 'Plain'
-                          brush = new SyntaxHighlighter.brushes[key]
-                          brush.init()
-                          $('#mirror').html brush.getHtml $('#buffer').val()
-                        else
-                          $('#mirror').text $('#buffer').val()
+                    a.lang(href="#" sh="") Plain
+                    a.lang(href="#" sh="sh_c") C
+                    a.lang(href="#" sh="sh_cpp") C++
+                    a.lang(href="#" sh="sh_csharp") C#
+                    a.lang(href="#" sh="sh_css") CSS
+                    a.lang(href="#" sh="sh_html") HTML
+                    a.lang(href="#" sh="sh_java") Java
+                    a.lang(href="#" sh="sh_javascript") JavaScript
+                    a.lang(href="#" sh="sh_perl") Perl
+                    a.lang(href="#" sh="sh_php") PHP
+                    a.lang(href="#" sh="sh_prolog") Prolog
+                    a.lang(href="#" sh="sh_python") Python
+                    a.lang(href="#" sh="sh_ruby") Ruby
+                    a.lang(href="#" sh="sh_scala") Scala
+                    a.lang(href="#" sh="sh_sh") sh
+                    a.lang(href="#" sh="sh_xml") XML
+              li.dropdown
+                a.dropdown-toggle(href="#" data-toggle="dropdown")
+                  | Compile
+                  b.caret
+                ul.dropdown-menu
+                  li
+                    a#view-markup(href="#") View Markup
+                    a#compile-markdown(href="#") Compile Markdown
     .container-fluid
       .row-fluid
-        textarea#buffer.span6(cols="64" rows="32")
         .span6
-          pre#mirror
-        :coffeescript
-          mirror = =>
-            if window.localStorage.brush and window.localStorage.brush != 'Plain'
-              brush = new SyntaxHighlighter.brushes[window.localStorage.brush]
-              brush.init()
-              $('#mirror').html brush.getHtml $('#buffer').val()
-            else
-              $('#mirror').text $('#buffer').val()
-          $('#buffer').keyup mirror
-          if window.localStorage.buffer
-            $('#buffer').append window.localStorage.buffer
-            mirror()
+          pre#buffer(contenteditable="true")
+        .span6
+          #view
