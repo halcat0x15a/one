@@ -18,7 +18,9 @@ html
       syntax = (sh) ->
         window.localStorage.sh = sh
         $('#buffer').attr 'class', sh
-      buffer = -> $('#buffer').text()
+      buffer = ->
+        $('#buffer br').replaceWith('\n')
+        $('#buffer').text()
       view = (data) -> $('#view').html data
       $(document).ready ->
         $('#open').click -> $('#file').click()
