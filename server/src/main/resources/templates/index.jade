@@ -13,24 +13,35 @@ html
         padding-top: 60px;
       }
     :coffeescript
-      $('.dropdown-toggle').dropdown()
+      filename = (name) ->
+        $('#save-form').attr 'action', '/save/' + name
       highlight = -> sh_highlightDocument('public/shjs-0.6/lang/', '.min.js')
       syntax = (sh) ->
         window.localStorage.sh = sh
-        $('#buffer').attr 'class', sh
+        if sh != ''
+          $('#buffer').attr 'class', 'sh_' + sh
+        else
+          $('#buffer').removeAttr 'class'
+        filename window.localStorage.file + if sh then '.' + sh else ''
       buffer = ->
         $('#buffer br').replaceWith('\n')
         $('#buffer').text()
       view = (data) -> $('#view').html data
+      $('.dropdown-toggle').dropdown()
+      if !window.localStorage.file
+        window.localStorage.file = 'out'
       $(document).ready ->
         $('#open').click -> $('#file').click()
         $('#file').change ->
           name = $('#file').val()
-          syntax 'sh_' + name.substr(name.lastIndexOf('.') + 1)
-          $('#submit').click()
+          syntax name.substr(name.lastIndexOf('.') + 1)
+          $('#load-file').click()
         $('#upload-target').load ->
           $('#buffer').text $('#upload-target').contents().text()
           highlight()
+        $('#save').click ->
+          $('#hidden-buffer').val buffer()
+          $('#submit-buffer').click()
         $('#save-local').click -> window.localStorage.buffer = buffer()
         $('.lang').click (event) ->
           sh = $(event.target).attr 'sh'
@@ -39,7 +50,13 @@ html
         $('#view-markup').click -> view buffer()
         $('#compile-markdown').click ->
           $.post 'markdown', { content: buffer() }, view, 'text'
+        $('#save-view-source').click ->
+          source = $('#view').html()
+          if source != ''
+            $('#hidden-buffer').val source
+            $('#submit-buffer').click()
         $('#buffer').blur -> highlight()
+        filename window.localStorage.file
         if window.localStorage.buffer
           $('#buffer').append window.localStorage.buffer
   body
@@ -57,9 +74,8 @@ html
                   li
                     a#open(href="#") Open
                     iframe#upload-target.hide(name="upload-target")
-                    form.hide(method="post" action="/open" enctype="multipart/form-data" target="upload-target")
-                      input#file(name="file" type="file" required=true)
-                      input#submit(type="submit")
+                  li
+                    a#save(href="#") Save
                   li
                     a#save-local(href="#") Save Local
                   li
@@ -71,21 +87,21 @@ html
                 ul.dropdown-menu
                   li
                     a.lang(href="#" sh="") Plain
-                    a.lang(href="#" sh="sh_c") C
-                    a.lang(href="#" sh="sh_cpp") C++
-                    a.lang(href="#" sh="sh_csharp") C#
-                    a.lang(href="#" sh="sh_css") CSS
-                    a.lang(href="#" sh="sh_html") HTML
-                    a.lang(href="#" sh="sh_java") Java
-                    a.lang(href="#" sh="sh_javascript") JavaScript
-                    a.lang(href="#" sh="sh_perl") Perl
-                    a.lang(href="#" sh="sh_php") PHP
-                    a.lang(href="#" sh="sh_prolog") Prolog
-                    a.lang(href="#" sh="sh_python") Python
-                    a.lang(href="#" sh="sh_ruby") Ruby
-                    a.lang(href="#" sh="sh_scala") Scala
-                    a.lang(href="#" sh="sh_sh") sh
-                    a.lang(href="#" sh="sh_xml") XML
+                    a.lang(href="#" sh="c") C
+                    a.lang(href="#" sh="cpp") C++
+                    a.lang(href="#" sh="csharp") C#
+                    a.lang(href="#" sh="css") CSS
+                    a.lang(href="#" sh="html") HTML
+                    a.lang(href="#" sh="java") Java
+                    a.lang(href="#" sh="javascript") JavaScript
+                    a.lang(href="#" sh="perl") Perl
+                    a.lang(href="#" sh="php") PHP
+                    a.lang(href="#" sh="prolog") Prolog
+                    a.lang(href="#" sh="python") Python
+                    a.lang(href="#" sh="ruby") Ruby
+                    a.lang(href="#" sh="scala") Scala
+                    a.lang(href="#" sh="sh") sh
+                    a.lang(href="#" sh="xml") XML
               li.dropdown
                 a.dropdown-toggle(href="#" data-toggle="dropdown")
                   | Compile
@@ -94,9 +110,17 @@ html
                   li
                     a#view-markup(href="#") View Markup
                     a#compile-markdown(href="#") Compile Markdown
+                    a#save-view-source(href="#") Save View Source
     .container-fluid
       .row-fluid
         .span6
           pre#buffer(contenteditable="true")
         .span6
           #view
+    .hide
+      form(method="post" action="/open" enctype="multipart/form-data" target="upload-target")
+        input#file(name="file" type="file" required=true)
+        input#load-file(type="submit")
+      form#save-form(method="post" action="/save" target="_blank")
+        textarea#hidden-buffer(name="content")
+        input#submit-buffer(type="submit")

@@ -3,6 +3,7 @@
   <application>oneditx</application>
   <version>1</version>
   <sessions-enabled>false</sessions-enabled>
+  <threadsafe>true</threadsafe>
   <system-properties>
     <property name="in.gae.j" value="true" />
     <property name="scalate.allowReload" value="false" />

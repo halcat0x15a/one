@@ -28,15 +28,18 @@ case class Editor(stage: Option[Stage]) extends Plan {
     case POST(Path("/open") & MultiPart(req)) => {
       MultiPartParams.Streamed(req).files("file") match {
         case Seq(file, _*) if !file.name.isEmpty => {
-          ResponseString(file.stream(t => scala.io.Source.fromInputStream(t).mkString)) ~> Ok
+          ResponseString(file.stream(t => scala.io.Source.fromInputStream(t).mkString))
         }
       }
     }
-    case POST(Path("/markdown") & Params(Content(content))) => {
-      ResponseString(ScalaMarkdownFilter.filter(new DummyRenderContext("", engine, null), content)) ~> Ok
+    case POST(Path(Seg("save" :: _)) & Params(Content(content))) => {
+      CharContentType("application/octet-stream") ~> ResponseString(content)
     }
-    case req@GET(Path("/")) => Scalate(req, "index.jade") ~> Ok
-    case GET(Path("/test")) => ResponseString("geso") ~> Ok
+    case POST(Path("/markdown") & Params(Content(content))) => {
+      ResponseString(ScalaMarkdownFilter.filter(new DummyRenderContext("", engine, null), content))
+    }
+    case req@GET(Path("/")) => Scalate(req, "index.jade")
+    case GET(Path("/test")) => ResponseString("geso")
   }
 
 }
