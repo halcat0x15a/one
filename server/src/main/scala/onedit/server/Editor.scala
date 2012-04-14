@@ -15,7 +15,7 @@ import unfiltered.util.{ Port, Browser }
 
 import javafx.stage.Stage
 
-import org.python.core._
+import javax.script._
 
 import scala.io.Source
 
@@ -28,7 +28,9 @@ case class Editor(stage: Option[Stage]) extends Plan {
 
   implicit val engine = new TemplateEngine(new File(templates) :: Nil, "production")
 
-  val highlight = Py.compile(Editor.resource("/python/highlight.py").openStream, "/python/highlight.py", CompileMode.eval)
+  val script = (new ScriptEngineManager).getEngineByName("python")
+
+  val highlight = Source.fromURL(Editor.resource("/highlight.py")).mkString
 
   def intent = {
     case POST(Path("/open") & MultiPart(req)) => {
@@ -44,8 +46,9 @@ case class Editor(stage: Option[Stage]) extends Plan {
     case POST(Path("/markdown") & Params(Content(content))) => {
       ResponseString(ScalaMarkdownFilter.filter(new DummyRenderContext("", engine, null), content))
     }
-    case POST(Path("/highlight")) => {
-      ResponseString(Py.runCode(highlight, null, null).asString)
+    case GET(Path("/highlight")) => {
+      script.eval(highlight)
+      ResponseString(script.get("result").toString)
     }
     case req@GET(Path("/")) => Scalate(req, "index.jade")
     case GET(Path("/test")) => ResponseString("geso")
@@ -64,7 +67,9 @@ object Editor {
   def apply(stage: Stage, port: Int): Server = Editor(Some(stage), port)
 
   def main(args: Array[String]) {
-    val server = Editor(scala.util.Properties.envOrElse("PORT", "8080").toInt)
+    val port = scala.util.Properties.envOrElse("PORT", "8080").toInt
+    println(port)
+    val server = Editor(port)
     server.run()
   }
 

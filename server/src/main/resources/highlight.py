@@ -4,4 +4,4 @@ from pygments.formatters import HtmlFormatter
 
 lexer = get_lexer_by_name("python")
 formatter = HtmlFormatter()
-highlight("print 'Hello'", lexer, formatter)
+result = highlight(code, lexer, formatter)
