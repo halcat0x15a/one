@@ -1,8 +1,6 @@
 import sbt._
 import Keys._
-import com.mojolly.scalate.ScalatePlugin._ 
-import sbtappengine.Plugin._
-import AppengineKeys._
+import com.typesafe.startscript.StartScriptPlugin._
 
 object EditorBuild extends Build {
 
@@ -21,9 +19,9 @@ object EditorBuild extends Build {
       "net.databinder" %% "unfiltered-uploads" % "0.6.1",
       "org.fusesource.scalate" % "scalate-jruby" % "1.5.3",
       "org.fusesource.scalamd" % "scalamd" % "1.5",
+      "org.python" % "jython-standalone" % "2.5.2",
       "org.slf4j" % "slf4j-nop" % "1.6.4",
       "org.mozilla" % "rhino" % "1.7R3",
-      "org.mortbay.jetty" % "jetty" % "6.1.22" % "container",
       "com.oracle" % "javafx-runtime" % "2.2-beta"
     )
   )
@@ -37,9 +35,7 @@ object EditorBuild extends Build {
   lazy val server = Project(
     id = "onedit-server",
     base = file("server"),
-    settings = buildSettings ++ scalateSettings ++ appengineSettings ++ Seq(
-      scalateTemplateDirectory in Compile <<= (baseDirectory)(_ / "src/main/resources/templates")
-    )
+    settings = buildSettings ++ startScriptForClassesSettings
   ) dependsOn uri("git://github.com/unfiltered/unfiltered-scalate")
 
   lazy val client = Project(

@@ -1,9 +1,3 @@
-addSbtPlugin("com.eed3si9n" % "sbt-appengine" % "0.4.0")
+resolvers += Classpaths.typesafeResolver
 
-resolvers ++= Seq(
-  "spray repo" at "http://repo.spray.cc",
-  Resolver.url("sbt-plugin-releases", url("http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns),
-  ScalaToolsSnapshots
-)
-
-libraryDependencies <+= sbtVersion(v => "com.mojolly.scalate" %% "xsbt-scalate-generator" % (v + "-0.1.6-SNAPSHOT"))
+addSbtPlugin("com.typesafe.startscript" % "xsbt-start-script-plugin" % "0.5.1")
