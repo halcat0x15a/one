@@ -1,1 +1,1 @@
-web: server/target/start onedit.server.Editor
+web: target/start onedit.Editor

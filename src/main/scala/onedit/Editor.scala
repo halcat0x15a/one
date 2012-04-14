@@ -1,4 +1,4 @@
-package onedit.server
+package onedit
 
 import java.io.File
 
@@ -13,8 +13,6 @@ import unfiltered.jetty._
 import unfiltered.scalate.Scalate
 import unfiltered.util.{ Port, Browser }
 
-import javafx.stage.Stage
-
 import javax.script._
 
 import scala.io.Source
@@ -22,7 +20,7 @@ import scala.io.Source
 import scalaz._
 import Scalaz._
 
-case class Editor(stage: Option[Stage]) extends Plan {
+class Editor extends Plan {
 
   val templates = Editor.resource("/templates").toURI
 
@@ -60,15 +58,11 @@ object Editor {
 
   lazy val resource = getClass.getResource _
 
-  private def apply(stage: Option[Stage], port: Int): Server = Http.local(port).context("/public")(_.resources(resource("/public"))).filter(Editor(stage))
-
-  def apply(port: Int): Server = Editor(None, port)
-
-  def apply(stage: Stage, port: Int): Server = Editor(Some(stage), port)
+  def apply(port: Int) = Http.local(port).context("/public")(_.resources(resource("/public"))).filter(new Editor)
 
   def main(args: Array[String]) {
     val port = scala.util.Properties.envOrElse("PORT", "8080").toInt
-    println(port)
+    println("Starting on port:" + port)
     val server = Editor(port)
     server.run()
   }

@@ -1,4 +1,4 @@
-package onedit.server
+package onedit
 
 import unfiltered.request._
 
