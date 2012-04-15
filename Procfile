@@ -1,1 +1,1 @@
-web: target/start onedit.Editor
+web: target/start onedit.Main

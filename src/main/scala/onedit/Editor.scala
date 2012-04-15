@@ -9,7 +9,7 @@ import org.fusesource.scalate.support.DummyRenderContext
 import unfiltered.request._
 import unfiltered.response._
 import unfiltered.filter._
-import unfiltered.jetty._
+import unfiltered.netty._
 import unfiltered.scalate.Scalate
 import unfiltered.util.{ Port, Browser }
 
@@ -20,7 +20,7 @@ import scala.io.Source
 import scalaz._
 import Scalaz._
 
-class Editor extends Plan {
+class Editor extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse {
 
   val templates = Editor.resource("/templates").toURI
 
@@ -58,13 +58,6 @@ object Editor {
 
   lazy val resource = getClass.getResource _
 
-  def apply(port: Int) = Http.local(port).context("/public")(_.resources(resource("/public"))).filter(new Editor)
-
-  def main(args: Array[String]) {
-    val port = scala.util.Properties.envOrElse("PORT", "8080").toInt
-    println("Starting on port:" + port)
-    val server = Editor(port)
-    server.run()
-  }
+  def apply(port: Int) = Http(port).resources(resource("/public")).plan(new Editor)
 
 }
