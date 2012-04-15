@@ -25,8 +25,6 @@ class Editor extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse {
 
   implicit val engine = new TemplateEngine(new File(templates) :: Nil, "production")
 
-  val script = (new ScriptEngineManager).getEngineByName("python")
-
   val highlight = Source.fromURL(Editor.resource("/highlight.py")).mkString
 
   def intent = {
@@ -43,13 +41,27 @@ class Editor extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse {
     case POST(Path("/markdown") & Params(Content(content))) => {
       ResponseString(ScalaMarkdownFilter.filter(new DummyRenderContext("", engine, null), content))
     }
-    case GET(Path("/highlight")) => {
-      script.eval(highlight)
-      ResponseString(script.get("result").toString)
+    case POST(Path("/highlight") & Params(Content(content) & Language(lang))) => {
+      val engine = (new ScriptEngineManager).getEngineByName("python")
+      val bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE)
+      bindings.put("code", content)
+      bindings.put("lang", lang)
+      engine.eval(highlight)
+      ResponseString(engine.get("result").toString)
     }
     case req@GET(Path("/")) => Scalate(req, "index.jade")
     case GET(Path("/test")) => ResponseString("geso")
   }
+
+  object Content extends Params.Extract(
+    "content",
+    Params.first ~> Params.nonempty
+  )
+
+  object Language extends Params.Extract(
+    "language",
+    Params.first ~> Params.nonempty
+  )
 
 }
 

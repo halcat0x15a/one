@@ -5,9 +5,9 @@ html
     link(type="text/css" rel="stylesheet" href="public/bootstrap/css/bootstrap.min.css")
     link(type="text/css" rel="stylesheet" href="public/bootstrap/css/bootstrap-responsive.min.css")
     link(type="text/css" rel="stylesheet" href="public/shjs-0.6/sh_style.min.css")
+    link(type="text/css" rel="stylesheet" href="public/pygments.css")
     script(type="text/javascript" src="public/jquery-1.7.1.min.js")
     script(type="text/javascript" src="public/bootstrap/js/bootstrap.js")
-    script(type="text/javascript" src="public/shjs-0.6/sh_main.min.js")
     :css
       body {
         padding-top: 60px;
@@ -15,14 +15,10 @@ html
     :coffeescript
       filename = (name) ->
         $('#save-form').attr 'action', '/save/' + name
-      highlight = -> sh_highlightDocument('public/shjs-0.6/lang/', '.min.js')
-      syntax = (sh) ->
-        window.localStorage.sh = sh
-        if sh != ''
-          $('#buffer').attr 'class', 'sh_' + sh
-        else
-          $('#buffer').removeAttr 'class'
-        filename window.localStorage.file + if sh then '.' + sh else ''
+      highlight = ->
+        set = (data) ->
+          $('#buffer').html(data)
+        $.post 'highlight', { content: buffer(), language: window.localStorage.lang }, set, "text"
       buffer = ->
         $('#buffer br').replaceWith('\n')
         $('#buffer').text()
@@ -31,10 +27,9 @@ html
       if !window.localStorage.file
         window.localStorage.file = 'out'
       $(document).ready ->
-        $('#open').click -> $('#file').click()
         $('#file').change ->
           name = $('#file').val()
-          syntax name.substr(name.lastIndexOf('.') + 1)
+          window.localStorage.lang = name.substr(name.lastIndexOf('.') + 1)
           $('#load-file').click()
         $('#upload-target').load ->
           $('#buffer').text $('#upload-target').contents().text()
@@ -44,8 +39,7 @@ html
           $('#submit-buffer').click()
         $('#save-local').click -> window.localStorage.buffer = buffer()
         $('.lang').click (event) ->
-          sh = $(event.target).attr 'sh'
-          syntax sh
+          window.localStorage.lang = $(event.target).text()
           highlight()
         $('#view-markup').click -> view buffer()
         $('#compile-markdown').click ->
@@ -86,22 +80,10 @@ html
                   b.caret
                 ul.dropdown-menu
                   li
-                    a.lang(href="#" sh="") Plain
-                    a.lang(href="#" sh="c") C
-                    a.lang(href="#" sh="cpp") C++
-                    a.lang(href="#" sh="csharp") C#
-                    a.lang(href="#" sh="css") CSS
-                    a.lang(href="#" sh="html") HTML
-                    a.lang(href="#" sh="java") Java
-                    a.lang(href="#" sh="javascript") JavaScript
-                    a.lang(href="#" sh="perl") Perl
-                    a.lang(href="#" sh="php") PHP
-                    a.lang(href="#" sh="prolog") Prolog
-                    a.lang(href="#" sh="python") Python
-                    a.lang(href="#" sh="ruby") Ruby
-                    a.lang(href="#" sh="scala") Scala
-                    a.lang(href="#" sh="sh") sh
-                    a.lang(href="#" sh="xml") XML
+                    a.lang(href="#") groovy
+                    a.lang(href="#") clojure
+                    a.lang(href="#") java
+                    a.lang(href="#") scala
               li.dropdown
                 a.dropdown-toggle(href="#" data-toggle="dropdown")
                   | Compile
@@ -124,3 +106,4 @@ html
       form#save-form(method="post" action="/save" target="_blank")
         textarea#hidden-buffer(name="content")
         input#submit-buffer(type="submit")
+    script(type="text/javascript" src="public/script.js")

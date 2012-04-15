@@ -23,6 +23,7 @@ object EditorBuild extends Build {
 	"org.fusesource.scalamd" % "scalamd" % "1.5",
 	"org.python" % "jython-standalone" % "2.5.2",
 	"org.slf4j" % "slf4j-nop" % "1.6.4",
+	"org.mozilla" % "rhino" % "1.7R3",
 	"javax.servlet" % "servlet-api" % "2.5"
       ),
       scalacOptions += "-unchecked"
