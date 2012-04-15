@@ -6,5 +6,5 @@
               :builds [{
                         :source-path "src/main/cljs"
                         :compiler {
-                                   :output-to "src/main/resources/public/script.js"
+                                   :output-to "src/main/resources/public/onedit.js"
                                    :pretty-print true}}]})

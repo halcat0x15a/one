@@ -27,10 +27,6 @@ html
       if !window.localStorage.file
         window.localStorage.file = 'out'
       $(document).ready ->
-        $('#file').change ->
-          name = $('#file').val()
-          window.localStorage.lang = name.substr(name.lastIndexOf('.') + 1)
-          $('#load-file').click()
         $('#upload-target').load ->
           $('#buffer').text $('#upload-target').contents().text()
           highlight()
@@ -67,7 +63,6 @@ html
                 ul.dropdown-menu
                   li
                     a#open(href="#") Open
-                    iframe#upload-target.hide(name="upload-target")
                   li
                     a#save(href="#") Save
                   li
@@ -100,10 +95,11 @@ html
         .span6
           #view
     .hide
-      form(method="post" action="/open" enctype="multipart/form-data" target="upload-target")
+      iframe#uploading-target.hide(name="uploading-target")
+      form(method="post" action="/open" enctype="multipart/form-data" target="uploading-target")
         input#file(name="file" type="file" required=true)
-        input#load-file(type="submit")
+        input#uploading(type="submit")
       form#save-form(method="post" action="/save" target="_blank")
         textarea#hidden-buffer(name="content")
         input#submit-buffer(type="submit")
-    script(type="text/javascript" src="public/script.js")
+    script(type="text/javascript" src="public/onedit.js")
