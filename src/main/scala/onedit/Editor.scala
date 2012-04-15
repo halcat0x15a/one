@@ -8,7 +8,6 @@ import org.fusesource.scalate.support.DummyRenderContext
 
 import unfiltered.request._
 import unfiltered.response._
-import unfiltered.filter._
 import unfiltered.netty._
 import unfiltered.scalate.Scalate
 import unfiltered.util.{ Port, Browser }
