@@ -1,16 +1,23 @@
 (ns onedit
   (:require [goog.dom :as dom]
-            [goog.events :as events]))
+            [goog.events :as events]
+            [goog.debug.Logger :as logger]
+            [goog.debug.Console :as console]))
 
-(defn open [e]
-  (.click (goog.dom.getElement "file")))
+(def logger (logger/getLogger "onedit"))
 
-(defn upload [e]
-  (.click (goog.dom.getElement "uploading")))
+(console/autoInstall)
 
-(defn uploaded [e]
-  (goog.dom.setTextContent (goog.dom.getElement "buffer") (-> "uploading-target" goog.dom.getElement goog.dom.getFrameContentDocument goog.dom.getTextContent)))
+(def reader
+  (let [reader (goog.global.FileReader.)]
+    (set! reader.onload (fn [e]
+                          (.info logger e.target.result)
+                          (dom/setTextContent (dom/getElement "buffer") e.target.result)))
+    reader))
 
-(goog.events.listen (goog.dom.getElement "open") goog.events.EventType.CLICK open)
-(goog.events.listen (goog.dom.getElement "file") goog.events.EventType.CHANGE upload)
-(goog.events.listen (goog.dom.getElement "uploading-target") goog.events.EventType.LOAD uploaded)
+(defn load [file]
+  (.readAsText reader file))
+
+(events/listen (dom/getElement "open") goog.events.EventType.CLICK #(.click (dom/getElement "file")))
+
+(events/listen (dom/getElement "file") goog.events.EventType.CHANGE (fn [e] (load (aget e.target.files 0))))
