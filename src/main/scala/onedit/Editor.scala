@@ -8,8 +8,7 @@ import org.fusesource.scalate.support.DummyRenderContext
 
 import unfiltered.request._
 import unfiltered.response._
-import unfiltered.filter._
-import unfiltered.jetty._
+import unfiltered.netty._
 import unfiltered.scalate.Scalate
 import unfiltered.util.{ Port, Browser }
 
@@ -20,22 +19,19 @@ import scala.io.Source
 import scalaz._
 import Scalaz._
 
-class Editor extends Plan {
+object Editor extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse {
 
-  val templates = Editor.resource("/templates").toURI
+  lazy val resource = getClass.getResource _
+
+  val templates = resource("/templates").toURI
 
   implicit val engine = new TemplateEngine(new File(templates) :: Nil, "production")
 
-  val highlight = Source.fromURL(Editor.resource("/highlight.py")).mkString
+  val highlight = Source.fromURL(resource("/highlight.py")).mkString
+
+  def apply(port: Int) = Http(port).resources(resource("/public")).plan(this)
 
   def intent = {
-    case POST(Path("/open") & MultiPart(req)) => {
-      MultiPartParams.Streamed(req).files("file") match {
-        case Seq(file, _*) if !file.name.isEmpty => {
-          ResponseString(file.stream(t => Source.fromInputStream(t).mkString))
-        }
-      }
-    }
     case POST(Path(Seg("save" :: _)) & Params(Content(content))) => {
       CharContentType("application/octet-stream") ~> ResponseString(content)
     }
@@ -63,13 +59,5 @@ class Editor extends Plan {
     "language",
     Params.first ~> Params.nonempty
   )
-
-}
-
-object Editor {
-
-  lazy val resource = getClass.getResource _
-
-  def apply(port: Int) = Http(port).context("/public")(_.resources(resource("/public"))).plan(new Editor)
 
 }

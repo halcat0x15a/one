@@ -17,8 +17,7 @@ object EditorBuild extends Build {
       ),
       libraryDependencies ++= Seq(
 	"org.scalaz" %% "scalaz-core" % "7.0-SNAPSHOT",
-	"net.databinder" %% "unfiltered-jetty" % "0.6.1",
-	"net.databinder" %% "unfiltered-uploads" % "0.6.1",
+	"net.databinder" %% "unfiltered-netty-websockets" % "0.6.1",
 	"org.fusesource.scalate" % "scalate-jruby" % "1.5.3",
 	"org.fusesource.scalamd" % "scalamd" % "1.5",
 	"org.python" % "jython-standalone" % "2.5.2",

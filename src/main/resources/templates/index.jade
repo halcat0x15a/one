@@ -15,10 +15,6 @@ html
     :coffeescript
       filename = (name) ->
         $('#save-form').attr 'action', '/save/' + name
-      highlight = ->
-        set = (data) ->
-          $('#buffer').html(data)
-        $.post 'highlight', { content: buffer(), language: window.localStorage.lang }, set, "text"
       buffer = ->
         $('#buffer br').replaceWith('\n')
         $('#buffer').text()
@@ -27,16 +23,10 @@ html
       if !window.localStorage.file
         window.localStorage.file = 'out'
       $(document).ready ->
-        $('#upload-target').load ->
-          $('#buffer').text $('#upload-target').contents().text()
-          highlight()
         $('#save').click ->
           $('#hidden-buffer').val buffer()
           $('#submit-buffer').click()
         $('#save-local').click -> window.localStorage.buffer = buffer()
-        $('.lang').click (event) ->
-          window.localStorage.lang = $(event.target).text()
-          highlight()
         $('#view-markup').click -> view buffer()
         $('#compile-markdown').click ->
           $.post 'markdown', { content: buffer() }, view, 'text'
@@ -45,7 +35,6 @@ html
           if source != ''
             $('#hidden-buffer').val source
             $('#submit-buffer').click()
-        $('#buffer').blur -> highlight()
         filename window.localStorage.file
         if window.localStorage.buffer
           $('#buffer').append window.localStorage.buffer
@@ -78,6 +67,7 @@ html
                     a.lang(href="#") groovy
                     a.lang(href="#") clojure
                     a.lang(href="#") java
+                    a.lang(href="#") python
                     a.lang(href="#") scala
               li.dropdown
                 a.dropdown-toggle(href="#" data-toggle="dropdown")
