@@ -1,27 +1,41 @@
 (ns onedit
   (:require [goog.dom :as dom]
+            [goog.style :as style]
             [goog.events :as events]
             [goog.debug.Logger :as logger]
             [goog.debug.Console :as console]
             [goog.net.cookies :as cookies]
             [goog.net.XhrIo :as xhr-io]
             [goog.Uri :as uri]
-            [goog.editor.Field :as field]
+            [goog.editor.SeamlessField :as field]
             [goog.editor.plugins.BasicTextFormatter :as text-formatter]))
 
 (def logger (logger/getLogger "onedit"))
 
 (console/autoInstall)
 
-(defn buffer-text []
-  (-> "buffer" dom/getElement dom/getTextContent))
+(def buffer (doto (goog.editor.SeamlessField. "buffer" js/document)
+              (.registerPlugin (goog.editor.plugins.BasicTextFormatter.))
+              (.makeEditable)))
+
+(events/listen buffer goog.editor.Field.EventType.DELAYEDCHANGE (amap (dom/getElementsByTagNameAndClass "br") i tags (let [tag (aget tags i)]
+                                                                                                                       (.info logger tag)
+                                                                                                                       (dom/replace "\n" tag))))
+
+(xhr-io/send "public/pygments.css" (fn [e]
+                                     (let [css (.getResponseText e.target)]
+                                       (.info logger css)
+                                       (style/installStyles css (.getElement buffer)))))
+
+(defn buffer-content []
+  (dom/getTextContent (.getElement buffer)))
 
 (def highlight-xhr
   (doto (goog.net.XhrIo.)
     (events/listen goog.net.EventType.SUCCESS (fn [e]
-                                                    (let [text (.getResponseText e.target)]
-                                                      (.info logger text)
-                                                      (.setHtml editor (dom/getElement "buffer") text))))
+                                                (let [text (.getResponseText e.target)]
+                                                  (.info logger text)
+                                                  (.setHtml buffer (dom/getElement "buffer") text))))
     (events/listen goog.net.EventType.ERROR (fn [e] (.info logger (.getLastError e.target))))))
 
 (defn highlight [content]
@@ -31,6 +45,8 @@
     (.info logger lang)
     (.info logger uri)
     (.send highlight-xhr uri "POST")))
+
+(events/listen buffer goog.editor.Field.EventType.BLUR #(highlight (buffer-content)))
 
 (def reader
   (let [reader (js/FileReader.)]
@@ -48,13 +64,9 @@
 (events/listen (dom/getElement "file") goog.events.EventType.CHANGE (fn [e] (load (aget e.target.files 0))))
 
 (amap (dom/getElementsByClass "lang") i languages (events/listen (aget languages i) events/EventType.CLICK (fn [e]
-                                                                                                             (let [text (buffer-text)
+                                                                                                             (let [text (buffer-content)
                                                                                                                    lang (dom/getTextContent e.target)]
                                                                                                                (.info logger text)
                                                                                                                (.info logger lang)
                                                                                                                (.set goog.net.cookies "lang" lang)
                                                                                                                (highlight text)))))
-
-(def editor (doto (goog.editor.Field. "buffer" js/document)
-              (.registerPlugin (goog.editor.plugins.BasicTextFormatter.))
-              (.makeEditable)))
