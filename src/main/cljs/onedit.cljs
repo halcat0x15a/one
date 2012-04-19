@@ -1,5 +1,6 @@
 (ns onedit
   (:require [goog.dom :as dom]
+            [goog.string :as string]
             [goog.style :as style]
             [goog.events :as events]
             [goog.debug.Logger :as logger]
@@ -18,10 +19,6 @@
               (.registerPlugin (goog.editor.plugins.BasicTextFormatter.))
               (.makeEditable)))
 
-(events/listen buffer goog.editor.Field.EventType.DELAYEDCHANGE (amap (dom/getElementsByTagNameAndClass "br") i tags (let [tag (aget tags i)]
-                                                                                                                       (.info logger tag)
-                                                                                                                       (dom/replace "\n" tag))))
-
 (xhr-io/send "public/pygments.css" (fn [e]
                                      (let [css (.getResponseText e.target)]
                                        (.info logger css)
@@ -33,7 +30,7 @@
 (def highlight-xhr
   (doto (goog.net.XhrIo.)
     (events/listen goog.net.EventType.SUCCESS (fn [e]
-                                                (let [text (.getResponseText e.target)]
+                                                (let [text (string/newLineToBr (.getResponseText e.target) true)]
                                                   (.info logger text)
                                                   (.setHtml buffer (dom/getElement "buffer") text))))
     (events/listen goog.net.EventType.ERROR (fn [e] (.info logger (.getLastError e.target))))))

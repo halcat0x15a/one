@@ -4,41 +4,12 @@ html
     title onedit
     link(type="text/css" rel="stylesheet" href="public/bootstrap/css/bootstrap.min.css")
     link(type="text/css" rel="stylesheet" href="public/bootstrap/css/bootstrap-responsive.min.css")
-    link(type="text/css" rel="stylesheet" href="public/shjs-0.6/sh_style.min.css")
-    link(type="text/css" rel="stylesheet" href="public/pygments.css")
     script(type="text/javascript" src="public/jquery-1.7.1.min.js")
     script(type="text/javascript" src="public/bootstrap/js/bootstrap.js")
-    :css
-      body {
-        padding-top: 60px;
-      }
-    :coffeescript
-      filename = (name) ->
-        $('#save-form').attr 'action', '/save/' + name
-      buffer = ->
-        $('#buffer br').replaceWith('\n')
-        $('#buffer').text()
-      view = (data) -> $('#view').html data
-      $('.dropdown-toggle').dropdown()
-      if !window.localStorage.file
-        window.localStorage.file = 'out'
-      $(document).ready ->
-        $('#save').click ->
-          $('#hidden-buffer').val buffer()
-          $('#submit-buffer').click()
-        $('#save-local').click -> window.localStorage.buffer = buffer()
-        $('#view-markup').click -> view buffer()
-        $('#compile-markdown').click ->
-          $.post 'markdown', { content: buffer() }, view, 'text'
-        $('#save-view-source').click ->
-          source = $('#view').html()
-          if source != ''
-            $('#hidden-buffer').val source
-            $('#submit-buffer').click()
-        filename window.localStorage.file
-        if window.localStorage.buffer
-          $('#buffer').append window.localStorage.buffer
-  body
+    :sass
+      #base
+        padding-top: 60px
+  body#base
     .navbar.navbar-fixed-top
       .navbar-inner
         .container
@@ -80,10 +51,8 @@ html
                     a#save-view-source(href="#") Save View Source
     .container-fluid
       .row-fluid
-        .span6
+        .span12
           #buffer
-        .span6
-          #view
     .hide
       iframe#uploading-target.hide(name="uploading-target")
       form(method="post" action="/open" enctype="multipart/form-data" target="uploading-target")
