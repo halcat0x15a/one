@@ -1,3 +1,4 @@
+-@ val lexers: String
 html
   head
     meta(http-equiv="Content-Type" content="text/html;charset=UTF-8")
@@ -35,11 +36,8 @@ html
                   b.caret
                 ul.dropdown-menu
                   li
-                    a.lang(href="#") groovy
-                    a.lang(href="#") clojure
-                    a.lang(href="#") java
-                    a.lang(href="#") python
-                    a.lang(href="#") scala
+                    - for(lexer <- lexers.split(","))
+                      a.lang(href="#")= lexer
               li.dropdown
                 a.dropdown-toggle(href="#" data-toggle="dropdown")
                   | Compile

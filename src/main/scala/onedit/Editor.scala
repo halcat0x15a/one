@@ -1,6 +1,6 @@
 package onedit
 
-import java.io.File
+import java.io.{ File, InputStreamReader }
 
 import org.fusesource.scalate.TemplateEngine
 import org.fusesource.scalate.filter.ScalaMarkdownFilter
@@ -29,6 +29,12 @@ object Editor extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse 
 
   val highlight = Source.fromURL(resource("/highlight.py")).mkString
 
+  val lexers = {
+    val engine = (new ScriptEngineManager).getEngineByName("python")
+    engine.eval(new InputStreamReader(resource("/lexers.py").openStream))
+    engine.get("result").toString
+  }
+
   def apply(port: Int) = Http(port).resources(resource("/public")).plan(this)
 
   def intent = {
@@ -46,7 +52,7 @@ object Editor extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse 
       engine.eval(highlight)
       ResponseString(engine.get("result").toString)
     }
-    case req@GET(Path("/")) => Scalate(req, "index.jade")
+    case req@GET(Path("/")) => Scalate(req, "index.jade", "lexers" -> lexers)
     case GET(Path("/test")) => ResponseString("geso")
   }
 

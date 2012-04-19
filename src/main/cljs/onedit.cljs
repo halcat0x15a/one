@@ -25,7 +25,7 @@
                                        (style/installStyles css (.getElement buffer)))))
 
 (defn buffer-content []
-  (dom/getTextContent (.getElement buffer)))
+  (dom/getRawTextContent (.getElement buffer)))
 
 (def highlight-xhr
   (doto (goog.net.XhrIo.)
@@ -47,10 +47,7 @@
 
 (def reader
   (let [reader (js/FileReader.)]
-    (set! reader.onload (fn [e]
-                          (let [content e.target.result]
-                            (.info logger content)
-                            (highlight content))))
+    (set! reader.onload (fn [e] (highlight e.target.result)))
     reader))
 
 (defn load [file]
@@ -61,9 +58,7 @@
 (events/listen (dom/getElement "file") goog.events.EventType.CHANGE (fn [e] (load (aget e.target.files 0))))
 
 (amap (dom/getElementsByClass "lang") i languages (events/listen (aget languages i) events/EventType.CLICK (fn [e]
-                                                                                                             (let [text (buffer-content)
-                                                                                                                   lang (dom/getTextContent e.target)]
-                                                                                                               (.info logger text)
+                                                                                                             (let [lang (dom/getTextContent e.target)]
                                                                                                                (.info logger lang)
                                                                                                                (.set goog.net.cookies "lang" lang)
-                                                                                                               (highlight text)))))
+                                                                                                               (highlight (buffer-content))))))
