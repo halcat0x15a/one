@@ -4,10 +4,9 @@ html
     title onedit
     link(type="text/css" rel="stylesheet" href="public/bootstrap/css/bootstrap.min.css")
     link(type="text/css" rel="stylesheet" href="public/bootstrap/css/bootstrap-responsive.min.css")
+    script(type="text/javascript" src="public/onedit.js")
     script(type="text/javascript" src="public/jquery-1.7.1.min.js")
     script(type="text/javascript" src="public/bootstrap/js/bootstrap.js")
-    :coffeescript
-      $.getJSON('lexers', (lexers) -> $('.typeahead').typeahead({source:(lexer.name for lexer in lexers)}))
     :sass
       #base
         padding-top: 60px
@@ -41,7 +40,7 @@ html
                     a#compile-markdown(href="#") Compile Markdown
                     a#save-view-source(href="#") Save View Source
             .navbar-search.pull-right
-              input#lang.search-query.typeahead(type="text" placeholder="Language")
+              input#lang.search-query(type="text" placeholder="Language")
     .container-fluid
       .row-fluid
         .span12
@@ -51,4 +50,5 @@ html
       form#save-form(method="post" action="/save" target="_blank")
         textarea#hidden-buffer(name="content")
         input#submit-buffer(type="submit")
-    script(type="text/javascript" src="public/onedit.js")
+    :coffeescript
+      onedit.init()

@@ -1,7 +1,7 @@
 (defproject onedit "0.1-SNAPSHOT"
   :description "online editor"
-  :dependencies [[org.clojure/clojure "1.3.0"]]
-  :plugins [[lein-cljsbuild "0.1.7"]]
+  :dependencies [[org.clojure/clojure "1.4.0"]]
+  :plugins [[lein-cljsbuild "0.1.8"]]
   :cljsbuild {
               :builds [{
                         :source-path "src/main/cljs"
