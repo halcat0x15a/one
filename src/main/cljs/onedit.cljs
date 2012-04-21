@@ -13,6 +13,7 @@
             [goog.net.XhrIo :as xhr-io]
             [goog.editor.SeamlessField :as field]
             [goog.editor.plugins.BasicTextFormatter :as text-formatter]
+            [goog.ui.FormPost :as form-post]
             [goog.events.FileDropHandler :as file-drop]))
 
 (def logger (logger/getLogger "onedit"))
@@ -48,8 +49,25 @@
 (defn load [files]
   (.readAsText reader (aget files 0)))
 
+(defn buffer-blur [e]
+  (let [text (buffer-content)]
+    (highlight text)
+    (forms/setValue (dom/getElement "hidden-buffer") text)))
+
+(defn buffer-delayed-change [e]
+  (.abort highlight-xhr))
+
+(def form-post (goog.ui.FormPost.))
+
+(defn save []
+  (let [text (buffer-content)]
+    (when-not (string/isEmpty text)
+      (.post form-post (object/create "content" text) (str "save/" (.get goog.net.cookies "filename"))))))
+
 (defn init []
   (console/autoInstall)
+  (when-not (.get goog.net.cookies "filename")
+    (.set goog.net.cookies "filename" "scratch"))
   (set! buffer (doto (goog.editor.SeamlessField. "buffer" js/document)
                  (.registerPlugin (goog.editor.plugins.BasicTextFormatter.))
                  (.makeEditable)
@@ -63,12 +81,13 @@
                                        (let [css (.getResponseText e.target)]
                                          (.info logger css)
                                          (style/installStyles css (.getElement buffer)))))
-  (events/listen buffer goog.editor.Field.EventType.BLUR #(highlight (buffer-content)))
-  (events/listen buffer goog.editor.Field.EventType.DELAYEDCHANGE #(.abort highlight-xhr))
+  (events/listen buffer goog.editor.Field.EventType.BLUR buffer-blur)
+  (events/listen buffer goog.editor.Field.EventType.DELAYEDCHANGE buffer-delayed-change)
   (events/listen (goog.events.FileDropHandler. (.getElement buffer)) goog.events.FileDropHandler.EventType.DROP #(let [e (.getBrowserEvent %)]
                                                                                                                    (load e.dataTransfer.files)))
   (events/listen (dom/getElement "open") goog.events.EventType.CLICK #(.click (dom/getElement "file")))
   (events/listen (dom/getElement "file") goog.events.EventType.CHANGE (fn [e] (load e.target.files)))
+  (events/listen (dom/getElement "save") goog.events.EventType.CLICK save)
   (events/listen (dom/getElement "lang") goog.events.EventType.CHANGE (fn [e]
                                                                         (let [lang (forms/getValue e.target)
                                                                               alias (aget (array/find lexers (fn [e i a] (object/contains e lang))) "alias")]

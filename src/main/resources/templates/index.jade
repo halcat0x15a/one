@@ -26,10 +26,6 @@ html
                     a#open(href="#") Open
                   li
                     a#save(href="#") Save
-                  li
-                    a#save-local(href="#") Save Local
-                  li
-                    a#quit(href="#") Quit
               li.dropdown
                 a.dropdown-toggle(href="#" data-toggle="dropdown")
                   | Compile
@@ -44,11 +40,12 @@ html
     .container-fluid
       .row-fluid
         .span12
-          #buffer
+          ul.nav.nav-tabs
+            li.active
+              a(href="#buffer" data-toggle="tab") scratch
+          .tab-content
+            #buffer.tab-pane.active
     .hide
       input#file(name="file" type="file" required=true)
-      form#save-form(method="post" action="/save" target="_blank")
-        textarea#hidden-buffer(name="content")
-        input#submit-buffer(type="submit")
     :coffeescript
       onedit.init()
