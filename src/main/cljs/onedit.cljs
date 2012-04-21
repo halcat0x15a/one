@@ -1,5 +1,8 @@
 (ns onedit
   (:require [goog.dom :as dom]
+            [goog.dom.forms :as forms]
+            [goog.object :as object]
+            [goog.array :as array]
             [goog.string :as string]
             [goog.style :as style]
             [goog.events :as events]
@@ -14,6 +17,13 @@
 (def logger (logger/getLogger "onedit"))
 
 (console/autoInstall)
+
+(def lexers)
+
+(xhr-io/send "lexers" (fn [e]
+                        (let [json (.getResponseJson e.target)]
+                          (.info logger json)
+                          (set! lexers json))))
 
 (def buffer (doto (goog.editor.SeamlessField. "buffer" js/document)
               (.registerPlugin (goog.editor.plugins.BasicTextFormatter.))
@@ -57,8 +67,10 @@
 
 (events/listen (dom/getElement "file") goog.events.EventType.CHANGE (fn [e] (load (aget e.target.files 0))))
 
-(amap (dom/getElementsByClass "lang") i languages (events/listen (aget languages i) events/EventType.CLICK (fn [e]
-                                                                                                             (let [lang (dom/getTextContent e.target)]
-                                                                                                               (.info logger lang)
-                                                                                                               (.set goog.net.cookies "lang" lang)
-                                                                                                               (highlight (buffer-content))))))
+(events/listen (dom/getElement "lang") goog.events.EventType.CHANGE (fn [e]
+                                                                      (let [lang (forms/getValue e.target)
+                                                                            alias (aget (array/find lexers (fn [e i a] (object/contains e lang))) "alias")]
+                                                                        (.info logger lang)
+                                                                        (.info logger alias)
+                                                                        (.set goog.net.cookies "lang" alias)
+                                                                        (highlight (buffer-content)))))
