@@ -28,7 +28,7 @@
     (events/listen goog.net.EventType.SUCCESS (fn [e]
                                                 (let [text (string/newLineToBr (.getResponseText e.target) true)]
                                                   (.info logger text)
-                                                  (.setHtml buffer false (dom/getElement "buffer") text))))
+                                                  (.setHtml buffer false text))))
     (events/listen goog.net.EventType.ERROR (fn [e] (.info logger (.getLastError e.target))))))
 
 (defn highlight [content]
