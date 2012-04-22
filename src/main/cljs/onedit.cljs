@@ -64,14 +64,27 @@
     (when-not (string/isEmpty text)
       (.post form-post (object/create "content" text) (str "save/" (.get goog.net.cookies "filename"))))))
 
+(defn add-tab [id]
+  (dom/appendChild (dom/getElementByClass "nav-tabs") (dom/createDom "li" (object/create "class" "active")
+                                                                     (dom/createDom "a" (object/create "href" (str "#" id) "data-toggle" "tab") "scratch")))
+  (dom/appendChild (dom/getElementByClass "tab-content") (dom/createDom "div" (object/create "id" id "class" "tab-pane active")))
+  (doto (goog.editor.SeamlessField. id js/document)
+    (.registerPlugin (goog.editor.plugins.BasicTextFormatter.))
+    (.addEventListener goog.editor.Field.EventType.BLUR buffer-blur)
+    (.addEventListener goog.editor.Field.EventType.DELAYEDCHANGE buffer-delayed-change)
+    (.setHtml false (dom/getOuterHtml (dom/createDom "div" (object/create "class" "highlight") (dom/createDom "pre"))))
+    (.makeEditable)))
+
 (defn init []
   (console/autoInstall)
   (when-not (.get goog.net.cookies "filename")
     (.set goog.net.cookies "filename" "scratch"))
   (set! buffer (doto (goog.editor.SeamlessField. "buffer" js/document)
                  (.registerPlugin (goog.editor.plugins.BasicTextFormatter.))
-                 (.makeEditable)
-                 (.setHtml false (dom/getOuterHtml (dom/createDom "div" (object/create "class" "highlight") (dom/createDom "pre"))))))
+                 (.addEventListener goog.editor.Field.EventType.BLUR buffer-blur)
+                 (.addEventListener goog.editor.Field.EventType.DELAYEDCHANGE buffer-delayed-change)
+                 (.setHtml false (dom/getOuterHtml (dom/createDom "div" (object/create "class" "highlight") (dom/createDom "pre"))))
+                 (.makeEditable)))
   (xhr-io/send "lexers" (fn [e]
                           (let [json (.getResponseJson e.target)]
                             (.info logger json)
@@ -81,8 +94,6 @@
                                        (let [css (.getResponseText e.target)]
                                          (.info logger css)
                                          (style/installStyles css (.getElement buffer)))))
-  (events/listen buffer goog.editor.Field.EventType.BLUR buffer-blur)
-  (events/listen buffer goog.editor.Field.EventType.DELAYEDCHANGE buffer-delayed-change)
   (events/listen (goog.events.FileDropHandler. (.getElement buffer)) goog.events.FileDropHandler.EventType.DROP #(let [e (.getBrowserEvent %)]
                                                                                                                    (load e.dataTransfer.files)))
   (events/listen (dom/getElement "open") goog.events.EventType.CLICK #(.click (dom/getElement "file")))
