@@ -12,14 +12,14 @@ import unfiltered.netty._
 import unfiltered.scalate.Scalate
 import unfiltered.util.{ Port, Browser }
 
-import javax.script._
+import dispatch._
 
 import scala.io.Source
 
 import scalaz._
 import Scalaz._
 
-object Editor extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse {
+case class Editor(py: String) extends async.Plan with ServerErrorResponse {
 
   lazy val resource = getClass.getResource _
 
@@ -27,36 +27,24 @@ object Editor extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse 
 
   val highlight = Source.fromURL(resource("/highlight.py")).mkString
 
-  def py = (new ScriptEngineManager).getEngineByName("python")
-
-  val lexers = {
-    val engine = py
-    engine.eval(new InputStreamReader(resource("/lexers.py").openStream))
-    engine.get("result").toString
-  }
+  val http = new nio.Http
 
   def apply(port: Int) = Http(port).resources(resource("/public")).plan(this)
 
   def intent = {
-    case GET(Path("/lexers")) => {
-      JsonContent ~> ResponseString(lexers)
+    case req@GET(Path("/lexers")) => {
+      http(:/(py) / "lexers" >- (rep => req.respond(JsonContent ~> ResponseString(rep))))
     }
-    case POST(Path(Seg("save" :: _)) & Params(Content(content))) => {
-      CharContentType("application/octet-stream") ~> ResponseString(content)
+    case req@POST(Path(Seg("save" :: _)) & Params(Content(content))) => {
+      req.respond(CharContentType("application/octet-stream") ~> ResponseString(content))
     }
-    case POST(Path("/markdown") & Params(Content(content))) => {
-      ResponseString(ScalaMarkdownFilter.filter(new DummyRenderContext("", template, null), content))
+    case req@POST(Path("/markdown") & Params(Content(content))) => {
+      req.respond(ResponseString(ScalaMarkdownFilter.filter(new DummyRenderContext("", template, null), content)))
     }
-    case POST(Path("/highlight") & Params(Content(content) & Language(lang))) => {
-      val engine = py
-      val bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE)
-      bindings.put("code", content)
-      bindings.put("lang", lang)
-      engine.eval(highlight)
-      ResponseString(engine.get("result").toString)
+    case req@POST(Path("/highlight") & Params(Content(content) & Language(lang))) => {
+      http(:/(py) / "highlight" << Map("content" -> content, "lang" -> lang) >- (rep => req.respond(ResponseString(rep))))
     }
-    case req@GET(Path("/")) => Scalate(req, "index.jade")
-    case GET(Path("/test")) => ResponseString("geso")
+    case req@GET(Path("/")) => req.respond(Scalate(req, "index.jade"))
   }
 
   object Content extends Params.Extract(
@@ -65,7 +53,7 @@ object Editor extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse 
   )
 
   object Language extends Params.Extract(
-    "language",
+    "lang",
     Params.first ~> Params.nonempty
   )
 

@@ -39,7 +39,7 @@
     (.info logger lang)
     (when (.isActive highlight-xhr)
       (.abort highlight-xhr))
-    (.send highlight-xhr "highlight" "POST" (uri-utils/buildQueryDataFromMap (object/create "language" lang "content" content)))))
+    (.send highlight-xhr "highlight" "POST" (uri-utils/buildQueryDataFromMap (object/create "lang" lang "content" content)))))
 
 (def reader
   (let [reader (js/FileReader.)]
@@ -50,9 +50,7 @@
   (.readAsText reader (aget files 0)))
 
 (defn buffer-blur [e]
-  (let [text (buffer-content)]
-    (highlight text)
-    (forms/setValue (dom/getElement "hidden-buffer") text)))
+  (highlight (buffer-content)))
 
 (defn buffer-delayed-change [e]
   (.abort highlight-xhr))

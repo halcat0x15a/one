@@ -7,9 +7,10 @@ html
     script(type="text/javascript" src="public/onedit.js")
     script(type="text/javascript" src="public/jquery-1.7.1.min.js")
     script(type="text/javascript" src="public/bootstrap/js/bootstrap.js")
-    :sass
-      #base
+    :css
+      #base {
         padding-top: 60px
+      }
   body#base
     .navbar.navbar-fixed-top
       .navbar-inner
@@ -47,5 +48,5 @@ html
             #buffer.tab-pane.active
     .hide
       input#file(name="file" type="file" required=true)
-    :coffeescript
-      onedit.init()
+    :javascript
+      onedit.init();

@@ -2,8 +2,5 @@ target
 *~
 *.log
 lib
-.lein-cljsbuild-compiler-0
-.lein-deps-sum
-.lein-plugins
+.lein*
 .history
-
