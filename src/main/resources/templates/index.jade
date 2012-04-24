@@ -45,7 +45,8 @@ html
             li.active
               a(href="#buffer" data-toggle="tab") scratch
           .tab-content
-            #buffer.tab-pane.active
+            .tab-pane.active
+              pre#buffer(contenteditable="true")
     .hide
       input#file(name="file" type="file" required=true)
     :javascript

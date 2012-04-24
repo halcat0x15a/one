@@ -25,14 +25,14 @@
 (def buffer)
 
 (defn buffer-content []
-  (dom/getRawTextContent (.getElement buffer)))
+  (.text (jquery "#buffer")))
 
 (def highlight-xhr
   (doto (goog.net.XhrIo.)
     (events/listen goog.net.EventType.SUCCESS (fn [e]
                                                 (let [text (string/newLineToBr (.getResponseText e.target) true)]
                                                   (.info logger text)
-                                                  (.setHtml buffer false text))))
+                                                  (.html (jquery "#buffer") text))))
     (events/listen goog.net.EventType.ERROR (fn [e] (.info logger (.getLastError e.target))))))
 
 (defn highlight [content]
@@ -65,30 +65,27 @@
       (.post form-post (object/create "content" text) (str "save/" (.get goog.net.cookies "filename"))))))
 
 (defn add-tab [id]
-  (let [buffer (goog.editor.SeamlessField. id js/document)]
-    (dom/appendChild (dom/getElementByClass "nav-tabs") (dom/createDom "li" (object/create)
-                                                                       (dom/createDom "a" (object/create "href" (str "#" id) "data-toggle" "tab") "scratch")))
+  (let [a (dom/createDom "a" (object/create "href" (str "#" id) "data-toggle" "tab") "scratch")]
+    (dom/appendChild (dom/getElementByClass "nav-tabs") (dom/createDom "li" (object/create) a))
     (dom/appendChild (dom/getElementByClass "tab-content") (dom/createDom "div" (object/create "id" id "class" "tab-pane")))
-    (events/listen (goog.events.FileDropHandler. (.getElement buffer)) goog.events.FileDropHandler.EventType.DROP #(let [e (.getBrowserEvent %)]
-                                                                                                                     (load-files e.dataTransfer.files)))
-    (doto buffer
-      (.registerPlugin (goog.editor.plugins.BasicTextFormatter.))
-      (.addEventListener goog.editor.Field.EventType.BLUR buffer-blur)
-      (.addEventListener goog.editor.Field.EventType.DELAYEDCHANGE buffer-delayed-change)
-      (.setHtml false (dom/getOuterHtml (dom/createDom "div" (object/create "class" "highlight") (dom/createDom "pre"))))
-      (.makeEditable))
-    (.tab (jquery ".nav-tabs a:last") "show")))
+    (let [buffer (goog.editor.SeamlessField. id js/document)]
+      (doto buffer
+        (.registerPlugin (goog.editor.plugins.BasicTextFormatter.))
+        (.addEventListener goog.editor.Field.EventType.BLUR buffer-blur)
+        (.addEventListener goog.editor.Field.EventType.DELAYEDCHANGE buffer-delayed-change)
+        (.setHtml false (dom/getOuterHtml (dom/createDom "div" (object/create "class" "highlight") (dom/createDom "pre"))))
+        (.makeEditable))
+      (events/listen (goog.events.FileDropHandler. (.getElement buffer)) goog.events.FileDropHandler.EventType.DROP #(let [e (.getBrowserEvent %)]
+                                                                                                                       (load-files e.dataTransfer.files)))
+      (.click (jquery ".nav-tabs a:last") #(this-as me
+                                                    (.alert js/window "a")
+                                                    (.tab (jquery me) "show"))))))
 
 (defn init []
   (console/autoInstall)
   (when-not (.get goog.net.cookies "filename")
     (.set goog.net.cookies "filename" "scratch"))
-  (set! buffer (doto (goog.editor.SeamlessField. "buffer" js/document)
-                 (.registerPlugin (goog.editor.plugins.BasicTextFormatter.))
-                 (.addEventListener goog.editor.Field.EventType.BLUR buffer-blur)
-                 (.addEventListener goog.editor.Field.EventType.DELAYEDCHANGE buffer-delayed-change)
-                 (.setHtml false (dom/getOuterHtml (dom/createDom "div" (object/create "class" "highlight") (dom/createDom "pre"))))
-                 (.makeEditable)))
+  (.blur (jquery "#buffer") buffer-blur)
   (xhr-io/send "lexers" (fn [e]
                           (let [json (.getResponseJson e.target)]
                             (.info logger json)
@@ -98,9 +95,8 @@
                                        (let [css (.getResponseText e.target)]
                                          (.info logger css)
                                          (style/installStyles css (.getElement buffer)))))
-  (events/listen (goog.events.FileDropHandler. (.getElement buffer)) goog.events.FileDropHandler.EventType.DROP #(let [e (.getBrowserEvent %)]
+  (events/listen (goog.events.FileDropHandler. (dom/getElement buffer)) goog.events.FileDropHandler.EventType.DROP #(let [e (.getBrowserEvent %)]
                                                                                                                    (load-files e.dataTransfer.files)))
-  (add-tab "scratch")
   (.click (jquery "#open") #(.click (jquery "#file")))
   (.change (jquery "#file") (fn [e] (load-files e.target.files)))
   (.click (jquery "#save") save)

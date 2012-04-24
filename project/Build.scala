@@ -18,7 +18,6 @@ object EditorBuild extends Build {
       libraryDependencies ++= Seq(
         "org.scalaz" %% "scalaz-core" % "7.0-SNAPSHOT",
         "net.databinder" %% "unfiltered-netty-websockets" % "0.6.1",
-	"net.databinder" %% "unfiltered-json" % "0.6.1",
 	"net.databinder" %% "dispatch-nio" % "0.8.8",
         "org.fusesource.scalamd" % "scalamd" % "1.5",
         "org.slf4j" % "slf4j-nop" % "1.6.4",
