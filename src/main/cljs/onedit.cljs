@@ -18,6 +18,8 @@
 
 (def logger (logger/getLogger "onedit"))
 
+(def jquery (js* "$"))
+
 (def lexers)
 
 (def buffer)
@@ -46,7 +48,7 @@
     (set! reader.onload (fn [e] (highlight e.target.result)))
     reader))
 
-(defn load [files]
+(defn load-files [files]
   (.readAsText reader (aget files 0)))
 
 (defn buffer-blur [e]
@@ -63,15 +65,19 @@
       (.post form-post (object/create "content" text) (str "save/" (.get goog.net.cookies "filename"))))))
 
 (defn add-tab [id]
-  (dom/appendChild (dom/getElementByClass "nav-tabs") (dom/createDom "li" (object/create "class" "active")
-                                                                     (dom/createDom "a" (object/create "href" (str "#" id) "data-toggle" "tab") "scratch")))
-  (dom/appendChild (dom/getElementByClass "tab-content") (dom/createDom "div" (object/create "id" id "class" "tab-pane active")))
-  (doto (goog.editor.SeamlessField. id js/document)
-    (.registerPlugin (goog.editor.plugins.BasicTextFormatter.))
-    (.addEventListener goog.editor.Field.EventType.BLUR buffer-blur)
-    (.addEventListener goog.editor.Field.EventType.DELAYEDCHANGE buffer-delayed-change)
-    (.setHtml false (dom/getOuterHtml (dom/createDom "div" (object/create "class" "highlight") (dom/createDom "pre"))))
-    (.makeEditable)))
+  (let [buffer (goog.editor.SeamlessField. id js/document)]
+    (dom/appendChild (dom/getElementByClass "nav-tabs") (dom/createDom "li" (object/create)
+                                                                       (dom/createDom "a" (object/create "href" (str "#" id) "data-toggle" "tab") "scratch")))
+    (dom/appendChild (dom/getElementByClass "tab-content") (dom/createDom "div" (object/create "id" id "class" "tab-pane")))
+    (events/listen (goog.events.FileDropHandler. (.getElement buffer)) goog.events.FileDropHandler.EventType.DROP #(let [e (.getBrowserEvent %)]
+                                                                                                                     (load-files e.dataTransfer.files)))
+    (doto buffer
+      (.registerPlugin (goog.editor.plugins.BasicTextFormatter.))
+      (.addEventListener goog.editor.Field.EventType.BLUR buffer-blur)
+      (.addEventListener goog.editor.Field.EventType.DELAYEDCHANGE buffer-delayed-change)
+      (.setHtml false (dom/getOuterHtml (dom/createDom "div" (object/create "class" "highlight") (dom/createDom "pre"))))
+      (.makeEditable))
+    (.tab (jquery ".nav-tabs a:last") "show")))
 
 (defn init []
   (console/autoInstall)
@@ -87,20 +93,22 @@
                           (let [json (.getResponseJson e.target)]
                             (.info logger json)
                             (set! lexers json)
-                            (.typeahead ((js* "$") "#lang") (object/create "source" (array/map json (fn [l] l.name)))))))
+                            (.typeahead (jquery "#lang") (object/create "source" (array/map json (fn [l] l.name)))))))
   (xhr-io/send "public/pygments.css" (fn [e]
                                        (let [css (.getResponseText e.target)]
                                          (.info logger css)
                                          (style/installStyles css (.getElement buffer)))))
   (events/listen (goog.events.FileDropHandler. (.getElement buffer)) goog.events.FileDropHandler.EventType.DROP #(let [e (.getBrowserEvent %)]
-                                                                                                                   (load e.dataTransfer.files)))
-  (events/listen (dom/getElement "open") goog.events.EventType.CLICK #(.click (dom/getElement "file")))
-  (events/listen (dom/getElement "file") goog.events.EventType.CHANGE (fn [e] (load e.target.files)))
-  (events/listen (dom/getElement "save") goog.events.EventType.CLICK save)
-  (events/listen (dom/getElement "lang") goog.events.EventType.CHANGE (fn [e]
-                                                                        (let [lang (forms/getValue e.target)
-                                                                              alias (aget (array/find lexers (fn [e i a] (object/contains e lang))) "alias")]
-                                                                          (.info logger lang)
-                                                                          (.info logger alias)
-                                                                          (.set goog.net.cookies "lang" alias)
-                                                                          (highlight (buffer-content))))))
+                                                                                                                   (load-files e.dataTransfer.files)))
+  (add-tab "scratch")
+  (.click (jquery "#open") #(.click (jquery "#file")))
+  (.change (jquery "#file") (fn [e] (load-files e.target.files)))
+  (.click (jquery "#save") save)
+  (.change (jquery "#lang") (fn [e]
+                              (let [lang (forms/getValue e.target)]
+                                (if-let [aliases (array/find lexers (fn [e i a] (object/contains e lang)))]
+                                  (let [alias (aget aliases "alias")]
+                                    (.info logger lang)
+                                    (.info logger alias)
+                                    (.set goog.net.cookies "lang" alias)
+                                    (highlight (buffer-content))))))))
