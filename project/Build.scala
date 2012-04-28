@@ -27,6 +27,6 @@ object EditorBuild extends Build {
       ),
       scalacOptions += "-unchecked"
     )
-  ) dependsOn RootProject(uri("git://github.com/unfiltered/unfiltered-scalate.git"))
+  ) dependsOn uri("git://github.com/unfiltered/unfiltered-scalate.git")
 
 }
