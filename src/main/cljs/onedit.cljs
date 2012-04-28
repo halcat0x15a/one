@@ -42,11 +42,14 @@
 (def set-html #(.html (core/buffer-array) %))
 
 (defn highlight-buffer []
-  (highlight (core/buffer-content) set-html))
+  (if-let [filename (.data (core/tab-pane) "filename")]
+    (highlight (core/buffer-content) set-html filename)
+    (highlight (core/buffer-content) set-html)))
 
 (defn open-file [target]
   (let [reader (js/FileReader.)
         file (aget target.files 0)]
+    (.data (core/tab-pane) "filename" file.name)
     (.text (core/jquery ".nav-tabs .active a") file.name)
     (set! reader.onload (fn [e] (highlight e.target.result set-html file.name)))
     (.readAsText reader file)))
@@ -93,10 +96,14 @@
 
 (def show-tab #(.tab % "show"))
 
-(defn add-tab [id elem]
-  (let [a (dom/createDom "a" (object/create "href" (str "#" id)) id)]
+(defn add-tab [id name elem]
+  (let [a (dom/createDom "a" (object/create "href" (str "#" id)) name)
+        div (dom/createDom "div" (object/create "id" id "class" "tab-pane") elem)]
+    (core/log id)
+    (core/log name)
+    (core/log elem)
     (.append (core/jquery ".nav-tabs") (dom/createDom "li" nil a))
-    (.append (core/jquery ".tab-content") (dom/createDom "div" (object/create "id" id "class" "tab-pane") elem))
+    (.append (core/jquery ".tab-content") div)
     (events/listen a goog.events.EventType.CLICK (fn [e]
                                                    (core/log e.target)
                                                    (.preventDefault e)
@@ -104,11 +111,11 @@
     (show-tab (core/jquery ".nav-tabs li a:last"))))
 
 (defn add-buffer
-  ([id] (add-buffer id ""))
-  ([id content]
+  ([name] (add-buffer name ""))
+  ([name content]
      (let [pre (doto (dom/createDom "pre" nil content)
                  (.setAttribute "contenteditable" "true"))]
-       (add-tab id pre)
+       (core/unique #(add-tab % name pre))
        (events/listen (goog.events.FileDropHandler. pre) goog.events.FileDropHandler.EventType.DROP file-drop)
        (events/listen pre goog.events.EventType.BLUR buffer-blur))))
 

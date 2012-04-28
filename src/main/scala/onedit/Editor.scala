@@ -16,6 +16,8 @@ import dispatch._
 import scalaz._
 import Scalaz._
 
+import scala.concurrent.stm._
+
 case class Editor(py: String) extends async.Plan with ServerErrorResponse {
 
   val CONTENT = "content"
@@ -36,7 +38,16 @@ case class Editor(py: String) extends async.Plan with ServerErrorResponse {
     http(:/(py) / "highlight" / dispatcher / value << Map(CONTENT -> content) >- (rep => req.respond(ResponseString(rep))))
   }
 
+  val counter = Ref(0L)
+
   def intent = {
+    case req@GET(Path("/unique")) => {
+      val id = counter.single()
+      atomic { implicit t => 
+	counter += 1
+      }
+      req.respond(JsonContent ~> ResponseString("""{"id":""" |+| id.shows |+| "}"))
+    }
     case req@GET(Path("/lexers")) => {
       http(:/(py) / "lexers" >- (rep => req.respond(JsonContent ~> ResponseString(rep))))
     }
