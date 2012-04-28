@@ -10,7 +10,7 @@ object EditorBuild extends Build {
     settings = Defaults.defaultSettings ++ startScriptForClassesSettings ++ Seq(
       organization := "baskingcat",
       version      := "0.1-SNAPSHOT",
-      scalaVersion := "2.9.1",
+      scalaVersion := "2.9.2",
       resolvers ++= Seq(
         "java" at "http://download.java.net/maven/2",
         ScalaToolsSnapshots
