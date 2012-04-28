@@ -5,6 +5,7 @@ import java.io.File
 import org.fusesource.scalate.TemplateEngine
 import org.fusesource.scalamd.Markdown
 
+import unfiltered.Async
 import unfiltered.request._
 import unfiltered.response._
 import unfiltered.netty._
@@ -17,6 +18,12 @@ import Scalaz._
 
 case class Editor(py: String) extends async.Plan with ServerErrorResponse {
 
+  val CONTENT = "content"
+
+  val LANGUAGE = "language"
+
+  val FILENAME = "filename"
+
   lazy val resource = getClass.getResource _
 
   implicit val template = new TemplateEngine(new File(resource("/templates").toURI) :: Nil, "production")
@@ -24,6 +31,10 @@ case class Editor(py: String) extends async.Plan with ServerErrorResponse {
   val http = new nio.Http
 
   def apply(port: Int) = Http(port).resources(resource("/public")).plan(this)
+
+  def highlight[T, R](req: HttpRequest[T] with Async.Responder[R], content: String, dispatcher: String, value: String) = {
+    http(:/(py) / "highlight" / dispatcher / value << Map(CONTENT -> content) >- (rep => req.respond(ResponseString(rep))))
+  }
 
   def intent = {
     case req@GET(Path("/lexers")) => {
@@ -35,19 +46,27 @@ case class Editor(py: String) extends async.Plan with ServerErrorResponse {
     case req@POST(Path("/markdown") & Params(Content(content))) => {
       req.respond(ResponseString(Markdown(content)))
     }
-    case req@POST(Path("/highlight") & Params(Content(content) & Language(lang))) => {
-      http(:/(py) / "highlight" << Map("content" -> content, "lang" -> lang) >- (rep => req.respond(ResponseString(rep))))
+    case req@POST(Path(Seg("highlight" :: FILENAME :: name :: Nil)) & Params(Content(content))) => {
+      highlight(req, content, FILENAME, name)
+    }
+    case req@POST(Path(Seg("highlight" :: LANGUAGE :: lang :: Nil)) & Params(Content(content))) => {
+      highlight(req, content, LANGUAGE, lang)
     }
     case req@GET(Path("/")) => req.respond(Scalate(req, "index.jade"))
   }
 
   object Content extends Params.Extract(
-    "content",
+    CONTENT,
     Params.first ~> Params.nonempty
   )
 
   object Language extends Params.Extract(
-    "lang",
+    LANGUAGE,
+    Params.first ~> Params.nonempty
+  )
+
+  object Filename extends Params.Extract(
+    FILENAME,
     Params.first ~> Params.nonempty
   )
 
