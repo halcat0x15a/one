@@ -13,7 +13,8 @@ object EditorBuild extends Build {
       scalaVersion := "2.9.2",
       resolvers ++= Seq(
         "java" at "http://download.java.net/maven/2",
-        ScalaToolsSnapshots
+	"typesafe releases" at "http://repo.typesafe.com/typesafe/releases/",
+	"typesafe snapshots" at "http://repo.typesafe.com/typesafe/snapshots/"
       ),
       libraryDependencies ++= Seq(
         "org.scalaz" %% "scalaz-core" % "7.0-SNAPSHOT",
@@ -26,6 +27,6 @@ object EditorBuild extends Build {
       ),
       scalacOptions += "-unchecked"
     )
-  ) dependsOn uri("git://github.com/unfiltered/unfiltered-scalate")
+  ) dependsOn RootProject(uri("git://github.com/unfiltered/unfiltered-scalate.git#master"))
 
 }
