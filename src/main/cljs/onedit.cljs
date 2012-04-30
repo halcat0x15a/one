@@ -83,14 +83,6 @@
   (let [browser (.getBrowserEvent e)]
     (open-file browser.dataTransfer)))
 
-(defn listen-events []
-  (let [file (core/jquery "#file")]
-    (.click (core/jquery "#new-tab") #(add-buffer "scratch"))
-    (.click (core/jquery "#open") #(.click file))
-    (.change file (fn [e] (open-file e.target)))
-    (.click (core/jquery "#save") save)
-    (.change (core/jquery "#lang") chage-lang)))
-
 (def show-tab #(.tab % "show"))
 
 (defn add-tab [id name elem]
@@ -110,7 +102,9 @@
 (defn buffer-blur [e]
   (highlight-buffer))
 
-(defn buffer-delayed-change [e])
+(defn buffer-delayed-change [e]
+  (if-let [socket (core/data "socket")]
+    (.send socket (core/buffer-content))))
 
 (defn add-buffer
   ([name] (add-buffer name ""))
@@ -120,8 +114,28 @@
        (core/unique #(add-tab % name pre))
        (events/listen (goog.events.FileDropHandler. pre) goog.events.FileDropHandler.EventType.DROP file-drop)
        (doto pre
-         (events/listen "DOMCharacterDataModified" buffer-delayed-changed)
+         (events/listen "DOMCharacterDataModified" buffer-delayed-change)
          (events/listen goog.events.EventType.BLUR buffer-blur)))))
+
+(defn live
+  ([]
+     (core/data "socket" (js/WebSocket. (str "ws://localhost:5000/live/" (.attr (core/tab-pane) "id")))))
+  ([id filename]
+     (add-buffer filename)
+     (let [socket (js/WebSocket. (str "ws://localhost:5000/live/" id \/ filename))
+           i (.attr (core/tab-pane) "id")]
+       (core/log i)
+       (set! socket.onmessage (fn [e]
+                                (core/log e.data)
+                                (.html (core/jquery (str "#" i)) e.data))))))
+
+(defn listen-events []
+  (let [file (core/jquery "#file")]
+    (.click (core/jquery "#new-tab") #(add-buffer "scratch"))
+    (.click (core/jquery "#open") #(.click file))
+    (.change file (fn [e] (open-file e.target)))
+    (.click (core/jquery "#save") save)
+    (.change (core/jquery "#lang") chage-lang)))
 
 (defn init []
   (console/autoInstall)

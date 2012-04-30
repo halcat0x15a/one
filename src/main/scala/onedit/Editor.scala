@@ -5,6 +5,8 @@ import java.io.File
 import org.fusesource.scalate.TemplateEngine
 import org.fusesource.scalamd.Markdown
 
+import net.liftweb.json._
+
 import unfiltered.Async
 import unfiltered.request._
 import unfiltered.response._
@@ -18,7 +20,7 @@ import Scalaz._
 
 import scala.concurrent.stm._
 
-case class Editor(py: String) extends async.Plan with ServerErrorResponse {
+case class Editor(server: String) extends async.Plan with ServerErrorResponse {
 
   val CONTENT = "content"
 
@@ -26,19 +28,15 @@ case class Editor(py: String) extends async.Plan with ServerErrorResponse {
 
   val FILENAME = "filename"
 
-  lazy val resource = getClass.getResource _
-
-  implicit val template = new TemplateEngine(new File(resource("/templates").toURI) :: Nil, "production")
+  implicit val template = new TemplateEngine(new File(getClass.getResource("/templates").toURI) :: Nil, "production")
 
   val http = new nio.Http
 
-  def apply(port: Int) = Http(port).resources(resource("/public")).plan(this)
-
   def highlight[T, R](req: HttpRequest[T] with Async.Responder[R], content: String, dispatcher: String, value: String) = {
-    http(:/(py) / "highlight" / dispatcher / value << Map(CONTENT -> content) >- (rep => req.respond(ResponseString(rep))))
+    http(:/(server) / "highlight" / dispatcher / value << Map(CONTENT -> content) >- (rep => req.respond(ResponseString(rep))))
   }
 
-  val counter = Ref(0L)
+  val counter = Ref(mzero[Long])
 
   def intent = {
     case req@GET(Path("/unique")) => {
@@ -46,10 +44,10 @@ case class Editor(py: String) extends async.Plan with ServerErrorResponse {
       atomic { implicit t => 
 	counter += 1
       }
-      req.respond(JsonContent ~> ResponseString("""{"id":""" |+| id.shows |+| "}"))
+      req.respond(Json(Extraction.decompose(Id(id))(DefaultFormats)))
     }
     case req@GET(Path("/lexers")) => {
-      http(:/(py) / "lexers" >- (rep => req.respond(JsonContent ~> ResponseString(rep))))
+      http(:/(server) / "lexers" >- (rep => req.respond(JsonContent ~> ResponseString(rep))))
     }
     case req@POST(Path(Seg("save" :: _)) & Params(Content(content))) => {
       req.respond(CharContentType("application/octet-stream") ~> ResponseString(content))
@@ -80,5 +78,7 @@ case class Editor(py: String) extends async.Plan with ServerErrorResponse {
     FILENAME,
     Params.first ~> Params.nonempty
   )
+
+  case class Id(id: Long)
 
 }

@@ -14,6 +14,10 @@
   ([] (.data (tab-pane) "filename"))
   ([filename] (.data (tab-pane) "filename" filename)))
 
+(defn data
+  ([key] (.data (tab-pane) key))
+  ([key value] (.data (tab-pane) key value)))
+
 (def buffer-array #(jquery ".active pre"))
 
 (def buffer #(aget (buffer-array) 0))
