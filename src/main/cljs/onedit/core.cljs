@@ -10,6 +10,10 @@
 
 (def tab-pane #(jquery "div.active"))
 
+(defn filename
+  ([] (.data (tab-pane) "filename"))
+  ([filename] (.data (tab-pane) "filename" filename)))
+
 (def buffer-array #(jquery ".active pre"))
 
 (def buffer #(aget (buffer-array) 0))

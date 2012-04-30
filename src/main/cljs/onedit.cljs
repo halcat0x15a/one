@@ -54,16 +54,13 @@
     (set! reader.onload (fn [e] (highlight e.target.result set-html file.name)))
     (.readAsText reader file)))
 
-(defn buffer-blur [e]
-  (highlight-buffer))
-
 (defn save []
   (let [text (core/buffer-content)]
     (when-not (string/isEmpty text)
-      (.post (goog.ui.FormPost.) (object/create "content" text) (str "save/" (.get goog.net.cookies "filename"))))))
+      (.post (goog.ui.FormPost.) (object/create "content" text) (str "save/" (core/filename))))))
 
 (defn send-lexers [callback]
-  (xhr-io/send "lexers" (fn [e] (callback (.getResponseJson e.target)))))
+  (.getJSON core/jquery "lexers" callback))
 
 (defn set-lexers [lexers]
   (core/log lexers)
@@ -110,6 +107,11 @@
                                                    (show-tab (core/jquery e.target))))
     (show-tab (core/jquery ".nav-tabs li a:last"))))
 
+(defn buffer-blur [e]
+  (highlight-buffer))
+
+(defn buffer-delayed-change [e])
+
 (defn add-buffer
   ([name] (add-buffer name ""))
   ([name content]
@@ -117,12 +119,12 @@
                  (.setAttribute "contenteditable" "true"))]
        (core/unique #(add-tab % name pre))
        (events/listen (goog.events.FileDropHandler. pre) goog.events.FileDropHandler.EventType.DROP file-drop)
-       (events/listen pre goog.events.EventType.BLUR buffer-blur))))
+       (doto pre
+         (events/listen "DOMCharacterDataModified" buffer-delayed-changed)
+         (events/listen goog.events.EventType.BLUR buffer-blur)))))
 
 (defn init []
   (console/autoInstall)
   (send-lexers set-lexers)
-  (when-not (.get goog.net.cookies "filename")
-    (.set goog.net.cookies "filename" "scratch"))
   (add-buffer "scratch")
   (listen-events))
