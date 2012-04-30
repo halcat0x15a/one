@@ -31,8 +31,9 @@ object LiveCoding extends Plan with CloseOnException with LiveCoding {
     }
     case GET(Path(Seg("live" :: filename :: Nil))) => {
       case Open(socket) => {
-	sender += SenderId(socket) -> filename -> socket
-	println(sender)
+	val id = SenderId(socket)
+	sender += id -> filename -> socket
+	socket.send(id.toString)
       }
       case Message(socket, Text(content)) => {
 	receiver.get(SenderId(socket) -> filename).foreach(_.values.foreach(_.send(content)))

@@ -119,7 +119,9 @@
 
 (defn live
   ([]
-     (core/data "socket" (js/WebSocket. (str "ws://localhost:5000/live/" (.attr (core/tab-pane) "id")))))
+     (let [socket (js/WebSocket. (str "ws://localhost:5000/live/" (.attr (core/tab-pane) "id")))]
+       (set! socket.onmessage (fn [e] (core/log e.data)))
+       (core/data "socket" socket)))
   ([id filename]
      (add-buffer filename)
      (let [socket (js/WebSocket. (str "ws://localhost:5000/live/" id \/ filename))
