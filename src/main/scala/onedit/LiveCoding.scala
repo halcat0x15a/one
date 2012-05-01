@@ -69,9 +69,11 @@ trait LiveCoding {
 
   type Key = (SenderId, String)
 
+  type ReceiverWebSocket = Map[ReceiverId, WebSocket]
+
   val sender: ConcurrentMap[Key, WebSocket] = new ConcurrentHashMap[Key, WebSocket]
 
-  val receiver: ConcurrentMap[Key, Map[ReceiverId, WebSocket]] = new ConcurrentHashMap[Key, Map[ReceiverId, WebSocket]]
+  val receiver: ConcurrentMap[Key, ReceiverWebSocket] = new ConcurrentHashMap[Key, ReceiverWebSocket]
 
   trait Sender
 

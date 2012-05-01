@@ -85,11 +85,11 @@
 
 (def show-tab #(.tab % "show"))
 
-(defn add-tab [id name elem]
-  (let [a (dom/createDom "a" (object/create "href" (str "#" id)) name)
+(defn add-tab [name elem]
+  (let [id (core/unique-name name)
+        a (dom/createDom "a" (object/create "href" (str "#" id)) id)
         div (dom/createDom "div" (object/create "id" id "class" "tab-pane") elem)]
     (core/log id)
-    (core/log name)
     (core/log elem)
     (.append (core/jquery ".nav-tabs") (dom/createDom "li" nil a))
     (.append (core/jquery ".tab-content") div)
@@ -97,7 +97,7 @@
                                                    (core/log e.target)
                                                    (.preventDefault e)
                                                    (show-tab (core/jquery e.target))))
-    (show-tab (core/jquery ".nav-tabs li a:last"))))
+    (show-tab (core/jquery a))))
 
 (defn buffer-blur [e]
   (highlight-buffer))
@@ -110,12 +110,11 @@
   ([name] (add-buffer name ""))
   ([name content]
      (let [pre (doto (dom/createDom "pre" nil content)
-                 (.setAttribute "contenteditable" "true"))]
-       (core/unique #(add-tab % name pre))
+                 (.setAttribute "contenteditable" "true")
+                 (events/listen "DOMCharacterDataModified" buffer-delayed-change)
+                 (events/listen goog.events.EventType.BLUR buffer-blur))]
        (events/listen (goog.events.FileDropHandler. pre) goog.events.FileDropHandler.EventType.DROP file-drop)
-       (doto pre
-         (events/listen "DOMCharacterDataModified" buffer-delayed-change)
-         (events/listen goog.events.EventType.BLUR buffer-blur)))))
+       (add-tab name pre))))
 
 (defn live
   ([]

@@ -24,5 +24,11 @@
 
 (def buffer-content (comp dom/getRawTextContent buffer))
 
-(defn unique [f]
-  (.getJSON jquery "unique" #(f (aget % "id"))))
+(def filenames-map {})
+
+(defn unique-name [name]
+  (let [[unique names] (if-let [names (filenames-map name)]
+                         [(str name "-" (inc (count names))) names]
+                         [name []])]
+    (set! filenames-map (assoc filenames-map name (conj names unique)))
+    unique))

@@ -5,8 +5,6 @@ import java.io.File
 import org.fusesource.scalate.TemplateEngine
 import org.fusesource.scalamd.Markdown
 
-import net.liftweb.json._
-
 import unfiltered.Async
 import unfiltered.request._
 import unfiltered.response._
@@ -17,8 +15,6 @@ import dispatch._
 
 import scalaz._
 import Scalaz._
-
-import scala.concurrent.stm._
 
 case class Editor(server: String) extends async.Plan with ServerErrorResponse {
 
@@ -36,16 +32,7 @@ case class Editor(server: String) extends async.Plan with ServerErrorResponse {
     http(:/(server) / "highlight" / dispatcher / value << Map(CONTENT -> content) >- (rep => req.respond(ResponseString(rep))))
   }
 
-  val counter = Ref(mzero[Long])
-
   def intent = {
-    case req@GET(Path("/unique")) => {
-      val id = counter.single()
-      atomic { implicit t => 
-	counter += 1
-      }
-      req.respond(Json(Extraction.decompose(Id(id))(DefaultFormats)))
-    }
     case req@GET(Path("/lexers")) => {
       http(:/(server) / "lexers" >- (rep => req.respond(JsonContent ~> ResponseString(rep))))
     }
@@ -78,7 +65,5 @@ case class Editor(server: String) extends async.Plan with ServerErrorResponse {
     FILENAME,
     Params.first ~> Params.nonempty
   )
-
-  case class Id(id: Long)
 
 }
