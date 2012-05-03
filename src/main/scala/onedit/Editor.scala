@@ -49,6 +49,7 @@ case class Editor(server: String) extends async.Plan with ServerErrorResponse {
       highlight(req, content, LANGUAGE, lang)
     }
     case req@GET(Path("/")) => req.respond(Scalate(req, "index.jade"))
+    case req@Path("/geso") => req.respond(ResponseString("geso"))
   }
 
   object Content extends Params.Extract(

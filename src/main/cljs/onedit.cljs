@@ -15,7 +15,8 @@
             [goog.editor.SeamlessField :as field]
             [goog.editor.plugins.BasicTextFormatter :as text-formatter]
             [goog.ui.FormPost :as form-post]
-            [goog.events.FileDropHandler :as file-drop]))
+            [goog.events.FileDropHandler :as file-drop])
+  (:require-macros [onedit.syntax :as syntax]))
 
 (defn highlight-success [e callback]
   (let [text (string/newLineToBr (.getResponseText e.target) true)]
@@ -143,3 +144,8 @@
   (send-lexers set-lexers)
   (add-buffer "scratch")
   (listen-events))
+
+(defn test-syntax []
+  (syntax/do-m [a (core/fmap (core/send "lexers") #(.getResponseText %))
+                b (core/fmap (core/send "lexers") #(.getResponseText %))]
+               (+ a.length b.length)))
