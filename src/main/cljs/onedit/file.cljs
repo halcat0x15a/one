@@ -2,7 +2,7 @@
   (:require [onedit.core :as core]
             [onedit.buffer :as buffer]
             [onedit.tab :as tab]
-            [onedit.highlight :as highlight]
+            [onedit.highlighter :as highlighter]
             [goog.object :as object]
             [goog.dom :as dom]
             [goog.events :as events]
@@ -13,7 +13,9 @@
   (let [reader (js/FileReader.)
         file (aget target.files 0)]
     (tab/set-name file.name)
-    (set! reader.onload (fn [e] (highlight/call e.target.result buffer/set-html "filename" file.name)))
+    (set! reader.onload (fn [e]
+                          (buffer/set-html e.target.result)
+                          (highlighter/filename file.name)))
     (.readAsText reader file)))
 
 (defn save []
@@ -22,7 +24,7 @@
       (.post (goog.ui.FormPost.) (object/create "content" text) (str "save/" (tab/data "filename"))))))
 
 (defn blur [e]
-  (highlight/buffer))
+  (highlighter/highlight))
 
 (defn delayed-change [e])
 
@@ -33,7 +35,7 @@
 (defn create
   ([name] (create name ""))
   ([name content]
-     (let [pre (doto (dom/createDom "pre" nil content)
+     (let [pre (doto (dom/createDom "pre" (object/create "class" "prettyprint") content)
                  (.setAttribute "contenteditable" "true")
                  (events/listen "DOMCharacterDataModified" delayed-change)
                  (events/listen goog.events.EventType.BLUR blur))]

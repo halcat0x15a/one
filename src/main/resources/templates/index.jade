@@ -4,9 +4,10 @@ html
     title onedit
     link(type="text/css" rel="stylesheet" href="public/bootstrap/css/bootstrap.min.css")
     link(type="text/css" rel="stylesheet" href="public/bootstrap/css/bootstrap-responsive.min.css")
-    link(type="text/css" rel="stylesheet" href="public/pygments.css")
+    link(type="text/css" rel="stylesheet" href="public/google-code-prettify/prettify.css")
     script(type="text/javascript" src="public/jquery-1.7.1.min.js")
     script(type="text/javascript" src="public/bootstrap/js/bootstrap.js")
+    script(type="text/javascript" src="public/google-code-prettify/prettify.js")
     script(type="text/javascript" src="public/onedit.js")
     :css
       #base {
@@ -38,13 +39,12 @@ html
                   li
                     a#view-markup(href="#") View Markup
                     a#compile-markdown(href="#") Compile Markdown
-            .navbar-search.pull-right
-              input#lang.search-query(type="text" placeholder="Language")
     .container-fluid
       .row-fluid
         .span12
           ul.nav.nav-tabs
           .tab-content
+    input.span12(type="text")
     .hide
       input#file(name="file" type="file" required=true)
     :javascript

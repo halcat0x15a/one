@@ -4,7 +4,8 @@
             [goog.dom :as dom]
             [goog.events :as events]))
 
-(def get-tab #(core/jquery ".nav-tabs .active a"))
+(defn get-tab []
+  (core/jquery ".nav-tabs .active a"))
 
 (defn data
   ([key] (.data (get-tab) key))
@@ -21,8 +22,6 @@
   (let [id (core/unique-name name)
         a (dom/createDom "a" (object/create "href" (str "#" id)) id)
         div (dom/createDom "div" (object/create "id" id "class" "tab-pane") elem)]
-    (core/log id)
-    (core/log elem)
     (.append (core/jquery ".nav-tabs") (dom/createDom "li" nil a))
     (.append (core/jquery ".tab-content") div)
     (events/listen a goog.events.EventType.CLICK (fn [e]
