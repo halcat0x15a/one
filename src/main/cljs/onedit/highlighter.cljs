@@ -1,7 +1,5 @@
 (ns onedit.highlighter
   (:require [onedit.core :as core]
-            [onedit.tab :as tab]
-            [onedit.buffer :as buffer]
             [goog.object :as object]
             [goog.string :as string]))
 

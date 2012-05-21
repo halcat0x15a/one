@@ -18,6 +18,9 @@ object EditorBuild extends Build {
       ),
       libraryDependencies ++= Seq(
         "org.scalaz" %% "scalaz-core" % "7.0-SNAPSHOT",
+	"com.google.api.client" % "google-api-client-auth-oauth2" % "1.2.3-alpha",
+	"com.google.api.client" % "google-api-data-docs-v3" % "1.0.10-alpha",
+	"com.google.api.client" % "google-api-data-docs-v3-atom" % "1.0.10-alpha",
         "net.databinder" %% "unfiltered-netty-websockets" % "0.6.1",
 	"net.databinder" %% "dispatch-nio" % "0.8.8",
         "org.fusesource.scalamd" % "scalamd" % "1.5",

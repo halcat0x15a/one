@@ -25,17 +25,12 @@ case class Editor(server: String) extends async.Plan with ServerErrorResponse {
   val http = new nio.Http
 
   def intent = {
-    case req@GET(Path("/lexers")) => {
-      http(:/(server) / "lexers" >- (rep => req.respond(JsonContent ~> ResponseString(rep))))
-    }
+    case req@Path("/geso") => req.respond(ResponseString("geso"))
     case req@POST(Path(Seg("save" :: _)) & Params(Content(content))) => {
       req.respond(CharContentType("application/octet-stream") ~> ResponseString(content))
     }
-    case req@POST(Path("/markdown") & Params(Content(content))) => {
-      req.respond(ResponseString(Markdown(content)))
-    }
-    case req@GET(Path("/")) => req.respond(Scalate(req, "index.jade"))
-    case req@Path("/geso") => req.respond(ResponseString("geso"))
+    case req@GET(Path(Seg("new" :: filename :: Nil))) => req.respond(Scalate(req, "index.jade", "filename" -> filename))
+    case req@GET(Path("/")) => req.respond(Scalate(req, "index.jade", "filename" -> "scratch"))
   }
 
   object Content extends Params.Extract(

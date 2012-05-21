@@ -1,6 +1,5 @@
 (ns onedit.live
   (:require [onedit.core :as core]
-            [onedit.tab :as tab]
             [onedit.file :as file]))
 
 (defn live

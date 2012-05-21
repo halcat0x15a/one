@@ -1,51 +1,12 @@
+-@ val filename: String
 html
   head
     meta(http-equiv="Content-Type" content="text/html;charset=UTF-8")
-    title onedit
-    link(type="text/css" rel="stylesheet" href="public/bootstrap/css/bootstrap.min.css")
-    link(type="text/css" rel="stylesheet" href="public/bootstrap/css/bootstrap-responsive.min.css")
-    link(type="text/css" rel="stylesheet" href="public/google-code-prettify/prettify.css")
-    script(type="text/javascript" src="public/jquery-1.7.1.min.js")
-    script(type="text/javascript" src="public/bootstrap/js/bootstrap.js")
-    script(type="text/javascript" src="public/google-code-prettify/prettify.js")
-    script(type="text/javascript" src="public/onedit.js")
-    :css
-      #base {
-        padding-top: 60px
-      }
-  body#base
-    .navbar.navbar-fixed-top
-      .navbar-inner
-        .container
-          a.brand(href="#") onedit
-          .nav-collapse
-            ul.nav
-              li.dropdown
-                a.dropdown-toggle(href="#" data-toggle="dropdown")
-                  | File
-                  b.caret
-                ul.dropdown-menu
-                  li
-                    a#new-tab(href="#") New Tab
-                  li
-                    a#open(href="#") Open
-                  li
-                    a#save(href="#") Save
-              li.dropdown
-                a.dropdown-toggle(href="#" data-toggle="dropdown")
-                  | Compile
-                  b.caret
-                ul.dropdown-menu
-                  li
-                    a#view-markup(href="#") View Markup
-                    a#compile-markdown(href="#") Compile Markdown
-    .container-fluid
-      .row-fluid
-        .span12
-          ul.nav.nav-tabs
-          .tab-content
-    input.span12(type="text")
-    .hide
-      input#file(name="file" type="file" required=true)
+    title= filename
+    link(type="text/css" rel="stylesheet" href="/public/style.css")
+    script(type="text/javascript" src="/public/onedit.js")
+  body
+    #field
+    input#file(type="file")
     :javascript
       onedit.init();
