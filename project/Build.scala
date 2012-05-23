@@ -4,6 +4,8 @@ import com.typesafe.startscript.StartScriptPlugin._
 
 object EditorBuild extends Build {
 
+  val unfilteredVersion = "0.6.+"
+
   lazy val root = Project(
     id = "onedit",
     base = file("."),
@@ -17,14 +19,12 @@ object EditorBuild extends Build {
 	"typesafe snapshots" at "http://repo.typesafe.com/typesafe/snapshots/"
       ),
       libraryDependencies ++= Seq(
-        "org.scalaz" %% "scalaz-core" % "7.0-SNAPSHOT",
-	"com.google.api.client" % "google-api-client-auth-oauth2" % "1.2.3-alpha",
-	"com.google.api.client" % "google-api-data-docs-v3" % "1.0.10-alpha",
-	"com.google.api.client" % "google-api-data-docs-v3-atom" % "1.0.10-alpha",
-        "net.databinder" %% "unfiltered-netty-websockets" % "0.6.1",
-	"net.databinder" %% "dispatch-nio" % "0.8.8",
-        "org.fusesource.scalamd" % "scalamd" % "1.5",
-        "org.slf4j" % "slf4j-nop" % "1.6.4",
+        "org.scalaz" %% "scalaz-core" % "7.+",
+        "net.databinder" %% "unfiltered-netty-websockets" % unfilteredVersion,
+        "net.databinder" %% "unfiltered-netty-uploads" % unfilteredVersion,
+	"net.databinder" %% "dispatch-nio" % "0.8.+",
+        "org.fusesource.scalamd" % "scalamd" % "1.+",
+        "org.slf4j" % "slf4j-nop" % "1.6.+",
         "javax.servlet" % "servlet-api" % "2.5"
       ),
       scalacOptions += "-unchecked"

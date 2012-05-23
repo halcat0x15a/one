@@ -9,6 +9,6 @@ object Main extends App {
   val port = Properties.envOrElse("PORT", "8080").toInt
   println("Starting on port:" + port)
   val editor = Editor(args.last)
-  Http(port).plan(LiveCoding).resources(getClass.getResource("/public")).plan(editor).run()
+  Http(port).plan(LiveCoding).resources(getClass.getResource("/public")).plan(editor).handler(editor.decoder).run()
   editor.http.shutdown()
 }

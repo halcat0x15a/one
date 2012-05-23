@@ -1,3 +1,4 @@
+-@ val content: String 
 -@ val filename: String
 html
   head
@@ -6,7 +7,6 @@ html
     link(type="text/css" rel="stylesheet" href="/public/style.css")
     script(type="text/javascript" src="/public/onedit.js")
   body
-    #field
-    input#file(type="file")
+    pre#buffer(contenteditable="true")= content
     :javascript
       onedit.init();

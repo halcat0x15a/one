@@ -3,15 +3,24 @@
             [goog.object :as object]
             [goog.string :as string]
             [goog.dom :as dom]
+            [goog.events :as events]
             [goog.ui.FormPost :as form-post]))
 
-(defn open [field target]
-  (let [reader (js/FileReader.)
-        file (aget target.files 0)]
-    (set! reader.onload (fn [e] (.setHtml field true (string/newLineToBr e.target.result) false)))
-    (.readAsText reader file)))
+(def file-form
+  (let [submit (dom/createDom "input" (object/create "type" "submit"))
+        file (doto (dom/createDom "input" (object/create "type" "file" "name" "file"))
+               (events/listen goog.events.EventType.CHANGE #(.click submit)))]
+    (dom/createDom "form" (object/create "method" "POST" "action" "/open" "enctype" "multipart/form-data")
+                   file
+                   submit)
+    file))
 
-(defn save [field]
-  (let [text (.getCleanContents field)]
+(defn open []
+  (.click file-form))
+
+(def form-post (goog.ui.FormPost.))
+
+(defn save [buffer]
+  (let [text (dom/getRawTextContent buffer)]
     (when-not (empty? text)
-      (.post (goog.ui.FormPost.) (object/create "content" text) (str "/save/" js/document.title)))))
+      (.post form-post (object/create "content" text) (str "/save/" js/document.title)))))

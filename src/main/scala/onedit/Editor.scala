@@ -10,6 +10,7 @@ import unfiltered.request._
 import unfiltered.response._
 import unfiltered.netty._
 import unfiltered.scalate.Scalate
+import unfiltered.netty.request._
 
 import dispatch._
 
@@ -24,13 +25,32 @@ case class Editor(server: String) extends async.Plan with ServerErrorResponse {
 
   val http = new nio.Http
 
+  def index[A](req: HttpRequest[A], filename: String, content: String = "") = {
+    Scalate(req, "index.jade", "filename" -> filename, CONTENT -> content)
+  }
+
+  def index[A](req: HttpRequest[A])(file: AbstractDiskFile): ResponseWriter = {
+    index(req, file.name, new String(file.bytes))
+  }
+
+  def decoder = async.MultiPartDecoder({
+    case POST(Path("/open") & MultiPart(req)) => {
+      case Decode(binding) => {
+	req.respond(MultiPartParams.Disk(binding).files("file").headOption.map(index(req)) | ResponseString(""))
+      }
+    }
+  })
+
   def intent = {
-    case req@Path("/geso") => req.respond(ResponseString("geso"))
     case req@POST(Path(Seg("save" :: _)) & Params(Content(content))) => {
       req.respond(CharContentType("application/octet-stream") ~> ResponseString(content))
     }
-    case req@GET(Path(Seg("new" :: filename :: Nil))) => req.respond(Scalate(req, "index.jade", "filename" -> filename))
-    case req@GET(Path("/")) => req.respond(Scalate(req, "index.jade", "filename" -> "scratch"))
+    case req@GET(Path(Seg("file" :: filename :: Nil))) => {
+      req.respond(index(req, filename))
+    }
+    case req@GET(Path("/")) => {
+      req.respond(index(req, "scratch"))
+    }
   }
 
   object Content extends Params.Extract(
