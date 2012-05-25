@@ -6,3 +6,5 @@
 (def log #(.info logger %))
 
 (def local js/window.localStorage)
+
+(def mode (atom nil))
