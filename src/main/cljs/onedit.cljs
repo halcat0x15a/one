@@ -8,28 +8,31 @@
             [goog.events.KeyHandler :as key-handler]
             [goog.editor.Field :as field]))
 
-(defn create-keymap [field]
-  {:cursor
-   {72 #(cursor/move-left field)
-    74 #(cursor/move-bottom field)
-    75 #(cursor/move-top field)
-    76 #(cursor/move-right field)
-    27 #(reset! core/mode nil)}
-   nil
-   {27 #(reset! core/mode :cursor)}})
+(def keymap
+  {:cursor {false {goog.events.KeyCodes.H cursor/move-left
+                   goog.events.KeyCodes.J cursor/move-bottom
+                   goog.events.KeyCodes.K cursor/move-top
+                   goog.events.KeyCodes.L cursor/move-right
+                   goog.events.KeyCodes.W cursor/move-forward
+                   goog.events.KeyCodes.B cursor/move-backward
+                   goog.events.KeyCodes.ZERO cursor/move-start
+                   goog.events.KeyCodes.ESC (fn [_] (reset! core/mode nil))}
+            true {goog.events.KeyCodes.FOUR cursor/move-end}}
+   nil {false {goog.events.KeyCodes.ESC (fn [_] (reset! core/mode :cursor))}
+        true nil}})
 
-(defn key-handler [field keymap e]
-  (when-let [f ((keymap @core/mode) e.keyCode)]
-    (core/log e.keyCode)
+(defn key-handler [field e]
+  (core/log e.keyCode)
+  (core/log e.shiftKey)
+  (when-let [f (((keymap @core/mode) e.shiftKey) e.keyCode)]
     (.preventDefault e)
-    (f)))
+    (f field)))
 
 (defn init-buffer [field]
-  (let [keymap (create-keymap field)
-        buffer (.getElement field)]
+  (let [buffer (.getElement field)]
     (when (empty? (.getCleanContents field))
       (.setHtml field true (if-let [t (.getItem core/local js/document.title)] t "")))
-    (events/listen (goog.events.KeyHandler. buffer) goog.events.KeyHandler.EventType.KEY (partial key-handler field keymap))))
+    (events/listen (goog.events.KeyHandler. buffer) goog.events.KeyHandler.EventType.KEY (partial key-handler field))))
 
 (defn init []
   (console/autoInstall)
