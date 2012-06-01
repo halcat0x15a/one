@@ -8,3 +8,5 @@
 (def local js/window.localStorage)
 
 (def mode (atom nil))
+
+(deftype Editor [buffer minibuffer])

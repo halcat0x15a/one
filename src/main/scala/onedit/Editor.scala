@@ -5,7 +5,6 @@ import java.io.File
 import org.fusesource.scalate.TemplateEngine
 import org.fusesource.scalamd.Markdown
 
-import unfiltered.Async
 import unfiltered.request._
 import unfiltered.response._
 import unfiltered.netty._
@@ -26,11 +25,10 @@ case class Editor(server: String) extends async.Plan with ServerErrorResponse {
   val http = new nio.Http
 
   def index[A](req: HttpRequest[A], filename: String, content: String = "") = {
-    Scalate(req, "index.jade", "filename" -> filename, CONTENT -> content)
+    Scalate(req, "index.jade", "filename" -> filename, CONTENT -> content.replaceAll(System.lineSeparator, "<br />"))
   }
 
-  def index[A](req: HttpRequest[A])(file: AbstractDiskFile): ResponseWriter = {
-    index(req, file.name, new String(file.bytes))
+  def index[A](req: HttpRequest[A])(file: AbstractDiskFile): ResponseWriter = {    index(req, file.name, new String(file.bytes))
   }
 
   def decoder = async.MultiPartDecoder({

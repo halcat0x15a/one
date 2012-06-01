@@ -3,8 +3,8 @@
             [goog.dom :as dom]
             [goog.string :as string]))
 
-(defn move [f field]
-  (let [range (.getRange field)]
+(defn move [f editor]
+  (let [range (.getRange editor.buffer)]
     (doto range
       (f)
       (.select))))
