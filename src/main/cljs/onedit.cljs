@@ -1,7 +1,9 @@
 (ns onedit
   (:require [onedit.core :as core]
-            [onedit.cursor :as cursor]
+            [onedit.buffer :as buffer]
             [onedit.minibuffer :as minibuffer]
+            [onedit.cursor :as cursor]
+            [onedit.deletion :as deletion]
             [onedit.file :as file]
             [goog.debug.Console :as console]
             [goog.dom :as dom]
@@ -20,6 +22,7 @@
                     keycodes/L cursor/move-right
                     keycodes/W cursor/move-forward
                     keycodes/B cursor/move-backward
+                    keycodes/X deletion/delete-character
                     keycodes/ZERO cursor/move-start
                     keycodes/SEMICOLON minibuffer/focus
                     keycodes/ESC core/default-mode
@@ -28,17 +31,8 @@
    :insert {false {keycodes/ESC core/default-mode}
             true {}}})
 
-(defn key-handler [editor e]
-  (core/log e.keyCode)
-  (when-let [f (((keymap @editor.mode) e.shiftKey) e.keyCode)]
-    (.preventDefault e)
-    (f editor)))
-
-(defn init-editor [editor]
-  (events/listen (events/KeyHandler. editor.buffer) events/KeyHandler.EventType.KEY (partial key-handler editor)))
-
 (defn init []
   (console/autoInstall)
-  (doto (core/Editor. (atom :default) (dom/getElement "buffer") (minibuffer/create))
-    (init-editor)
+  (doto (core/Editor. (atom :default) (buffer/create) (minibuffer/create))
+    (buffer/init keymap)
     (minibuffer/init functionmap)))

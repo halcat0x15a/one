@@ -4,13 +4,19 @@
             [goog.dom.Range :as range]
             [goog.string :as string]))
 
+(defn create []
+  (range/createFromWindow))
+
 (defn move [f editor]
-  (let [range (range/createFromWindow)]
+  (let [range (create)]
     (doto range
-      (f editor)
+      (f)
       (.select))))
 
-(defn horizontal [f pred range editor]
+(defn move-n [editor node offset]
+  (move (fn [range editor] (.moveToNodes range node offset node offset)) editor))
+
+(defn horizontal [f pred range]
   (when (pred range)
     (.moveToNodes range (.getStartNode range) (f (.getStartOffset range)) (.getEndNode range) (f (.getEndOffset range)))))
 
@@ -18,34 +24,33 @@
 
 (def move-right (partial move (partial horizontal inc #(< (.getStartOffset %) (alength (.getStartNode %))))))
 
-(defn vertical [f range editor]
+(defn vertical [editor f range]
   (when-let [node (-> (.getStartNode range) f f)]
     (when (dom/contains editor.buffer node)
       (let [offset (min (.getStartOffset range) (dom/getNodeTextLength node))]
         (.moveToNodes range node offset node offset)))))
 
-(def move-top (partial move (partial vertical dom/getPreviousNode)))
+(defn move-top [editor]
+  (move (partial vertical editor dom/getPreviousNode) editor))
 
-(def move-bottom (partial move (partial vertical dom/getNextNode)))
+(defn move-bottom [editor]
+  (move (partial vertical editor dom/getNextNode) editor))
 
-(defn word [f range editor]
+(defn word [f range]
   (let [offset (f (map (partial apply str) (split-at (.getStartOffset range) (dom/getRawTextContent (.getStartNode range)))))]
     (.moveToNodes range (.getStartNode range) offset (.getEndNode range) offset)))
 
 (defn forward [[s1 s2]]
-  (core/log s1)
-  (core/log s2)
   (+ (count s1) (count (re-find #"\s*\w+" s2))))
 
 (defn backward [[s _]]
-  (core/log s)
-  (reduce + (map count (drop-last (re-seq #"\w+\s*" s)))))
+  (apply + (map count (drop-last (re-seq #"\w+\s*" s)))))
 
 (def move-forward (partial move (partial word forward)))
 
 (def move-backward (partial move (partial word backward)))
 
-(defn line [f range editor]
+(defn line [f range]
   (let [node (.getStartNode range)
         offset (f node)]
     (.moveToNodes range node offset node offset)))

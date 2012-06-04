@@ -9,8 +9,9 @@
 
 (deftype Editor [mode buffer minibuffer])
 
-(defn default-mode [editor]
-  (reset! editor.mode :default))
+(defn change-mode [mode editor]
+  (reset! editor.mode mode))
 
-(defn insert-mode [editor]
-  (reset! editor.mode :insert))
+(def default-mode (partial change-mode :default))
+
+(def insert-mode (partial change-mode :insert))
