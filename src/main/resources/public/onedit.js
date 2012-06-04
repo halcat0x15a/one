@@ -20778,12 +20778,12 @@ goog.provide("onedit.core");
 goog.require("cljs.core");
 goog.require("goog.debug.Logger");
 onedit.core.logger = goog.debug.Logger.getLogger.call(null, "onedit");
-onedit.core.log = function log(p1__32244_SHARP_) {
-  return onedit.core.logger.info(p1__32244_SHARP_)
+onedit.core.log = function log(p1__72326_SHARP_) {
+  return onedit.core.logger.info(p1__72326_SHARP_)
 };
 onedit.core.local = window["localStorage"];
-onedit.core.mode = cljs.core.atom.call(null, null);
-onedit.core.Editor = function(buffer, minibuffer) {
+onedit.core.Editor = function(mode, buffer, minibuffer) {
+  this.mode = mode;
   this.buffer = buffer;
   this.minibuffer = minibuffer
 };
@@ -20792,6 +20792,12 @@ onedit.core.Editor.cljs$lang$ctorPrSeq = function(this__455__auto__) {
   return cljs.core.list.call(null, "onedit.core.Editor")
 };
 onedit.core.Editor;
+onedit.core.default_mode = function default_mode(editor) {
+  return cljs.core.reset_BANG_.call(null, editor.mode, "\ufdd0'default")
+};
+onedit.core.insert_mode = function insert_mode(editor) {
+  return cljs.core.reset_BANG_.call(null, editor.mode, "\ufdd0'insert")
+};
 goog.provide("goog.dom.BrowserFeature");
 goog.require("goog.userAgent");
 goog.dom.BrowserFeature = {CAN_ADD_NAME_OR_TYPE_ATTRIBUTES:!goog.userAgent.IE || goog.userAgent.isDocumentMode(9), CAN_USE_CHILDREN_ATTRIBUTE:!goog.userAgent.GECKO && !goog.userAgent.IE || goog.userAgent.IE && goog.userAgent.isDocumentMode(9) || goog.userAgent.GECKO && goog.userAgent.isVersion("1.9.1"), CAN_USE_INNER_TEXT:goog.userAgent.IE && !goog.userAgent.isVersion("9"), INNER_HTML_NEEDS_SCOPED_ELEMENT:goog.userAgent.IE};
@@ -26148,206 +26154,6 @@ onedit.minibuffer.focus = function focus(editor) {
   G__183075__183076;
   return goog.editor.focus.focusInputField.call(null, editor.minibuffer.getElement())
 };
-goog.provide("onedit.cursor");
-goog.require("cljs.core");
-goog.require("onedit.core");
-goog.require("goog.dom");
-goog.require("goog.string");
-onedit.cursor.move = function move(f, editor) {
-  var range__129282 = editor.buffer.getRange();
-  var G__129283__129284 = range__129282;
-  f.call(null, G__129283__129284);
-  G__129283__129284.select();
-  return G__129283__129284
-};
-onedit.cursor.horizontal = function horizontal(f, pred, range) {
-  if(cljs.core.truth_(pred.call(null, range))) {
-    return range.moveToNodes(range.getStartNode(), f.call(null, range.getStartOffset()), range.getEndNode(), f.call(null, range.getEndOffset()))
-  }else {
-    return null
-  }
-};
-onedit.cursor.move_left = cljs.core.partial.call(null, onedit.cursor.move, cljs.core.partial.call(null, onedit.cursor.horizontal, cljs.core.dec, function(p1__129285_SHARP_) {
-  return p1__129285_SHARP_.getStartOffset() > 0
-}));
-onedit.cursor.move_right = cljs.core.partial.call(null, onedit.cursor.move, cljs.core.partial.call(null, onedit.cursor.horizontal, cljs.core.inc, function(p1__129286_SHARP_) {
-  return p1__129286_SHARP_.getStartOffset() < p1__129286_SHARP_.getStartNode().length
-}));
-onedit.cursor.vertical = function vertical(f, range) {
-  var temp__3974__auto____129287 = f.call(null, f.call(null, range.getStartNode()));
-  if(cljs.core.truth_(temp__3974__auto____129287)) {
-    var node__129288 = temp__3974__auto____129287;
-    var offset__129289 = range.getStartOffset() < goog.dom.getNodeTextLength.call(null, node__129288) ? range.getStartOffset() : goog.dom.getNodeTextLength.call(null, node__129288);
-    return range.moveToNodes(node__129288, offset__129289, node__129288, offset__129289)
-  }else {
-    return null
-  }
-};
-onedit.cursor.move_top = cljs.core.partial.call(null, onedit.cursor.move, cljs.core.partial.call(null, onedit.cursor.vertical, goog.dom.getPreviousNode));
-onedit.cursor.move_bottom = cljs.core.partial.call(null, onedit.cursor.move, cljs.core.partial.call(null, onedit.cursor.vertical, goog.dom.getNextNode));
-onedit.cursor.word = function word(f, range) {
-  var offset__129290 = f.call(null, cljs.core.map.call(null, cljs.core.partial.call(null, cljs.core.apply, cljs.core.str), cljs.core.split_at.call(null, range.getStartOffset(), goog.dom.getTextContent.call(null, range.getStartNode()))));
-  return range.moveToNodes(range.getStartNode(), offset__129290, range.getEndNode(), offset__129290)
-};
-onedit.cursor.forward = function forward(p__129291) {
-  var vec__129292__129293 = p__129291;
-  var s1__129294 = cljs.core.nth.call(null, vec__129292__129293, 0, null);
-  var s2__129295 = cljs.core.nth.call(null, vec__129292__129293, 1, null);
-  return cljs.core.count.call(null, s1__129294) + cljs.core.count.call(null, cljs.core.re_find.call(null, /\s*\w+/, s2__129295))
-};
-onedit.cursor.backward = function backward(p__129296) {
-  var vec__129297__129298 = p__129296;
-  var s__129299 = cljs.core.nth.call(null, vec__129297__129298, 0, null);
-  var ___129300 = cljs.core.nth.call(null, vec__129297__129298, 1, null);
-  return cljs.core.reduce.call(null, cljs.core._PLUS_, cljs.core.map.call(null, cljs.core.count, cljs.core.drop_last.call(null, cljs.core.re_seq.call(null, /\w+\s*/, s__129299))))
-};
-onedit.cursor.move_forward = cljs.core.partial.call(null, onedit.cursor.move, cljs.core.partial.call(null, onedit.cursor.word, onedit.cursor.forward));
-onedit.cursor.move_backward = cljs.core.partial.call(null, onedit.cursor.move, cljs.core.partial.call(null, onedit.cursor.word, onedit.cursor.backward));
-onedit.cursor.line = function line(f, range) {
-  var node__129301 = range.getStartNode();
-  var offset__129302 = f.call(null, node__129301);
-  return range.moveToNodes(node__129301, offset__129302, node__129301, offset__129302)
-};
-onedit.cursor.start = function start(node) {
-  return 0
-};
-onedit.cursor.end = function end(node) {
-  return goog.dom.getNodeTextLength.call(null, node)
-};
-onedit.cursor.move_start = cljs.core.partial.call(null, onedit.cursor.move, cljs.core.partial.call(null, onedit.cursor.line, onedit.cursor.start));
-onedit.cursor.move_end = cljs.core.partial.call(null, onedit.cursor.move, cljs.core.partial.call(null, onedit.cursor.line, onedit.cursor.end));
-goog.provide("goog.ui.FormPost");
-goog.require("goog.array");
-goog.require("goog.dom.TagName");
-goog.require("goog.string");
-goog.require("goog.string.StringBuffer");
-goog.require("goog.ui.Component");
-goog.ui.FormPost = function(opt_dom) {
-  goog.ui.Component.call(this, opt_dom)
-};
-goog.inherits(goog.ui.FormPost, goog.ui.Component);
-goog.ui.FormPost.prototype.createDom = function() {
-  this.setElementInternal(this.getDomHelper().createDom(goog.dom.TagName.FORM, {"method":"POST", "style":"display:none"}))
-};
-goog.ui.FormPost.prototype.post = function(parameters, opt_url, opt_target) {
-  var form = this.getElement();
-  if(!form) {
-    this.render();
-    form = this.getElement()
-  }
-  form.action = opt_url || "";
-  form.target = opt_target || "";
-  this.setParameters_(form, parameters);
-  form.submit()
-};
-goog.ui.FormPost.prototype.setParameters_ = function(form, parameters) {
-  var name, value, sb = new goog.string.StringBuffer;
-  for(name in parameters) {
-    value = parameters[name];
-    if(goog.isArrayLike(value)) {
-      goog.array.forEach(value, goog.bind(this.appendInput_, this, sb, name))
-    }else {
-      this.appendInput_(sb, name, value)
-    }
-  }
-  form.innerHTML = sb.toString()
-};
-goog.ui.FormPost.prototype.appendInput_ = function(out, name, value) {
-  out.append('<input type="hidden" name="', goog.string.htmlEscape(name), '" value="', goog.string.htmlEscape(value), '">')
-};
-goog.provide("onedit.file");
-goog.require("cljs.core");
-goog.require("onedit.core");
-goog.require("goog.object");
-goog.require("goog.string");
-goog.require("goog.dom");
-goog.require("goog.events");
-goog.require("goog.ui.FormPost");
-onedit.file.file_form = function() {
-  var submit__129627 = goog.dom.createDom.call(null, "input", goog.object.create.call(null, "type", "submit"));
-  var file__129630 = function() {
-    var G__129628__129629 = goog.dom.createDom.call(null, "input", goog.object.create.call(null, "type", "file", "name", "file"));
-    goog.events.listen.call(null, G__129628__129629, goog.events.EventType.CHANGE, function() {
-      return submit__129627.click()
-    });
-    return G__129628__129629
-  }();
-  goog.dom.createDom.call(null, "form", goog.object.create.call(null, "method", "POST", "action", "/open", "enctype", "multipart/form-data"), file__129630, submit__129627);
-  return file__129630
-}();
-onedit.file.open = function open(editor) {
-  return onedit.file.file_form.click()
-};
-onedit.file.form_post = new goog.ui.FormPost;
-onedit.file.save = function save(editor) {
-  var text__129631 = editor.buffer.getCleanContents();
-  if(cljs.core.empty_QMARK_.call(null, text__129631)) {
-    return null
-  }else {
-    return onedit.file.form_post.post(goog.object.create.call(null, "content", text__129631), [cljs.core.str("/save/"), cljs.core.str(document["title"])].join(""))
-  }
-};
-goog.provide("goog.editor.defines");
-goog.editor.defines.USE_CONTENTEDITABLE_IN_FIREFOX_3 = false;
-goog.provide("goog.userAgent.product.isVersion");
-goog.require("goog.userAgent.product");
-goog.userAgent.product.determineVersion_ = function() {
-  var version = "", re, combine;
-  if(goog.userAgent.product.FIREFOX) {
-    re = /Firefox\/([0-9.]+)/
-  }else {
-    if(goog.userAgent.product.IE || goog.userAgent.product.OPERA) {
-      return goog.userAgent.VERSION
-    }else {
-      if(goog.userAgent.product.CHROME) {
-        re = /Chrome\/([0-9.]+)/
-      }else {
-        if(goog.userAgent.product.SAFARI) {
-          re = /Version\/([0-9.]+)/
-        }else {
-          if(goog.userAgent.product.IPHONE || goog.userAgent.product.IPAD) {
-            re = /Version\/(\S+).*Mobile\/(\S+)/;
-            combine = true
-          }else {
-            if(goog.userAgent.product.ANDROID) {
-              re = /Android\s+([0-9.]+)(?:.*Version\/([0-9.]+))?/
-            }else {
-              if(goog.userAgent.product.CAMINO) {
-                re = /Camino\/([0-9.]+)/
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  if(re) {
-    var arr = re.exec(goog.userAgent.getUserAgentString());
-    if(arr) {
-      version = combine ? arr[1] + "." + arr[2] : arr[2] || arr[1]
-    }else {
-      version = ""
-    }
-  }
-  return version
-};
-goog.userAgent.product.VERSION = goog.userAgent.product.determineVersion_();
-goog.userAgent.product.isVersion = function(version) {
-  return goog.string.compareVersions(goog.userAgent.product.VERSION, version) >= 0
-};
-goog.provide("goog.editor.BrowserFeature");
-goog.require("goog.editor.defines");
-goog.require("goog.userAgent");
-goog.require("goog.userAgent.product");
-goog.require("goog.userAgent.product.isVersion");
-goog.editor.BrowserFeature = {HAS_IE_RANGES:goog.userAgent.IE && !goog.userAgent.isDocumentMode(9), HAS_W3C_RANGES:goog.userAgent.GECKO || goog.userAgent.WEBKIT || goog.userAgent.OPERA || goog.userAgent.IE && goog.userAgent.isDocumentMode(9), HAS_CONTENT_EDITABLE:goog.userAgent.IE || goog.userAgent.WEBKIT || goog.userAgent.OPERA || goog.editor.defines.USE_CONTENTEDITABLE_IN_FIREFOX_3 && goog.userAgent.GECKO && goog.userAgent.isVersion("1.9"), USE_MUTATION_EVENTS:goog.userAgent.GECKO, HAS_DOM_SUBTREE_MODIFIED_EVENT:goog.userAgent.WEBKIT || 
-goog.editor.defines.USE_CONTENTEDITABLE_IN_FIREFOX_3 && goog.userAgent.GECKO && goog.userAgent.isVersion("1.9"), HAS_DOCUMENT_INDEPENDENT_NODES:goog.userAgent.GECKO, PUTS_CURSOR_BEFORE_FIRST_BLOCK_ELEMENT_ON_FOCUS:goog.userAgent.GECKO, CLEARS_SELECTION_WHEN_FOCUS_LEAVES:goog.userAgent.IE || goog.userAgent.WEBKIT || goog.userAgent.OPERA, HAS_UNSELECTABLE_STYLE:goog.userAgent.GECKO || goog.userAgent.WEBKIT, FORMAT_BLOCK_WORKS_FOR_BLOCKQUOTES:goog.userAgent.GECKO || goog.userAgent.WEBKIT || goog.userAgent.OPERA, 
-CREATES_MULTIPLE_BLOCKQUOTES:goog.userAgent.WEBKIT && !goog.userAgent.isVersion("534.16") || goog.userAgent.OPERA, WRAPS_BLOCKQUOTE_IN_DIVS:goog.userAgent.OPERA, PREFERS_READY_STATE_CHANGE_EVENT:goog.userAgent.IE, TAB_FIRES_KEYPRESS:!goog.userAgent.IE, NEEDS_99_WIDTH_IN_STANDARDS_MODE:goog.userAgent.IE, USE_DOCUMENT_FOR_KEY_EVENTS:goog.userAgent.GECKO && !goog.editor.defines.USE_CONTENTEDITABLE_IN_FIREFOX_3, SHOWS_CUSTOM_ATTRS_IN_INNER_HTML:goog.userAgent.IE, COLLAPSES_EMPTY_NODES:goog.userAgent.GECKO || 
-goog.userAgent.WEBKIT || goog.userAgent.OPERA, CONVERT_TO_B_AND_I_TAGS:goog.userAgent.GECKO || goog.userAgent.OPERA, TABS_THROUGH_IMAGES:goog.userAgent.IE, UNESCAPES_URLS_WITHOUT_ASKING:goog.userAgent.IE && !goog.userAgent.isVersion("7.0"), HAS_STYLE_WITH_CSS:goog.userAgent.GECKO && goog.userAgent.isVersion("1.8") || goog.userAgent.WEBKIT || goog.userAgent.OPERA, FOLLOWS_EDITABLE_LINKS:goog.userAgent.WEBKIT, HAS_ACTIVE_ELEMENT:goog.userAgent.IE || goog.userAgent.OPERA || goog.userAgent.GECKO && goog.userAgent.isVersion("1.9"), 
-HAS_SET_CAPTURE:goog.userAgent.IE, EATS_EMPTY_BACKGROUND_COLOR:goog.userAgent.GECKO || goog.userAgent.WEBKIT && !goog.userAgent.isVersion("527"), SUPPORTS_FOCUSIN:goog.userAgent.IE || goog.userAgent.OPERA, SELECTS_IMAGES_ON_CLICK:goog.userAgent.IE || goog.userAgent.OPERA, MOVES_STYLE_TO_HEAD:goog.userAgent.WEBKIT, COLLAPSES_SELECTION_ONMOUSEDOWN:false, CARET_INSIDE_SELECTION:goog.userAgent.OPERA, FOCUSES_EDITABLE_BODY_ON_HTML_CLICK:true, USES_KEYDOWN:goog.userAgent.IE || goog.userAgent.WEBKIT && 
-goog.userAgent.isVersion("525"), ADDS_NBSPS_IN_REMOVE_FORMAT:goog.userAgent.WEBKIT && !goog.userAgent.isVersion("531"), GETS_STUCK_IN_LINKS:goog.userAgent.WEBKIT && !goog.userAgent.isVersion("528"), NORMALIZE_CORRUPTS_EMPTY_TEXT_NODES:goog.userAgent.GECKO && goog.userAgent.isVersion("1.9") || goog.userAgent.IE || goog.userAgent.OPERA || goog.userAgent.WEBKIT && goog.userAgent.isVersion("531"), NORMALIZE_CORRUPTS_ALL_TEXT_NODES:goog.userAgent.IE, NESTS_SUBSCRIPT_SUPERSCRIPT:goog.userAgent.IE || goog.userAgent.GECKO || 
-goog.userAgent.OPERA, CAN_SELECT_EMPTY_ELEMENT:!goog.userAgent.IE && !goog.userAgent.WEBKIT, FORGETS_FORMATTING_WHEN_LISTIFYING:goog.userAgent.GECKO || goog.userAgent.WEBKIT && !goog.userAgent.isVersion("526"), LEAVES_P_WHEN_REMOVING_LISTS:goog.userAgent.IE || goog.userAgent.OPERA, CAN_LISTIFY_BR:!goog.userAgent.IE && !goog.userAgent.OPERA, DOESNT_OVERRIDE_FONT_SIZE_IN_STYLE_ATTR:!goog.userAgent.WEBKIT, SUPPORTS_HTML5_FILE_DRAGGING:goog.userAgent.product.CHROME && goog.userAgent.product.isVersion("4") || 
-goog.userAgent.product.SAFARI && goog.userAgent.isVersion("533") || goog.userAgent.GECKO && goog.userAgent.isVersion("2.0"), SUPPORTS_OPERA_DEFAULTBLOCK_COMMAND:goog.userAgent.OPERA && goog.userAgent.isVersion("11.10"), SUPPORTS_FILE_PASTING:goog.userAgent.product.CHROME && goog.userAgent.product.isVersion("12")};
 goog.provide("goog.dom.SavedRange");
 goog.require("goog.Disposable");
 goog.require("goog.debug.Logger");
@@ -28420,6 +28226,214 @@ goog.dom.Range.isReversed = function(anchorNode, anchorOffset, focusNode, focusO
   }
   return(goog.dom.compareNodeOrder(anchorNode, focusNode) || anchorOffset - focusOffset) > 0
 };
+goog.provide("onedit.cursor");
+goog.require("cljs.core");
+goog.require("onedit.core");
+goog.require("goog.dom");
+goog.require("goog.dom.Range");
+goog.require("goog.string");
+onedit.cursor.move = function move(f, editor) {
+  var range__126015 = goog.dom.Range.createFromWindow.call(null);
+  var G__126016__126017 = range__126015;
+  f.call(null, G__126016__126017, editor);
+  G__126016__126017.select();
+  return G__126016__126017
+};
+onedit.cursor.horizontal = function horizontal(f, pred, range, editor) {
+  if(cljs.core.truth_(pred.call(null, range))) {
+    return range.moveToNodes(range.getStartNode(), f.call(null, range.getStartOffset()), range.getEndNode(), f.call(null, range.getEndOffset()))
+  }else {
+    return null
+  }
+};
+onedit.cursor.move_left = cljs.core.partial.call(null, onedit.cursor.move, cljs.core.partial.call(null, onedit.cursor.horizontal, cljs.core.dec, function(p1__126018_SHARP_) {
+  return p1__126018_SHARP_.getStartOffset() > 0
+}));
+onedit.cursor.move_right = cljs.core.partial.call(null, onedit.cursor.move, cljs.core.partial.call(null, onedit.cursor.horizontal, cljs.core.inc, function(p1__126019_SHARP_) {
+  return p1__126019_SHARP_.getStartOffset() < p1__126019_SHARP_.getStartNode().length
+}));
+onedit.cursor.vertical = function vertical(f, range, editor) {
+  var temp__3974__auto____126020 = f.call(null, f.call(null, range.getStartNode()));
+  if(cljs.core.truth_(temp__3974__auto____126020)) {
+    var node__126021 = temp__3974__auto____126020;
+    if(cljs.core.truth_(goog.dom.contains.call(null, editor.buffer, node__126021))) {
+      var offset__126022 = range.getStartOffset() < goog.dom.getNodeTextLength.call(null, node__126021) ? range.getStartOffset() : goog.dom.getNodeTextLength.call(null, node__126021);
+      return range.moveToNodes(node__126021, offset__126022, node__126021, offset__126022)
+    }else {
+      return null
+    }
+  }else {
+    return null
+  }
+};
+onedit.cursor.move_top = cljs.core.partial.call(null, onedit.cursor.move, cljs.core.partial.call(null, onedit.cursor.vertical, goog.dom.getPreviousNode));
+onedit.cursor.move_bottom = cljs.core.partial.call(null, onedit.cursor.move, cljs.core.partial.call(null, onedit.cursor.vertical, goog.dom.getNextNode));
+onedit.cursor.word = function word(f, range, editor) {
+  var offset__126023 = f.call(null, cljs.core.map.call(null, cljs.core.partial.call(null, cljs.core.apply, cljs.core.str), cljs.core.split_at.call(null, range.getStartOffset(), goog.dom.getRawTextContent.call(null, range.getStartNode()))));
+  return range.moveToNodes(range.getStartNode(), offset__126023, range.getEndNode(), offset__126023)
+};
+onedit.cursor.forward = function forward(p__126024) {
+  var vec__126025__126026 = p__126024;
+  var s1__126027 = cljs.core.nth.call(null, vec__126025__126026, 0, null);
+  var s2__126028 = cljs.core.nth.call(null, vec__126025__126026, 1, null);
+  onedit.core.log.call(null, s1__126027);
+  onedit.core.log.call(null, s2__126028);
+  return cljs.core.count.call(null, s1__126027) + cljs.core.count.call(null, cljs.core.re_find.call(null, /\s*\w+/, s2__126028))
+};
+onedit.cursor.backward = function backward(p__126029) {
+  var vec__126030__126031 = p__126029;
+  var s__126032 = cljs.core.nth.call(null, vec__126030__126031, 0, null);
+  var ___126033 = cljs.core.nth.call(null, vec__126030__126031, 1, null);
+  onedit.core.log.call(null, s__126032);
+  return cljs.core.reduce.call(null, cljs.core._PLUS_, cljs.core.map.call(null, cljs.core.count, cljs.core.drop_last.call(null, cljs.core.re_seq.call(null, /\w+\s*/, s__126032))))
+};
+onedit.cursor.move_forward = cljs.core.partial.call(null, onedit.cursor.move, cljs.core.partial.call(null, onedit.cursor.word, onedit.cursor.forward));
+onedit.cursor.move_backward = cljs.core.partial.call(null, onedit.cursor.move, cljs.core.partial.call(null, onedit.cursor.word, onedit.cursor.backward));
+onedit.cursor.line = function line(f, range, editor) {
+  var node__126034 = range.getStartNode();
+  var offset__126035 = f.call(null, node__126034);
+  return range.moveToNodes(node__126034, offset__126035, node__126034, offset__126035)
+};
+onedit.cursor.start = function start(node) {
+  return 0
+};
+onedit.cursor.end = function end(node) {
+  return goog.dom.getNodeTextLength.call(null, node)
+};
+onedit.cursor.move_start = cljs.core.partial.call(null, onedit.cursor.move, cljs.core.partial.call(null, onedit.cursor.line, onedit.cursor.start));
+onedit.cursor.move_end = cljs.core.partial.call(null, onedit.cursor.move, cljs.core.partial.call(null, onedit.cursor.line, onedit.cursor.end));
+goog.provide("goog.ui.FormPost");
+goog.require("goog.array");
+goog.require("goog.dom.TagName");
+goog.require("goog.string");
+goog.require("goog.string.StringBuffer");
+goog.require("goog.ui.Component");
+goog.ui.FormPost = function(opt_dom) {
+  goog.ui.Component.call(this, opt_dom)
+};
+goog.inherits(goog.ui.FormPost, goog.ui.Component);
+goog.ui.FormPost.prototype.createDom = function() {
+  this.setElementInternal(this.getDomHelper().createDom(goog.dom.TagName.FORM, {"method":"POST", "style":"display:none"}))
+};
+goog.ui.FormPost.prototype.post = function(parameters, opt_url, opt_target) {
+  var form = this.getElement();
+  if(!form) {
+    this.render();
+    form = this.getElement()
+  }
+  form.action = opt_url || "";
+  form.target = opt_target || "";
+  this.setParameters_(form, parameters);
+  form.submit()
+};
+goog.ui.FormPost.prototype.setParameters_ = function(form, parameters) {
+  var name, value, sb = new goog.string.StringBuffer;
+  for(name in parameters) {
+    value = parameters[name];
+    if(goog.isArrayLike(value)) {
+      goog.array.forEach(value, goog.bind(this.appendInput_, this, sb, name))
+    }else {
+      this.appendInput_(sb, name, value)
+    }
+  }
+  form.innerHTML = sb.toString()
+};
+goog.ui.FormPost.prototype.appendInput_ = function(out, name, value) {
+  out.append('<input type="hidden" name="', goog.string.htmlEscape(name), '" value="', goog.string.htmlEscape(value), '">')
+};
+goog.provide("onedit.file");
+goog.require("cljs.core");
+goog.require("onedit.core");
+goog.require("goog.object");
+goog.require("goog.string");
+goog.require("goog.dom");
+goog.require("goog.events");
+goog.require("goog.ui.FormPost");
+onedit.file.file_form = function() {
+  var submit__129627 = goog.dom.createDom.call(null, "input", goog.object.create.call(null, "type", "submit"));
+  var file__129630 = function() {
+    var G__129628__129629 = goog.dom.createDom.call(null, "input", goog.object.create.call(null, "type", "file", "name", "file"));
+    goog.events.listen.call(null, G__129628__129629, goog.events.EventType.CHANGE, function() {
+      return submit__129627.click()
+    });
+    return G__129628__129629
+  }();
+  goog.dom.createDom.call(null, "form", goog.object.create.call(null, "method", "POST", "action", "/open", "enctype", "multipart/form-data"), file__129630, submit__129627);
+  return file__129630
+}();
+onedit.file.open = function open(editor) {
+  return onedit.file.file_form.click()
+};
+onedit.file.form_post = new goog.ui.FormPost;
+onedit.file.save = function save(editor) {
+  var text__129631 = editor.buffer.getCleanContents();
+  if(cljs.core.empty_QMARK_.call(null, text__129631)) {
+    return null
+  }else {
+    return onedit.file.form_post.post(goog.object.create.call(null, "content", text__129631), [cljs.core.str("/save/"), cljs.core.str(document["title"])].join(""))
+  }
+};
+goog.provide("goog.editor.defines");
+goog.editor.defines.USE_CONTENTEDITABLE_IN_FIREFOX_3 = false;
+goog.provide("goog.userAgent.product.isVersion");
+goog.require("goog.userAgent.product");
+goog.userAgent.product.determineVersion_ = function() {
+  var version = "", re, combine;
+  if(goog.userAgent.product.FIREFOX) {
+    re = /Firefox\/([0-9.]+)/
+  }else {
+    if(goog.userAgent.product.IE || goog.userAgent.product.OPERA) {
+      return goog.userAgent.VERSION
+    }else {
+      if(goog.userAgent.product.CHROME) {
+        re = /Chrome\/([0-9.]+)/
+      }else {
+        if(goog.userAgent.product.SAFARI) {
+          re = /Version\/([0-9.]+)/
+        }else {
+          if(goog.userAgent.product.IPHONE || goog.userAgent.product.IPAD) {
+            re = /Version\/(\S+).*Mobile\/(\S+)/;
+            combine = true
+          }else {
+            if(goog.userAgent.product.ANDROID) {
+              re = /Android\s+([0-9.]+)(?:.*Version\/([0-9.]+))?/
+            }else {
+              if(goog.userAgent.product.CAMINO) {
+                re = /Camino\/([0-9.]+)/
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  if(re) {
+    var arr = re.exec(goog.userAgent.getUserAgentString());
+    if(arr) {
+      version = combine ? arr[1] + "." + arr[2] : arr[2] || arr[1]
+    }else {
+      version = ""
+    }
+  }
+  return version
+};
+goog.userAgent.product.VERSION = goog.userAgent.product.determineVersion_();
+goog.userAgent.product.isVersion = function(version) {
+  return goog.string.compareVersions(goog.userAgent.product.VERSION, version) >= 0
+};
+goog.provide("goog.editor.BrowserFeature");
+goog.require("goog.editor.defines");
+goog.require("goog.userAgent");
+goog.require("goog.userAgent.product");
+goog.require("goog.userAgent.product.isVersion");
+goog.editor.BrowserFeature = {HAS_IE_RANGES:goog.userAgent.IE && !goog.userAgent.isDocumentMode(9), HAS_W3C_RANGES:goog.userAgent.GECKO || goog.userAgent.WEBKIT || goog.userAgent.OPERA || goog.userAgent.IE && goog.userAgent.isDocumentMode(9), HAS_CONTENT_EDITABLE:goog.userAgent.IE || goog.userAgent.WEBKIT || goog.userAgent.OPERA || goog.editor.defines.USE_CONTENTEDITABLE_IN_FIREFOX_3 && goog.userAgent.GECKO && goog.userAgent.isVersion("1.9"), USE_MUTATION_EVENTS:goog.userAgent.GECKO, HAS_DOM_SUBTREE_MODIFIED_EVENT:goog.userAgent.WEBKIT || 
+goog.editor.defines.USE_CONTENTEDITABLE_IN_FIREFOX_3 && goog.userAgent.GECKO && goog.userAgent.isVersion("1.9"), HAS_DOCUMENT_INDEPENDENT_NODES:goog.userAgent.GECKO, PUTS_CURSOR_BEFORE_FIRST_BLOCK_ELEMENT_ON_FOCUS:goog.userAgent.GECKO, CLEARS_SELECTION_WHEN_FOCUS_LEAVES:goog.userAgent.IE || goog.userAgent.WEBKIT || goog.userAgent.OPERA, HAS_UNSELECTABLE_STYLE:goog.userAgent.GECKO || goog.userAgent.WEBKIT, FORMAT_BLOCK_WORKS_FOR_BLOCKQUOTES:goog.userAgent.GECKO || goog.userAgent.WEBKIT || goog.userAgent.OPERA, 
+CREATES_MULTIPLE_BLOCKQUOTES:goog.userAgent.WEBKIT && !goog.userAgent.isVersion("534.16") || goog.userAgent.OPERA, WRAPS_BLOCKQUOTE_IN_DIVS:goog.userAgent.OPERA, PREFERS_READY_STATE_CHANGE_EVENT:goog.userAgent.IE, TAB_FIRES_KEYPRESS:!goog.userAgent.IE, NEEDS_99_WIDTH_IN_STANDARDS_MODE:goog.userAgent.IE, USE_DOCUMENT_FOR_KEY_EVENTS:goog.userAgent.GECKO && !goog.editor.defines.USE_CONTENTEDITABLE_IN_FIREFOX_3, SHOWS_CUSTOM_ATTRS_IN_INNER_HTML:goog.userAgent.IE, COLLAPSES_EMPTY_NODES:goog.userAgent.GECKO || 
+goog.userAgent.WEBKIT || goog.userAgent.OPERA, CONVERT_TO_B_AND_I_TAGS:goog.userAgent.GECKO || goog.userAgent.OPERA, TABS_THROUGH_IMAGES:goog.userAgent.IE, UNESCAPES_URLS_WITHOUT_ASKING:goog.userAgent.IE && !goog.userAgent.isVersion("7.0"), HAS_STYLE_WITH_CSS:goog.userAgent.GECKO && goog.userAgent.isVersion("1.8") || goog.userAgent.WEBKIT || goog.userAgent.OPERA, FOLLOWS_EDITABLE_LINKS:goog.userAgent.WEBKIT, HAS_ACTIVE_ELEMENT:goog.userAgent.IE || goog.userAgent.OPERA || goog.userAgent.GECKO && goog.userAgent.isVersion("1.9"), 
+HAS_SET_CAPTURE:goog.userAgent.IE, EATS_EMPTY_BACKGROUND_COLOR:goog.userAgent.GECKO || goog.userAgent.WEBKIT && !goog.userAgent.isVersion("527"), SUPPORTS_FOCUSIN:goog.userAgent.IE || goog.userAgent.OPERA, SELECTS_IMAGES_ON_CLICK:goog.userAgent.IE || goog.userAgent.OPERA, MOVES_STYLE_TO_HEAD:goog.userAgent.WEBKIT, COLLAPSES_SELECTION_ONMOUSEDOWN:false, CARET_INSIDE_SELECTION:goog.userAgent.OPERA, FOCUSES_EDITABLE_BODY_ON_HTML_CLICK:true, USES_KEYDOWN:goog.userAgent.IE || goog.userAgent.WEBKIT && 
+goog.userAgent.isVersion("525"), ADDS_NBSPS_IN_REMOVE_FORMAT:goog.userAgent.WEBKIT && !goog.userAgent.isVersion("531"), GETS_STUCK_IN_LINKS:goog.userAgent.WEBKIT && !goog.userAgent.isVersion("528"), NORMALIZE_CORRUPTS_EMPTY_TEXT_NODES:goog.userAgent.GECKO && goog.userAgent.isVersion("1.9") || goog.userAgent.IE || goog.userAgent.OPERA || goog.userAgent.WEBKIT && goog.userAgent.isVersion("531"), NORMALIZE_CORRUPTS_ALL_TEXT_NODES:goog.userAgent.IE, NESTS_SUBSCRIPT_SUPERSCRIPT:goog.userAgent.IE || goog.userAgent.GECKO || 
+goog.userAgent.OPERA, CAN_SELECT_EMPTY_ELEMENT:!goog.userAgent.IE && !goog.userAgent.WEBKIT, FORGETS_FORMATTING_WHEN_LISTIFYING:goog.userAgent.GECKO || goog.userAgent.WEBKIT && !goog.userAgent.isVersion("526"), LEAVES_P_WHEN_REMOVING_LISTS:goog.userAgent.IE || goog.userAgent.OPERA, CAN_LISTIFY_BR:!goog.userAgent.IE && !goog.userAgent.OPERA, DOESNT_OVERRIDE_FONT_SIZE_IN_STYLE_ATTR:!goog.userAgent.WEBKIT, SUPPORTS_HTML5_FILE_DRAGGING:goog.userAgent.product.CHROME && goog.userAgent.product.isVersion("4") || 
+goog.userAgent.product.SAFARI && goog.userAgent.isVersion("533") || goog.userAgent.GECKO && goog.userAgent.isVersion("2.0"), SUPPORTS_OPERA_DEFAULTBLOCK_COMMAND:goog.userAgent.OPERA && goog.userAgent.isVersion("11.10"), SUPPORTS_FILE_PASTING:goog.userAgent.product.CHROME && goog.userAgent.product.isVersion("12")};
 goog.provide("goog.dom.iter.AncestorIterator");
 goog.provide("goog.dom.iter.ChildIterator");
 goog.provide("goog.dom.iter.SiblingIterator");
@@ -31560,51 +31574,29 @@ goog.require("onedit.minibuffer");
 goog.require("goog.debug.Console");
 goog.require("onedit.core");
 onedit.functionmap = cljs.core.ObjMap.fromObject(["\ufdd0'open"], {"\ufdd0'open":onedit.file.open});
-onedit.keymap = cljs.core.PersistentArrayMap.fromArrays(["\ufdd0'cursor", null], [cljs.core.PersistentArrayMap.fromArrays([false, true], [cljs.core.PersistentArrayMap.fromArrays([goog.events.KeyCodes.ESC, goog.events.KeyCodes.ZERO, goog.events.KeyCodes.W, goog.events.KeyCodes.B, goog.events.KeyCodes.SEMICOLON, goog.events.KeyCodes.J, goog.events.KeyCodes.K, goog.events.KeyCodes.H, goog.events.KeyCodes.L], [function keymap(_) {
-  return cljs.core.reset_BANG_.call(null, onedit.core.mode, null)
-}, onedit.cursor.move_start, onedit.cursor.move_forward, onedit.cursor.move_backward, onedit.minibuffer.focus, onedit.cursor.move_bottom, onedit.cursor.move_top, onedit.cursor.move_left, onedit.cursor.move_right]), cljs.core.PersistentArrayMap.fromArrays([goog.events.KeyCodes.FOUR], [onedit.cursor.move_end])]), cljs.core.PersistentArrayMap.fromArrays([false, true], [cljs.core.PersistentArrayMap.fromArrays([goog.events.KeyCodes.ESC], [function keymap(_) {
-  return cljs.core.reset_BANG_.call(null, onedit.core.mode, "\ufdd0'cursor")
-}]), null])]);
+onedit.keymap = cljs.core.ObjMap.fromObject(["\ufdd0'default", "\ufdd0'insert"], {"\ufdd0'default":cljs.core.PersistentArrayMap.fromArrays([false, true], [cljs.core.PersistentArrayMap.fromArrays([goog.events.KeyCodes.ESC, goog.events.KeyCodes.ZERO, goog.events.KeyCodes.W, goog.events.KeyCodes.B, goog.events.KeyCodes.SEMICOLON, goog.events.KeyCodes.J, goog.events.KeyCodes.K, goog.events.KeyCodes.H, goog.events.KeyCodes.I, goog.events.KeyCodes.L], [onedit.core.default_mode, onedit.cursor.move_start, 
+onedit.cursor.move_forward, onedit.cursor.move_backward, onedit.minibuffer.focus, onedit.cursor.move_bottom, onedit.cursor.move_top, onedit.cursor.move_left, onedit.core.insert_mode, onedit.cursor.move_right]), cljs.core.PersistentArrayMap.fromArrays([goog.events.KeyCodes.FOUR], [onedit.cursor.move_end])]), "\ufdd0'insert":cljs.core.PersistentArrayMap.fromArrays([false, true], [cljs.core.PersistentArrayMap.fromArrays([goog.events.KeyCodes.ESC], [onedit.core.default_mode]), cljs.core.ObjMap.fromObject([], 
+{})])});
 onedit.key_handler = function key_handler(editor, e) {
   onedit.core.log.call(null, e.keyCode);
-  var temp__3974__auto____26562 = onedit.keymap.call(null, cljs.core.deref.call(null, onedit.core.mode)).call(null, e.shiftKey).call(null, e.keyCode);
-  if(cljs.core.truth_(temp__3974__auto____26562)) {
-    var f__26563 = temp__3974__auto____26562;
+  var temp__3974__auto____82334 = onedit.keymap.call(null, cljs.core.deref.call(null, editor.mode)).call(null, e.shiftKey).call(null, e.keyCode);
+  if(cljs.core.truth_(temp__3974__auto____82334)) {
+    var f__82335 = temp__3974__auto____82334;
     e.preventDefault();
-    return f__26563.call(null, editor)
+    return f__82335.call(null, editor)
   }else {
     return null
   }
 };
 onedit.init_editor = function init_editor(editor) {
-  if(cljs.core.empty_QMARK_.call(null, editor.buffer.getCleanContents())) {
-    editor.buffer.setHtml(true, function() {
-      var temp__3971__auto____26564 = onedit.core.local.getItem(document["title"]);
-      if(cljs.core.truth_(temp__3971__auto____26564)) {
-        var t__26565 = temp__3971__auto____26564;
-        return t__26565
-      }else {
-        return""
-      }
-    }())
-  }else {
-  }
-  console.log(editor.buffer.getElement());
-  goog.dom.appendChild.call(null, editor.buffer.getElement(), goog.dom.createElement.call(null, "pre"));
-  return goog.events.listen.call(null, new goog.events.KeyHandler(editor.buffer.getElement()), goog.events.KeyHandler.EventType.KEY, cljs.core.partial.call(null, onedit.key_handler, editor))
-};
-onedit.create_buffer = function create_buffer() {
-  var G__26566__26567 = new goog.editor.Field("buffer");
-  G__26566__26567.registerPlugin(new goog.editor.plugins.BasicTextFormatter);
-  G__26566__26567.makeEditable();
-  return G__26566__26567
+  return goog.events.listen.call(null, new goog.events.KeyHandler(editor.buffer), goog.events.KeyHandler.EventType.KEY, cljs.core.partial.call(null, onedit.key_handler, editor))
 };
 onedit.init = function init() {
   goog.debug.Console.autoInstall.call(null);
-  var G__26568__26569 = new onedit.core.Editor(onedit.create_buffer.call(null), onedit.minibuffer.create.call(null));
-  onedit.init_editor.call(null, G__26568__26569);
-  onedit.minibuffer.init.call(null, G__26568__26569, onedit.functionmap);
-  return G__26568__26569
+  var G__82336__82337 = new onedit.core.Editor(cljs.core.atom.call(null, "\ufdd0'default"), goog.dom.getElement.call(null, "buffer"), onedit.minibuffer.create.call(null));
+  onedit.init_editor.call(null, G__82336__82337);
+  onedit.minibuffer.init.call(null, G__82336__82337, onedit.functionmap);
+  return G__82336__82337
 };
 goog.provide("onedit.vi.core");
 goog.require("cljs.core");

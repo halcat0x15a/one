@@ -14,39 +14,31 @@
   {:open file/open})
 
 (def keymap
-  {:cursor {false {keycodes/H cursor/move-left
-                   keycodes/J cursor/move-bottom
-                   keycodes/K cursor/move-top
-                   keycodes/L cursor/move-right
-                   keycodes/W cursor/move-forward
-                   keycodes/B cursor/move-backward
-                   keycodes/ZERO cursor/move-start
-                   keycodes/SEMICOLON minibuffer/focus
-                   keycodes/ESC (fn [_] (reset! core/mode nil))}
-            true {keycodes/FOUR cursor/move-end}}
-   nil {false {keycodes/ESC (fn [_] (reset! core/mode :cursor))}
-        true nil}})
+  {:default {false {keycodes/H cursor/move-left
+                    keycodes/J cursor/move-bottom
+                    keycodes/K cursor/move-top
+                    keycodes/L cursor/move-right
+                    keycodes/W cursor/move-forward
+                    keycodes/B cursor/move-backward
+                    keycodes/ZERO cursor/move-start
+                    keycodes/SEMICOLON minibuffer/focus
+                    keycodes/ESC core/default-mode
+                    keycodes/I core/insert-mode}
+             true {keycodes/FOUR cursor/move-end}}
+   :insert {false {keycodes/ESC core/default-mode}
+            true {}}})
 
 (defn key-handler [editor e]
   (core/log e.keyCode)
-  (when-let [f (((keymap @core/mode) e.shiftKey) e.keyCode)]
+  (when-let [f (((keymap @editor.mode) e.shiftKey) e.keyCode)]
     (.preventDefault e)
     (f editor)))
 
 (defn init-editor [editor]
-  (when (empty? (.getCleanContents editor.buffer))
-    (.setHtml editor.buffer true (if-let [t (.getItem core/local js/document.title)] t "")))
-  (.log js/console (.getElement editor.buffer))
-  (dom/appendChild (.getElement editor.buffer) (dom/createElement "pre"))
-  (events/listen (events/KeyHandler. (.getElement editor.buffer)) events/KeyHandler.EventType.KEY (partial key-handler editor)))
-
-(defn create-buffer []
-  (doto (goog.editor.Field. "buffer")
-    (.registerPlugin (goog.editor.plugins.BasicTextFormatter.))
-    (.makeEditable)))
+  (events/listen (events/KeyHandler. editor.buffer) events/KeyHandler.EventType.KEY (partial key-handler editor)))
 
 (defn init []
   (console/autoInstall)
-  (doto (core/Editor. (create-buffer) (minibuffer/create))
+  (doto (core/Editor. (atom :default) (dom/getElement "buffer") (minibuffer/create))
     (init-editor)
     (minibuffer/init functionmap)))

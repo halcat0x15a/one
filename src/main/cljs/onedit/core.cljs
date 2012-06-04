@@ -7,6 +7,10 @@
 
 (def local js/window.localStorage)
 
-(def mode (atom nil))
+(deftype Editor [mode buffer minibuffer])
 
-(deftype Editor [buffer minibuffer])
+(defn default-mode [editor]
+  (reset! editor.mode :default))
+
+(defn insert-mode [editor]
+  (reset! editor.mode :insert))
