@@ -7,7 +7,7 @@
             [goog.ui.Textarea :as textarea]))
 
 (defn focus-out [editor e]
-  (.setVisible editor.minibuffer false))
+  (.setVisible (core/minibuffer editor) false))
 
 (defn handle-key [editor functionmap e]
   (when (= e.keyCode events/KeyCodes.ENTER)
@@ -25,7 +25,5 @@
       (.setVisible false)
       (.decorate element))))
 
-(defn focus [editor]
-  (doto editor.minibuffer
-    (.setVisible true))
-  (focus/focusInputField (.getElement editor.minibuffer)))
+(defn focus [minibuffer]
+  (focus/focusInputField minibuffer))

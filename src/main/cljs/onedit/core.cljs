@@ -1,5 +1,6 @@
 (ns onedit.core
-  (:require [goog.debug.Logger :as debug-logger]))
+  (:require [goog.dom :as dom]
+            [goog.debug.Logger :as debug-logger]))
 
 (def logger (debug-logger/getLogger "onedit"))
 
@@ -7,11 +8,13 @@
 
 (def local js/window.localStorage)
 
-(deftype Editor [mode buffer minibuffer])
+(defprotocol Mode
+  (action [mode editor e]))
 
-(defn change-mode [mode editor]
-  (reset! editor.mode mode))
-
-(def default-mode (partial change-mode :default))
-
-(def insert-mode (partial change-mode :insert))
+(defprotocol IEditor
+  (mode [this])
+  (buffer [this])
+  (minibuffer [this])
+  (key-handler [this])
+  (normal [this])
+  (cursor [this]))

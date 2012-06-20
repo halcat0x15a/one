@@ -1,64 +1,61 @@
 (ns onedit.cursor
   (:require [onedit.core :as core]
+            [onedit.util :as util]
+            [onedit.buffer :as buffer]
             [goog.dom :as dom]
-            [goog.dom.Range :as range]
+            [goog.dom.Range :as dom-range]
             [goog.string :as string]))
 
-(defn create []
-  (range/createFromWindow))
+(defn select [range node offset]
+  (doto range
+    (.moveToNodes node offset node offset false)
+    (.select)))
 
-(defn move [f editor]
-  (let [range (create)]
-    (doto range
-      (f)
-      (.select))))
+(defn move [f g editor]
+  (let [range (dom-range/createFromWindow)]
+    (select range (f range) (g range))
+    (core/mode editor)))
 
-(defn move-n [editor node offset]
-  (move (fn [range editor] (.moveToNodes range node offset node offset)) editor))
+(def offset #(.getStartOffset %))
 
-(defn horizontal [f pred range]
-  (when (pred range)
-    (.moveToNodes range (.getStartNode range) (f (.getStartOffset range)) (.getEndNode range) (f (.getEndOffset range)))))
+(def node #(.getStartNode %))
 
-(def move-left (partial move (partial horizontal dec #(> (.getStartOffset %) 0))))
+(def inc-offset (comp (util/collfn min) (juxt (comp alength node) (comp inc offset))))
 
-(def move-right (partial move (partial horizontal inc #(< (.getStartOffset %) (alength (.getStartNode %))))))
+(def dec-offset (comp (partial max 0) dec offset))
 
-(defn vertical [editor f range]
-  (when-let [node (-> (.getStartNode range) f f)]
-    (when (dom/contains editor.buffer node)
-      (let [offset (min (.getStartOffset range) (dom/getNodeTextLength node))]
-        (.moveToNodes range node offset node offset)))))
+(def move-right (partial move node inc-offset))
 
-(defn move-top [editor]
-  (move (partial vertical editor dom/getPreviousNode) editor))
+(def move-left (partial move node dec-offset))
 
-(defn move-bottom [editor]
-  (move (partial vertical editor dom/getNextNode) editor))
+(def move-line #(comp first (partial drop-while nil?) (juxt (comp (util/double %) node) node)))
 
-(defn word [f range]
-  (let [offset (f (map (partial apply str) (split-at (.getStartOffset range) (dom/getRawTextContent (.getStartNode range)))))]
-    (.moveToNodes range (.getStartNode range) offset (.getEndNode range) offset)))
+(def next-line (move-line dom/getNextNode))
 
-(defn forward [[s1 s2]]
-  (+ (count s1) (count (re-find #"\s*\w+" s2))))
+(def prev-line (move-line dom/getPreviousNode))
 
-(defn backward [[s _]]
-  (apply + (map count (drop-last (re-seq #"\w+\s*" s)))))
+(def move-bottom (partial move next-line offset))
 
-(def move-forward (partial move (partial word forward)))
+(def move-top (partial move prev-line offset))
 
-(def move-backward (partial move (partial word backward)))
+(def word (comp (partial map util/join) (util/collfn split-at) (juxt offset (comp dom/getRawTextContent node))))
+
+(def forward (comp util/sum (juxt (comp count first) (comp count (partial re-find #"\s*\w+") second))))
+
+(def backward (comp (util/collfn -) (juxt count (comp count last (partial re-seq #"\w+\s*"))) first))
+
+(def move-forward (partial move node (comp forward word)))
+
+(def move-backward (partial move node (comp backward word)))
 
 (defn line [f range]
   (let [node (.getStartNode range)
         offset (f node)]
     (.moveToNodes range node offset node offset)))
 
-(defn start [node] 0)
+(def start (constantly 0))
 
-(defn end [node]
-  (dom/getNodeTextLength node))
+(def end (comp count dom/getRawTextContent node))
 
 (def move-start (partial move (partial line start)))
 

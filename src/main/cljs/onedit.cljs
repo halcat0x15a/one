@@ -3,36 +3,51 @@
             [onedit.buffer :as buffer]
             [onedit.minibuffer :as minibuffer]
             [onedit.cursor :as cursor]
+            [onedit.insertion :as insertion]
             [onedit.deletion :as deletion]
-            [onedit.file :as file]
-            [goog.debug.Console :as console]
+            [onedit.replacement :as replacement]
             [goog.dom :as dom]
-            [goog.events :as events]
+            [goog.dom.Range :as dom-range]
             [goog.events.KeyCodes :as keycodes]
-            [goog.editor.plugins.BasicTextFormatter :as formatter]
-            [goog.editor.Field :as field]))
-
-(def functionmap
-  {:open file/open})
+            [goog.debug.Console :as console]))
 
 (def keymap
-  {:default {false {keycodes/H cursor/move-left
-                    keycodes/J cursor/move-bottom
-                    keycodes/K cursor/move-top
-                    keycodes/L cursor/move-right
-                    keycodes/W cursor/move-forward
-                    keycodes/B cursor/move-backward
-                    keycodes/X deletion/delete-character
-                    keycodes/ZERO cursor/move-start
-                    keycodes/SEMICOLON minibuffer/focus
-                    keycodes/ESC core/default-mode
-                    keycodes/I core/insert-mode}
-             true {keycodes/FOUR cursor/move-end}}
-   :insert {false {keycodes/ESC core/default-mode}
-            true {}}})
+  {false {keycodes/H cursor/move-left
+          keycodes/J cursor/move-bottom
+          keycodes/K cursor/move-top
+          keycodes/L cursor/move-right
+          keycodes/LEFT cursor/move-left
+          keycodes/DOWN cursor/move-bottom
+          keycodes/UP cursor/move-top
+          keycodes/RIGHT cursor/move-right
+          keycodes/W cursor/move-forward
+          keycodes/B cursor/move-backward
+          keycodes/X deletion/delete-character
+          keycodes/ZERO cursor/move-start
+          keycodes/SEMICOLON minibuffer/focus
+          keycodes/I (fn [_] (insertion/Mode.))
+          keycodes/R (fn [_] (replacement/Mode.))
+          keycodes/D (fn [_] (deletion/Mode.))}
+   true {keycodes/FOUR cursor/move-end}})
+
+(deftype Mode []
+  core/Mode
+  (action [this editor e]
+    (.preventDefault e)
+    (if-let [f ((keymap e.shiftKey) e.keyCode)]
+      (f editor)
+      this)))
+
+(deftype Editor [mode buffer minibuffer]
+  core/IEditor
+  (mode [this] this.mode)
+  (buffer [this] this.buffer)
+  (minibuffer [this] this.minibuffer)
+  (normal [this] (Mode.)))
 
 (defn init []
   (console/autoInstall)
-  (doto (core/Editor. (atom :default) (buffer/create) (minibuffer/create))
-    (buffer/init keymap)
-    (minibuffer/init functionmap)))
+  (doto (Editor. (Mode.) (dom/getElement "buffer") (minibuffer/create))
+    (buffer/init)))
+
+;    (minibuffer/init)
