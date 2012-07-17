@@ -1,5 +1,6 @@
 (ns onedit
-  (:require [onedit.core :as core]
+  (:require [cljs.core.logic :as logic]
+            [onedit.core :as core]
             [onedit.buffer :as buffer]
             [onedit.minibuffer :as minibuffer]
             [onedit.cursor :as cursor]
@@ -9,7 +10,8 @@
             [goog.dom :as dom]
             [goog.dom.Range :as dom-range]
             [goog.events.KeyCodes :as keycodes]
-            [goog.debug.Console :as console]))
+            [goog.debug.Console :as console])
+  (:require-macros [cljs.core.logic.macros :as logic-macros]))
 
 (def keymap
   {false {keycodes/H cursor/move-left
@@ -29,6 +31,9 @@
           keycodes/R (fn [_] (replacement/Mode.))
           keycodes/D (fn [_] (deletion/Mode.))}
    true {keycodes/FOUR cursor/move-end}})
+
+(defn x []
+  (logic-macros/run* [q] (logic/appendo [1 2] [3 4] q)))
 
 (deftype Mode []
   core/Mode

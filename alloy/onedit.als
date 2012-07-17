@@ -57,5 +57,4 @@ assert moveCursor {
 
 check moveCursor
 
-run {}
 run openFile
