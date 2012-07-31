@@ -32,9 +32,6 @@
           keycodes/D (fn [_] (deletion/Mode.))}
    true {keycodes/FOUR cursor/move-end}})
 
-(defn x []
-  (logic-macros/run* [q] (logic/appendo [1 2] [3 4] q)))
-
 (deftype Mode []
   core/Mode
   (action [this editor e]

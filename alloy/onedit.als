@@ -1,4 +1,14 @@
-sig Cursor {
+sig Character {}
+
+sig TextContent {
+  string: set Character
+}
+
+sig File {
+  contents: set TextContent
+}
+
+one sig Cursor {
   x: Int,
   y: Int
 } {
@@ -6,55 +16,62 @@ sig Cursor {
   y >= 0
 }
 
-sig TextContent {}
-
 abstract sig TextField {
-  cursor: Cursor,
-  content: TextContent
+  cursor: lone Cursor,
+  contents: some TextContent
+} {
+  cursor.y < #contents
+  cursor.x < #contents.string
 }
 
-sig Buffer extends TextField {}
+one sig Buffer extends TextField {}
 
-sig MiniBuffer extends TextField {}
+one sig MiniBuffer extends TextField {}
 
-fact {
-  #MiniBuffer = 1
-  #Buffer = 1
+one sig Editor {
+  buffer: Buffer,
+  miniBuffer: MiniBuffer
+} {
+  no buffer.contents & miniBuffer.contents
+  no buffer.cursor & miniBuffer.cursor
+  one buffer.cursor + miniBuffer.cursor
 }
 
-pred openFile (buffer: Buffer, content': TextContent) {
-  buffer.content = content'
+pred openFile (buffer: Buffer, file: File) {
+  buffer.contents = file.contents
 }
 
-pred h (cursor, cursor': Cursor) {
-  cursor.x > 0
-  cursor'.x = cursor.x - 1
+pred h (field, field': TextField) {
+  field.cursor.x > 0
+  field'.cursor.x = field.cursor.x - 1
 }
 
-pred j (cursor, cursor': Cursor) {
-  cursor'.y = cursor.y + 1
+pred j (field, field': TextField) {
+  field.cursor.y < #field.contents.string - 1
+  field'.cursor.y = field.cursor.y + 1
 }
 
-pred k (cursor, cursor': Cursor) {
-  cursor.y > 0
-  cursor'.y = cursor.y - 1
+pred k (field, field': TextField) {
+  field.cursor.y > 0
+  field'.cursor.y = field.cursor.y - 1
 }
 
-pred l (cursor, cursor': Cursor) {
-  cursor'.x = cursor.x + 1
+pred l (field, field': TextField) {
+  field.cursor.x < #field.contents.string - 1
+  field'.cursor.x = field.cursor.x + 1
 }
 
 assert moveCursor {
   all field, field', field'': TextField |
-    l [ field.cursor, field'.cursor ] and
-    h [ field'.cursor, field''.cursor ] implies
+    l [ field, field' ] and
+    h [ field', field'' ] implies
     field.cursor = field''.cursor
   all field, field', field'': TextField |
-    j [ field.cursor, field'.cursor ] and
-    k [ field'.cursor, field''.cursor ] implies
+    j [ field, field' ] and
+    k [ field', field'' ] implies
     field.cursor = field''.cursor
 }
 
 check moveCursor
 
-run openFile
+run l
