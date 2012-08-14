@@ -1,4 +1,4 @@
-package onedit
+package onedit.server
 
 import java.util.concurrent.ConcurrentHashMap
 
