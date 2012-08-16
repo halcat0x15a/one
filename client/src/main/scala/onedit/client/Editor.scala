@@ -21,7 +21,7 @@ class Editor extends Application {
   def start(stage: Stage) {
     val web = new WebView
     val engine = web.getEngine
-    val url = getParameters.getUnnamed.get(0)
+    val url = getParameters.getUnnamed get 0
     engine.load(url)
     val scene = new Scene(web)
     stage.setScene(scene)
@@ -45,10 +45,10 @@ object Editor extends SafeApp {
 
   def port = settings.port | Port.any
 
-  def launch(url: String) = IO(Application.launch(classOf[Editor], url))
+  lazy val launch: String => Unit = Application.launch(classOf[Editor], _)
 
-  def run(server: Http) =
-    IO(server.start).bracket_(IO(server.stop) >> IO(server.destroy))(launch(server.url))
+  lazy val run: Http => IO[Unit] =
+    _.start.point[IO].bracket(_.stop.destroy.point[IO])(_.url |> launch >>> (_.point[IO]))
 
   override def runc = client(server(port) >>> run)
 
