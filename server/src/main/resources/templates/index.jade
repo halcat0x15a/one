@@ -8,6 +8,6 @@ html
     script(type="text/javascript" src="/public/onedit.js")
   body
     pre#buffer(contenteditable="true")
-    textarea#minibuffer
+    input#minibuffer(type="text")
     :javascript
-      onedit.init();
+      onedit.main();
