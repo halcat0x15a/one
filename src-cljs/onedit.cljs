@@ -2,33 +2,26 @@
   (:require [clojure.string :as string]
             [clojure.browser.dom :as dom]
             [clojure.browser.event :as event]
-            [goog.events.EventType :as event-type]))
+            [goog.events.EventType :as gevent-type]
+            [onedit.core :as core]
+            [onedit.buffer :as buffer]
+            [onedit.cursor :as cursor]))
 
 (defrecord Editor [buffer cursor])
 
-(defn open [file]
-  (let [reader (js/FileReader.)]
-    (.readAsText reader file)))
+(defn editor []
+  (Editor. (buffer/value) (cursor/value)))
 
-(defn save [])
-
-(defn insert [string editor]
-  (let [buffer (string/join (split-at (:cursor editor) (:buffer editor)))]
-    (assoc editor :buffer buffer)))
-
-(def functions [insert])
-
-(defn function-map []
-  functions)
-
-(defn exec [buffer minibuffer event]
-  (let [value (dom/get-value minibuffer)
-        [f & args] (string/split value #" ")]
-    (dom/log f)
-    (dom/log args)
-    (dom/set-text buffer "")))
+(defn exec [event]
+  (let [value (dom/get-value :minibuffer)
+        [f & args] (string/split value #"\s+")]
+    (if-let [function (aget core/editor f)]
+      (let [editor (apply function (cons (editor) args))]
+        (buffer/update (:buffer editor))
+        (cursor/update (:cursor editor))
+        (dom/set-value :minibuffer "")))))
 
 (defn main []
-  (let [buffer (dom/get-element "buffer")
-        minibuffer (dom/get-element "minibuffer")]
-    (event/listen minibuffer event-type/CHANGE (partial exec buffer minibuffer))))
+  (let [buffer (dom/ensure-element :buffer)
+        minibuffer (dom/ensure-element :minibuffer)]
+    (event/listen minibuffer gevent-type/CHANGE exec)))
