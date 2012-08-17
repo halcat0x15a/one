@@ -27,4 +27,4 @@
 
 (defn save [editor])
 
-(core/register :e open)
+(core/register :open open)

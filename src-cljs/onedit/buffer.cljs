@@ -11,7 +11,7 @@
   (count (get (:buffer editor) y)))
 
 (defn create []
-  (string/split (gdom/getRawTextContent (dom/ensure-element :buffer)) #"\n"))
+  (string/split-lines (gdom/getRawTextContent (dom/ensure-element :buffer))))
 
 (defn update [buffer]
   (dom/set-text :buffer (string/join (interpose \newline buffer))))

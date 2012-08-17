@@ -1,5 +1,6 @@
 (ns onedit.cursor
-  (:require [clojure.browser.dom :as dom]
+  (:require [clojure.string :as string]
+            [clojure.browser.dom :as dom]
             [onedit.core :as core]
             [onedit.buffer :as buffer]))
 
@@ -66,7 +67,41 @@
                   :x (inc x)))
       editor)))
 
+(defn move-while [editor pred f]
+  (loop [editor editor]
+    (let [cursor (:cursor editor)
+          editor' (f editor)]
+      (if-let [character (nth (get (:buffer editor) (:y cursor)) (:x cursor))]
+        (if (and (not= editor' editor) (pred character))
+          (recur editor')
+          editor)
+        editor))))
+
+(defn forward [editor]
+  (-> editor
+      (move-while string/blank? right)
+      (move-while (comp not string/blank?) right)))
+
+(defn backward [editor]
+  (-> editor
+      left
+      (move-while string/blank? left)
+      (move-while (comp not string/blank?) left)
+      (move-while string/blank? right)))
+
+(defn start-line [editor]
+  (-> editor
+      left
+      (move-while (constantly true) left)))
+
+(defn end-line [editor]
+  (move-while editor (constantly true) right))
+
 (core/register :h left)
 (core/register :j down)
 (core/register :k up)
 (core/register :l right)
+(core/register :w forward)
+(core/register :b backward)
+(core/register :| start-line)
+(core/register :$ end-line)
