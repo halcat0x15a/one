@@ -25,6 +25,6 @@
     (dom/click-element))
   editor)
 
-(defn save [])
+(defn save [editor])
 
 (core/register :e open)

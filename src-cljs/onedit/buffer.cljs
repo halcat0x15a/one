@@ -5,6 +5,11 @@
             [onedit.core :as core])
   (:use-macros [clojure.core.match.js :only [match]]))
 
+(def count-lines (comp count :buffer))
+
+(defn count-line [editor y]
+  (count (get (:buffer editor) y)))
+
 (defn create []
   (string/split (gdom/getRawTextContent (dom/ensure-element :buffer)) #"\n"))
 
