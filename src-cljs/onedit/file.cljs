@@ -10,7 +10,7 @@
 
 (defn load [editor event]
   (editor/update (assoc editor
-                   :buffer (string/split-lines (aget (aget event "target") "result"))
+                   :buffers (string/split-lines (aget (aget event "target") "result"))
                    :cursor cursor/unit)))
 
 (defn select [editor event]

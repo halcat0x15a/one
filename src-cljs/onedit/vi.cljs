@@ -10,6 +10,8 @@
   (core/register :O buffer/prepend-newline)
   (core/register :x buffer/delete-forward)
   (core/register :X buffer/delete-backward)
+  (core/register :dd buffer/delete-line)
+  (core/register :r buffer/replace-character)
   (core/register :h cursor/left)
   (core/register :j cursor/down)
   (core/register :k cursor/up)

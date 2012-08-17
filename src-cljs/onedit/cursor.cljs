@@ -71,7 +71,7 @@
   (loop [editor editor]
     (let [cursor (:cursor editor)
           editor' (f editor)]
-      (if-let [character (nth (get (:buffer editor) (:y cursor)) (:x cursor))]
+      (if-let [character (nth (get (:buffers editor) (:y cursor)) (:x cursor))]
         (if (and (not= editor' editor) (pred character))
           (recur editor')
           editor)
