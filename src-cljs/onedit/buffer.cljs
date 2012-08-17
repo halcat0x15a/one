@@ -39,5 +39,37 @@
                              :x (+ x (count string)))))
     [[string & strings']] (apply insert (insert (insert editor string) " ") strings')))
 
+(defn delete-forward [editor]
+  (let [cursor (:cursor editor)
+        buffer (:buffer editor)
+        y (:y cursor)
+        line (get buffer y)
+        length (count line)
+        x (:x cursor)]
+    (if (> length 0)
+      (assoc editor
+        :buffer (assoc buffer
+                  y
+                  (str (subs line 0 x) (subs line (inc x) (count line)))))
+      editor)))
+
+(defn delete-backward [editor]
+  (let [cursor (:cursor editor)
+        buffer (:buffer editor)
+        y (:y cursor)
+        line (get buffer y)
+        length (count line)
+        x (:x cursor)]
+    (if (> length 0)
+      (assoc editor
+        :buffer (assoc buffer
+                  y
+                  (str (subs line 0 (dec x)) (subs line x (count line))))
+        :cursor (assoc cursor
+                  :x (dec x)))
+      editor)))
+
 (core/register :i insert)
 (core/register :o new-line)
+(core/register :x delete-forward)
+(core/register :X delete-backward)

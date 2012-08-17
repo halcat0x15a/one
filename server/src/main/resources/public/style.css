@@ -2,11 +2,23 @@ body {
   margin: 0;
 }
 
+@-webkit-keyframes blink {
+  from { opacity: 1.0; }
+  to { opacity: 0; }
+}
+
+@-moz-keyframes blink {
+  from { opacity: 1.0; }
+  to { opacity: 0; }
+}
+
 #cursor {
   background-color: white;
   position: absolute;
   width: 1ex;
   height: 1em;
+  -webkit-animation: blink 1s infinite;
+  -moz-animation: blink 1s infinite;
 }
 
 #buffer {
