@@ -5,7 +5,8 @@
             [goog.events.EventType :as gevent-type]
             [onedit.core :as core]
             [onedit.editor :as editor]
-            [onedit.cursor :as cursor]))
+            [onedit.cursor :as cursor])
+  (:use-macros [onedit.core :only [defun]]))
 
 (defn load [editor event]
   (editor/update (assoc editor
@@ -17,7 +18,7 @@
     (aset "onload" (partial load editor))
     (.readAsText (aget (aget (aget event "target") "files") 0))))
 
-(defn open [editor]
+(defun open [editor]
   (doto (dom/element :input)
     (dom/log)
     (dom/set-properties {"type" "file"})
@@ -26,5 +27,3 @@
   editor)
 
 (defn save [editor])
-
-(core/register :open open)
