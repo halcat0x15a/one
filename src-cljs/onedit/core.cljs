@@ -9,15 +9,33 @@
 
 (def unit-cursor (Cursor. 0 0))
 
-(defrecord Editor [buffer cursor])
+(defrecord Buffer [strings cursor])
 
-(defrecord X [buffers current])
+(defrecord Editor [buffers current])
 
-(def current-cursor (comp :cursor :current))
+(defn get-buffer [editor]
+  ((:buffers editor) (:current editor)))
 
-(def current-buffer (comp :buffer :current))
+(def get-cursor (comp :cursor get-buffer))
 
-(def count-lines (comp count :buffer))
+(def get-strings (comp :strings get-buffer))
 
-(defn count-line [editor y]
-  (count (get (:buffer editor) y)))
+(defn set-buffer [editor buffer]
+  (assoc editor
+    :buffers (assoc (:buffers editor)
+               (:current editor) buffer)))
+
+(defn set-cursor [editor cursor]
+  (set-buffer editor (assoc (get-buffer editor)
+                :cursor cursor)))
+
+(defn set-strings [editor strings]
+  (set-buffer editor (assoc (get-buffer editor)
+                       :strings strings)))
+
+(def count-lines (comp count get-strings))
+
+(defn get-line [editor y]
+  (get (get-strings editor) y))
+
+(def count-line (comp count get-line))

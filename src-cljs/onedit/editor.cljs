@@ -6,40 +6,28 @@
             [onedit.core :as core])
   (:use-macros [onedit.core :only [defun]]))
 
-(defn buffers []
-  (dom/ensure-element :buffers))
-
-(defn current? [elem]
-  (= (aget elem "className") "current"))
-
-(defn current-element [buffers]
-  (-> buffers
-      gdom/getChildren
-      (garray/find current?)
-      gdom/getChildren))
-
-(defn current []
-  (let [elems (current-element (buffers))
-        cursor (aget elems 0)
-        buffer (aget elems 1)]
-    (core/->Editor buffer cursor)))
-
 (defn cursor
-  ([elem] (core/->Cursor (cursor elem "left") (cursor elem "top")))
-  ([elem attr] (let [str (aget (aget elem "style") attr)]
-                 (int (subs str 0 (- (count str) 2))))))
+  ([] (core/->Cursor (cursor "left") (cursor "top")))
+  ([attr] (let [str (aget (aget (dom/ensure-element :cursor) "style") attr)]
+            (int (subs str 0 (- (count str) 2))))))
 
-(def buffer (comp string/split-lines gdom/getRawTextContent))
+(defn strings []
+  (-> (dom/ensure-element :buffer)
+      gdom/getRawTextContent
+      string/split-lines))
 
-(def create (comp (partial apply core/->Editor) (juxt (comp buffer :buffer) (comp cursor :cursor)) current))
+(def buffer (comp (partial apply core/->Buffer) (juxt strings cursor)))
+
+(defn create []
+  (core/->Editor {:scratch (buffer)} :scratch))
 
 (defn update [editor]
-  (let [{:keys [x y]} (:cursor editor)
-        style (str "left: " x "ex; top: " y "em;")
-        editor' (current)]
-    (dom/set-properties (:cursor editor') {"style" style})
-    (dom/set-text (:buffer editor') (string/join (interpose \newline (:buffer editor))))))
+  (let [{:keys [x y]} (core/get-cursor editor)
+        style (str "left: " x "ex; top: " y "em;")]
+    (dom/set-properties (dom/ensure-element :cursor) {"style" style})
+    (dom/set-text (dom/ensure-element :buffer) (string/join (interpose \newline (core/get-strings editor))))))
 
+(comment
 (defn hidden! [buffers]
   (garray/forEach (gdom/getChildren buffers) #(dom/set-properties % {"class" "hidden"})))
 
@@ -56,3 +44,4 @@
   (create))
 
 (defun commands [editor])
+)

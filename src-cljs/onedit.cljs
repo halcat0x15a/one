@@ -10,7 +10,7 @@
 (defn exec [event]
   (let [value (dom/get-value :minibuffer)
         [f & args] (string/split value #"\s+")]
-    (if-let [function (aget core/editor f)]
+    (when-let [function (aget core/editor f)]
       (let [editor' (apply function (cons (editor/create) args))]
         (editor/update editor')
         (dom/set-value :minibuffer "")))))
