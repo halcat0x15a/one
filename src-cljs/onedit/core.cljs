@@ -7,9 +7,15 @@
 
 (defrecord Cursor [x y])
 
-(def unit (Cursor. 0 0))
+(def unit-cursor (Cursor. 0 0))
 
 (defrecord Editor [buffer cursor])
+
+(defrecord X [buffers current])
+
+(def current-cursor (comp :cursor :current))
+
+(def current-buffer (comp :buffer :current))
 
 (def count-lines (comp count :buffer))
 

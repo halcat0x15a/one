@@ -4,13 +4,13 @@
             [clojure.browser.event :as event]
             [goog.events.EventType :as gevent-type]
             [onedit.core :as core]
-            [onedit.cursor :as cursor])
+            [onedit.editor :as editor])
   (:use-macros [onedit.core :only [defun]]))
 
 (defn load [editor event]
   (editor/update (assoc editor
                    :buffer (string/split-lines (aget (aget event "target") "result"))
-                   :cursor cursor/unit)))
+                   :cursor core/unit-cursor)))
 
 (defn select [editor event]
   (doto (js/FileReader.)

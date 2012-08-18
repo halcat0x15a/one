@@ -12,10 +12,6 @@ body {
   to { opacity: 0; }
 }
 
-#buffers *:not(.current) {
-  display: hidden;
-}
-
 #buffers .current .cursor {
   background-color: white;
   position: absolute;
@@ -25,16 +21,23 @@ body {
   -moz-animation: blink 1s infinite;
 }
 
+#buffers * .buffer {
+  margin: 0;
+}
+
 #buffers .current .buffer {
   background-color: black;
   color: white;
   width: 100%;
   height: 100%;
-  margin: 0;
 }
 
 #minibuffer {
   position: fixed;
   bottom: 0;
   width: 100%;
+}
+
+.hidden {
+  display: none;
 }
