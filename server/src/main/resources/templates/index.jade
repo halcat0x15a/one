@@ -7,9 +7,10 @@ html
     link(type="text/css" rel="stylesheet" href="/public/style.css")
     script(type="text/javascript" src="/public/onedit.js")
   body
-    span#cursor
     #buffers
-      pre#buffer.buffer(contenteditable="true")
+      #scratch.current
+        span.cursor
+        pre.buffer(contenteditable="true")
     input#minibuffer(type="text")
     :javascript
       onedit.main();

@@ -1,23 +1,7 @@
 (ns onedit.cursor
   (:require [clojure.string :as string]
-            [clojure.browser.dom :as dom]
             [onedit.core :as core])
   (:use-macros [onedit.core :only [defun]]))
-
-(defrecord Cursor [x y])
-
-(def unit (Cursor. 0 0))
-
-(defn create
-  ([] (Cursor. (create "left") (create "top")))
-  ([attr]
-     (let [str (aget (aget (dom/ensure-element :cursor) "style") attr)]
-       (int (subs str 0 (- (count str) 2))))))
-
-(defn update
-  ([cursor] (update (:x cursor) (:y cursor)))
-  ([x y]
-     (dom/set-properties :cursor {"style" (str "left: " x "ex; top: " y "em;")})))
 
 (defun left [editor]
   (let [cursor (:cursor editor)
@@ -71,7 +55,7 @@
   (loop [editor editor]
     (let [cursor (:cursor editor)
           editor' (f editor)]
-      (if-let [character (nth (get (:buffers editor) (:y cursor)) (:x cursor))]
+      (if-let [character (nth (get (:buffer editor) (:y cursor)) (:x cursor))]
         (if (and (not= editor' editor) (pred character))
           (recur editor')
           editor)
