@@ -1,8 +1,11 @@
 (ns onedit.editor
   (:require [clojure.string :as string]
             [clojure.browser.dom :as dom]
+            [clojure.browser.event :as event]
             [goog.dom :as gdom]
+            [goog.events :as gevents]
             [goog.array :as garray]
+            [goog.events.EventType :as gevents-type]
             [onedit.core :as core])
   (:use-macros [onedit.core :only [fn-map]]))
 
@@ -21,11 +24,32 @@
 (defn unit []
   (core/->Editor {:scratch (get-buffer)} :scratch))
 
-(defn update [editor]
-  (let [{:keys [x y]} (core/get-cursor editor)
-        style (str "left: " x "ex; top: " y "em;")]
-    (dom/set-properties (dom/ensure-element :cursor) {"style" style})
-    (dom/set-text (dom/ensure-element :buffer) (string/join (interpose \newline (core/get-strings editor))))))
+(declare exec)
+
+(defn listen [minibuffer editor]
+  (gevents/removeAll minibuffer gevents-type/CHANGE)
+  (event/listen-once minibuffer gevents-type/CHANGE (partial exec editor)))
+
+(defn update
+  ([editor] (update editor (dom/ensure-element :minibuffer)))
+  ([editor minibuffer]
+     (let [{:keys [x y]} (core/get-cursor editor)
+           style (str "left: " x "ex; top: " y "em;")]
+       (dom/set-properties (dom/ensure-element :cursor) {"style" style})
+       (dom/set-text (dom/ensure-element :buffer) (string/join (interpose \newline (core/get-strings editor))))
+       (listen minibuffer editor))))
+
+(defn exec [editor event]
+  (let [minibuffer (dom/ensure-element :minibuffer)
+        value (dom/get-value minibuffer)
+        [f & args] (string/split value #"\s+")]
+    (if-let [function ((keyword f) onedit/functions)]
+      (let [editor' (apply function (cons (core/set-buffer editor (get-buffer)) args))]
+        (dom/log editor')
+        (dom/set-value minibuffer "")
+        (update editor')
+        (listen minibuffer editor'))
+      (listen minibuffer editor))))
 
 (defn buffer [editor id]
   (let [key (keyword id)
