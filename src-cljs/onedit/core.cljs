@@ -11,6 +11,8 @@
 
 (defrecord Buffer [strings cursor])
 
+(def unit-buffer (Buffer. [] unit-cursor))
+
 (defrecord Editor [buffers current])
 
 (defn get-buffer [editor]

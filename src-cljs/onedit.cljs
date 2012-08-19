@@ -7,15 +7,24 @@
             [onedit.core :as core]
             [onedit.editor :as editor]))
 
-(defn exec [event]
+(def history [])
+
+(declare exec)
+
+(defn listen [editor]
+  (event/listen-once (dom/ensure-element :minibuffer) gevent-type/CHANGE (partial exec editor)))
+
+(defn exec [editor event]
   (let [value (dom/get-value :minibuffer)
         [f & args] (string/split value #"\s+")]
-    (when-let [function (aget core/editor f)]
-      (let [editor' (apply function (cons (editor/create) args))]
+    (if-let [function (aget core/editor f)]
+      (let [editor' (apply function (cons (core/set-buffer editor (editor/get-buffer)) args))]
+        (dom/log editor')
         (editor/update editor')
-        (dom/set-value :minibuffer "")))))
+        (dom/set-value :minibuffer "")
+        (listen editor'))
+      (listen editor))))
 
 (defn main []
-  (doto (dom/ensure-element :minibuffer)
-    (event/listen gevent-type/CHANGE exec)
-    (focus/focusInputField)))
+  (listen (editor/unit))
+  (focus/focusInputField (dom/ensure-element :minibuffer)))
