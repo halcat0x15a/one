@@ -22,4 +22,6 @@
       (assert= (buffer/delete-forward (core/->Editor {"scratch" (core/->Buffer ["hello"] (core/->Cursor 1 0))} "scratch"))
                (core/->Editor {"scratch" (core/->Buffer ["hllo"] (core/->Cursor 1 0))} "scratch"))
       (assert= (buffer/delete-backward (core/->Editor {"scratch" (core/->Buffer ["hello"] (core/->Cursor 1 0))} "scratch"))
-               (core/->Editor {"scratch" (core/->Buffer ["ello"] (core/->Cursor 0 0))} "scratch"))))
+               (core/->Editor {"scratch" (core/->Buffer ["ello"] (core/->Cursor 0 0))} "scratch"))
+      (assert= (buffer/delete-line (core/->Editor {"scratch" (core/->Buffer ["hello"] (core/->Cursor 1 0))} "scratch"))
+               (core/->Editor {"scratch" (core/->Buffer [""] (core/->Cursor 0 0))} "scratch"))))

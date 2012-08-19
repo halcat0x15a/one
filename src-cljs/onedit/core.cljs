@@ -1,17 +1,12 @@
 (ns onedit.core)
 
-(def editor (js-obj))
-
-(defn register [key f]
-  (aset editor (name key) f))
-
 (defrecord Cursor [x y])
 
 (def unit-cursor (Cursor. 0 0))
 
 (defrecord Buffer [strings cursor])
 
-(def unit-buffer (Buffer. [] unit-cursor))
+(def unit-buffer (Buffer. [""] unit-cursor))
 
 (defrecord Editor [buffers current])
 

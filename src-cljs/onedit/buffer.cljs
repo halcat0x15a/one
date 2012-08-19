@@ -5,21 +5,21 @@
             [goog.array :as garray]
             [onedit.core :as core]
             [onedit.cursor :as cursor])
-  (:use-macros [onedit.core :only [defun]]))
+  (:use-macros [onedit.core :only [fn-map]]))
 
-(defun prepend-newline [editor]
+(defn prepend-newline [editor]
   (let [[lines lines'] (split-at (:y (core/get-cursor editor)) (core/get-strings editor))]
     (-> editor
         (core/set-strings (concat lines [""] lines'))
         cursor/start-line)))
 
-(defun append-newline [editor]
+(defn append-newline [editor]
   (let [[lines lines'] (split-at (inc (:y (core/get-cursor editor))) (core/get-strings editor))]
     (-> editor
         (core/set-strings (vec (concat lines [""] lines')))
         cursor/down)))
 
-(defun insert-newline [editor]
+(defn insert-newline [editor]
   (let [{:keys [x y]} (core/get-cursor editor)
         buffer (core/get-strings editor)
         line (get buffer y)
@@ -29,7 +29,7 @@
         cursor/down
         cursor/start-line)))
 
-(defun insert [editor string]
+(defn insert [editor string]
   (let [cursor (core/get-cursor editor)
         x (:x cursor)
         y (:y cursor)
@@ -40,7 +40,7 @@
         (core/set-strings (assoc buffer y line'))
         (core/set-cursor (assoc cursor :x (+ x (count string)))))))
 
-(defun delete-forward [editor]
+(defn delete-forward [editor]
   (let [{:keys [x y]} (core/get-cursor editor)
         buffer (core/get-strings editor)
         line (get buffer y)
@@ -51,7 +51,7 @@
                                  (str (subs line 0 x) (subs line (inc x) (count line)))))
       editor)))
 
-(defun delete-backward [editor]
+(defn delete-backward [editor]
   (let [{:keys [x y]} (core/get-cursor editor)
         buffer (core/get-strings editor)
         line (get buffer y)
@@ -64,15 +64,32 @@
           cursor/left)
       editor)))
 
-(defun delete-line [editor]
+(defn delete-line [editor]
   (let [[lines lines'] (split-at (:y (core/get-cursor editor)) (core/get-strings editor))]
     (-> editor
-        (core/set-strings (concat lines (rest lines')))
+        (core/set-strings (vec (concat lines (rest lines'))))
         cursor/up
-        cursor/down)))
+        cursor/down
+        cursor/start-line)))
 
-(defun replace-character [editor string]
+(defn replace-character [editor string]
   (let [{:keys [x y]} (core/get-cursor editor)
         buffer (core/get-strings editor)
         line (get buffer y)]
     (core/set-strings editor (assoc buffer y (str (subs line 0 x) string (subs line (inc x) (count line)))))))
+
+(def functions
+  (merge (fn-map insert
+                 append-newline
+                 prepend-newline
+                 delete-forward
+                 delete-backward
+                 delete-line
+                 replace-character)
+         {:i insert
+          :o append-newline
+          :O prepend-newline
+          :x delete-forward
+          :X delete-backward
+          :dd delete-line
+          :r replace-character}))

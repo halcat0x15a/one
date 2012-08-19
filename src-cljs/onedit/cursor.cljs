@@ -1,17 +1,17 @@
 (ns onedit.cursor
   (:require [clojure.string :as string]
             [onedit.core :as core])
-  (:use-macros [onedit.core :only [defun]]))
+  (:use-macros [onedit.core :only [fn-map]]))
 
-(defun left [editor]
+(defn left [editor]
   (let [cursor (core/get-cursor editor)
         x (:x cursor)]
     (if (> x 0)
       (core/set-cursor editor (assoc cursor
-                               :x (dec x)))
+                                :x (dec x)))
       editor)))
 
-(defun down [editor]
+(defn down [editor]
   (let [cursor (core/get-cursor editor)
         x (:x cursor)
         y (:y cursor)
@@ -25,7 +25,7 @@
                                 :y y'))
       editor)))
 
-(defun up [editor]
+(defn up [editor]
   (let [cursor (core/get-cursor editor)
         x (:x cursor)
         y (:y cursor)
@@ -39,7 +39,7 @@
                                 :y y'))
       editor)))
 
-(defun right [editor]
+(defn right [editor]
   (let [cursor (core/get-cursor editor)
         x (:x cursor)]
     (if (< x (core/count-line editor (:y cursor)))
@@ -57,33 +57,55 @@
           editor)
         editor))))
 
-(defun forward [editor]
+(defn forward [editor]
   (-> editor
       (move-while string/blank? right)
       (move-while (comp not string/blank?) right)))
 
-(defun backward [editor]
+(defn backward [editor]
   (-> editor
       left
       (move-while string/blank? left)
       (move-while (comp not string/blank?) left)
       (move-while string/blank? right)))
 
-(defun start-line [editor]
+(defn start-line [editor]
   (core/set-cursor editor (assoc (core/get-cursor editor)
                             :x 0)))
 
-(defun end-line [editor]
+(defn end-line [editor]
   (let [cursor (core/get-cursor editor)]
     (core/set-cursor editor (assoc cursor
                               :x (dec (core/count-line editor (:x cursor)))))))
 
-(defun start-buffer [editor]
+(defn start-buffer [editor]
   (-> editor
       (move-while (constantly true) up)
       start-line))
 
-(defun end-buffer [editor]
+(defn end-buffer [editor]
   (-> editor
       (move-while (constantly true) down)
       end-line))
+
+(def functions
+  (merge (fn-map left
+                 down
+                 up
+                 right
+                 forward
+                 backward
+                 start-line
+                 end-line
+                 start-buffer
+                 end-buffer)
+         {:h left
+          :j down
+          :k up
+          :l right
+          :w forward
+          :b backward
+          :| start-line
+          :$ end-line
+          :gg start-buffer
+          :G end-buffer}))

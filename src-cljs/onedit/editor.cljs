@@ -4,7 +4,7 @@
             [goog.dom :as gdom]
             [goog.array :as garray]
             [onedit.core :as core])
-  (:use-macros [onedit.core :only [defun]]))
+  (:use-macros [onedit.core :only [fn-map]]))
 
 (defn get-cursor
   ([] (core/->Cursor (get-cursor "left") (get-cursor "top")))
@@ -27,13 +27,35 @@
     (dom/set-properties (dom/ensure-element :cursor) {"style" style})
     (dom/set-text (dom/ensure-element :buffer) (string/join (interpose \newline (core/get-strings editor))))))
 
-(defun buffer [editor id]
+(defn buffer [editor id]
   (let [key (keyword id)
         buffers (:buffers editor)]
-    (if (contains? buffers key)
-      (assoc editor
-        :current key)
-      (assoc editor
-        :buffers (assoc buffers
-                   key core/unit-buffer)
-        :current key))))
+    (assoc (if (contains? buffers key)
+             editor
+             (assoc editor
+               :buffers (assoc buffers
+                          key core/unit-buffer)))
+      :current key)))
+
+(defn delete-buffer [editor id]
+  (assoc editor
+    :buffers (dissoc (:buffers editor) id)))
+
+(defn buffers [editor]
+  (letfn [(set-buffers [editor]
+            (core/set-strings editor (map name (keys (:buffers editor)))))]
+    (-> editor
+        (buffer :buffers)
+        set-buffers)))
+
+(defn grep [editor string]
+  (let [re (re-pattern string)]
+    (-> editor
+        (buffer :grep)
+        (core/set-strings (filter (partial re-find re) (core/get-strings editor))))))
+
+(def functions
+  (fn-map delete-buffer
+          buffer
+          buffers
+          grep))
