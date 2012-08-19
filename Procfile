@@ -1,1 +1,1 @@
-web: target/start onedit.Main onedit-py.herokuapp.com
+web: server/target/start onedit.server.Editor

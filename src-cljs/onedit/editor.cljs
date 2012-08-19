@@ -37,15 +37,18 @@
            style (str "left: " x "ex; top: " y "em;")]
        (dom/set-properties (dom/ensure-element :cursor) {"style" style})
        (dom/set-text (dom/ensure-element :buffer) (string/join (interpose \newline (core/get-strings editor))))
-       (listen minibuffer editor))))
+       (listen minibuffer editor)
+       editor)))
+
+(defn get-function [function]
+  ((keyword function) onedit/functions))
 
 (defn exec [editor event]
   (let [minibuffer (dom/ensure-element :minibuffer)
         value (dom/get-value minibuffer)
         [f & args] (string/split value #"\s+")]
-    (if-let [function ((keyword f) onedit/functions)]
+    (if-let [function (get-function f)]
       (let [editor' (apply function (cons (core/set-buffer editor (get-buffer)) args))]
-        (dom/log editor')
         (dom/set-value minibuffer "")
         (update editor')
         (listen minibuffer editor'))
@@ -78,8 +81,38 @@
         (buffer :grep)
         (core/set-strings (filter (partial re-find re) (core/get-strings editor))))))
 
+(defn commands [editor]
+  (-> editor
+      (buffer :commands)
+      (core/set-strings (map name (keys onedit/functions)))))
+
+(defn count-lines [editor]
+  (-> editor
+      (buffer :count-lines)
+      (core/set-strings [(str (core/count-lines editor))])))
+
+(defn apply-buffers [editor command & args]
+  (let [f (get-function command)]
+    (loop [editor editor buffers (:buffers editor) result []]
+      (if (empty? buffers)
+        (-> editor
+            (buffer :apply-buffers)
+            (core/set-strings result))
+        (let [[k v] (first buffers)
+              editor' (apply f (-> editor (buffer k)) args)]
+          (recur editor' (rest buffers) (concat result (core/get-strings editor'))))))))
+
+(defn sum [editor]
+  (-> editor
+      (buffer :sum)
+      (core/set-strings [(str (apply + (map int (flatten (map (partial re-seq #"\d+") (core/get-strings editor))))))])))
+
 (def functions
   (fn-map delete-buffer
           buffer
           buffers
-          grep))
+          grep
+          commands
+          count-lines
+          sum
+          apply-buffers))

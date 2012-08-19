@@ -17,3 +17,5 @@
   (doto (dom/ensure-element :minibuffer)
     (editor/listen (editor/unit))
     (focus/focusInputField)))
+
+(main)

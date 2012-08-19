@@ -8,25 +8,31 @@
             [onedit.editor :as editor])
   (:use-macros [onedit.core :only [fn-map]]))
 
-(defn load [editor file event]
-  (-> editor
-      (editor/buffer file/name)
-      (core/set-strings (string/split-lines event.target/result))
-      (core/set-cursor core/unit-cursor)
-      editor/update))
+(declare read)
 
-(defn read [editor file]
+(defn load [editor files n event]
+  (let [file (aget files n)
+        editor' (-> editor
+                    (editor/buffer (aget file "name"))
+                    (core/set-strings (string/split-lines event.target/result))
+                    (core/set-cursor core/unit-cursor)
+                    editor/update)
+        n' (inc n)]
+    (when (< n' files/length)
+      (read editor' files n'))))
+
+(defn read [editor files n]
   ((fn [reader]
-     (set! reader/onload (partial load editor file))
-     (.readAsText reader file))
+     (set! reader/onload (partial load editor files n))
+     (.readAsText reader (aget files n)))
    (js/FileReader.)))
 
 (defn select [editor event]
-  (garray/forEach event.target/files (partial read editor)))
+  (read editor event.target/files 0))
 
 (defn open [editor]
   (doto (dom/element :input)
-    (dom/set-properties {"type" "file"})
+    (dom/set-properties {"type" "file" "multiple" "multiple"})
     (event/listen gevent-type/CHANGE (partial select editor))
     (dom/click-element))
   editor)
