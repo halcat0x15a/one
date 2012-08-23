@@ -1,13 +1,18 @@
 (ns onedit.editor
   (:require [clojure.string :as string]
             [clojure.browser.dom :as dom]
-            [clojure.browser.event :as event]
             [goog.dom :as gdom]
-            [goog.events :as gevents]
             [goog.array :as garray]
-            [goog.events.EventType :as gevents-type]
+            [goog.storage.mechanism.HTML5LocalStorage :as storage]
             [onedit.core :as core])
   (:use-macros [onedit.core :only [fn-map]]))
+
+(def current (atom core/unit-editor))
+
+(def local
+  (doto (goog.storage.mechanism.HTML5LocalStorage.)
+    (.set "scratch" "")
+    (.set "current" "scratch")))
 
 (defn get-cursor
   ([] (core/->Cursor (get-cursor "left") (get-cursor "top")))
@@ -19,40 +24,28 @@
       gdom/getRawTextContent
       string/split-lines))
 
-(def get-buffer (comp (partial apply core/->Buffer) (juxt get-strings get-cursor)))
+(defn get-buffer []
+  (core/->Buffer (get-strings) (get-cursor)))
 
-(defn unit []
-  (core/->Editor {:scratch (get-buffer)} :scratch))
-
-(declare exec)
-
-(defn listen [minibuffer editor]
-  (gevents/removeAll minibuffer gevents-type/CHANGE)
-  (event/listen-once minibuffer gevents-type/CHANGE (partial exec editor)))
-
-(defn update
-  ([editor] (update editor (dom/ensure-element :minibuffer)))
-  ([editor minibuffer]
-     (let [{:keys [x y]} (core/get-cursor editor)
-           style (str "left: " x "ex; top: " y "em;")]
-       (dom/set-properties (dom/ensure-element :cursor) {"style" style})
-       (dom/set-text (dom/ensure-element :buffer) (string/join (interpose \newline (core/get-strings editor))))
-       (listen minibuffer editor)
-       editor)))
+(defn update [editor]
+  (let [{:keys [x y]} (core/get-cursor editor)
+        style (str "left: " x "ex; top: " y "em;")]
+    (dom/set-properties (dom/ensure-element :cursor) {"style" style})
+    (dom/set-text (dom/ensure-element :buffer) (string/join (interpose \newline (core/get-strings editor))))
+    (reset! current editor)
+    editor))
 
 (defn get-function [function]
   ((keyword function) onedit/functions))
 
-(defn exec [editor event]
+(defn exec [event]
   (let [minibuffer (dom/ensure-element :minibuffer)
         value (dom/get-value minibuffer)
         [f & args] (string/split value #"\s+")]
-    (if-let [function (get-function f)]
-      (let [editor' (apply function (cons (core/set-buffer editor (get-buffer)) args))]
+    (when-let [function (get-function f)]
+      (let [editor' (apply function (cons (core/set-buffer @current (get-buffer)) args))]
         (dom/set-value minibuffer "")
-        (update editor')
-        (listen minibuffer editor'))
-      (listen minibuffer editor))))
+        (update editor')))))
 
 (defn buffer [editor id]
   (let [key (keyword id)

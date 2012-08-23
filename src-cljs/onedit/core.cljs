@@ -10,6 +10,8 @@
 
 (defrecord Editor [buffers current])
 
+(def unit-editor (Editor. {:scratch unit-buffer} :scratch))
+
 (defn get-buffer [editor]
   ((:buffers editor) (:current editor)))
 
