@@ -7,17 +7,20 @@
             [onedit.cursor :as cursor])
   (:use-macros [onedit.core :only [fn-map]]))
 
-(defn prepend-newline [editor]
-  (let [[lines lines'] (split-at (:y (core/get-cursor editor)) (core/get-strings editor))]
+(defn insert-newline [editor y]
+  (let [[lines lines'] (split-at y (core/get-strings editor))]
     (-> editor
-        (core/set-strings (concat lines [""] lines'))
-        cursor/start-line)))
+        (core/set-strings (concat lines [""] lines')))))
+
+(defn prepend-newline [editor]
+  (-> editor
+      (insert-newline (:y (core/get-cursor editor)))
+      cursor/start-line))
 
 (defn append-newline [editor]
-  (let [[lines lines'] (split-at (inc (:y (core/get-cursor editor))) (core/get-strings editor))]
-    (-> editor
-        (core/set-strings (vec (concat lines [""] lines')))
-        cursor/down)))
+  (-> editor
+      (insert-newline (inc (:y (core/get-cursor editor))))
+      cursor/down))
 
 (defn insert-newline [editor]
   (let [{:keys [x y]} (core/get-cursor editor)

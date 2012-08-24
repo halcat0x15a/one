@@ -26,7 +26,7 @@
 
 (defn set-cursor [editor cursor]
   (set-buffer editor (assoc (get-buffer editor)
-                :cursor cursor)))
+                       :cursor cursor)))
 
 (defn set-strings [editor strings]
   (set-buffer editor (assoc (get-buffer editor)

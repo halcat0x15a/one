@@ -3,16 +3,10 @@
             [clojure.browser.dom :as dom]
             [goog.dom :as gdom]
             [goog.array :as garray]
-            [goog.storage.mechanism.HTML5LocalStorage :as storage]
             [onedit.core :as core])
   (:use-macros [onedit.core :only [fn-map]]))
 
 (def current (atom core/unit-editor))
-
-(def local
-  (doto (goog.storage.mechanism.HTML5LocalStorage.)
-    (.set "scratch" "")
-    (.set "current" "scratch")))
 
 (defn get-cursor
   ([] (core/->Cursor (get-cursor "left") (get-cursor "top")))
