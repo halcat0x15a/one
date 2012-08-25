@@ -10,30 +10,26 @@
 
 (declare read)
 
-(defn load [editor files n event]
-  (let [file (aget files n)
-        editor' (-> editor
-                    (editor/buffer (aget file "name"))
-                    (core/set-strings (string/split-lines event.target/result))
-                    (core/set-cursor core/unit-cursor)
-                    editor/update)
-        n' (inc n)]
-    (when (< n' files/length)
-      (read editor' files n'))))
+(defn load [file event]
+  (reset! core/current-editor
+          (-> @core/current-editor
+              (editor/buffer file/name)
+              (core/set-strings (string/split-lines event.target/result))
+              (core/set-cursor core/unit-cursor)
+              editor/update)))
 
-(defn read [editor files n]
-  ((fn [reader]
-     (set! reader/onload (partial load editor files n))
-     (.readAsText reader (aget files n)))
-   (js/FileReader.)))
-
-(defn select [editor event]
-  (read editor event.target/files 0))
+(defn select [event]
+  (garray/forEach event.target/files
+                  (fn [file]
+                    ((fn [reader]
+                       (set! reader/onload (partial load file))
+                       (.readAsText reader file))
+                     (js/FileReader.)))))
 
 (defn open [editor]
   (doto (dom/element :input)
     (dom/set-properties {"type" "file" "multiple" "multiple"})
-    (event/listen gevent-type/CHANGE (partial select editor))
+    (event/listen gevent-type/CHANGE select)
     (dom/click-element))
   editor)
 

@@ -12,6 +12,8 @@
 
 (def unit-editor (Editor. {:scratch unit-buffer} :scratch))
 
+(def current-editor (atom unit-editor))
+
 (defn get-buffer [editor]
   ((:buffers editor) (:current editor)))
 

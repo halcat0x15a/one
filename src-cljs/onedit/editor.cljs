@@ -3,31 +3,21 @@
             [clojure.browser.dom :as dom]
             [goog.dom :as gdom]
             [goog.array :as garray]
-            [onedit.core :as core])
+            [onedit.core :as core]
+            [onedit.style :as style])
   (:use-macros [onedit.core :only [fn-map]]))
-
-(def current (atom core/unit-editor))
-
-(defn get-cursor
-  ([] (core/->Cursor (get-cursor "left") (get-cursor "top")))
-  ([attr] (let [str (aget (aget (dom/ensure-element :cursor) "style") attr)]
-            (int (subs str 0 (- (count str) 2))))))
 
 (defn get-strings []
   (-> (dom/ensure-element :buffer)
       gdom/getRawTextContent
       string/split-lines))
 
-(defn get-buffer []
-  (core/->Buffer (get-strings) (get-cursor)))
-
 (defn update [editor]
-  (let [{:keys [x y]} (core/get-cursor editor)
-        style (str "left: " x "ex; top: " y "em;")]
-    (dom/set-properties (dom/ensure-element :cursor) {"style" style})
-    (dom/set-text (dom/ensure-element :buffer) (string/join (interpose \newline (core/get-strings editor))))
-    (reset! current editor)
-    editor))
+  (dom/set-properties (dom/ensure-element :cursor) {"style" (style/cursor-style (core/get-cursor editor))})
+  (doto (dom/ensure-element :buffer)
+    (dom/set-properties {"style" (style/buffer-style)})
+    (dom/set-text (string/join (interpose \newline (core/get-strings editor)))))
+  (reset! core/current-editor editor))
 
 (defn get-function [function]
   ((keyword function) onedit/functions))
@@ -37,7 +27,7 @@
         value (dom/get-value minibuffer)
         [f & args] (string/split value #"\s+")]
     (when-let [function (get-function f)]
-      (let [editor' (apply function (cons (core/set-buffer @current (get-buffer)) args))]
+      (let [editor' (apply function (core/set-strings @core/current-editor (get-strings)) args)]
         (dom/set-value minibuffer "")
         (update editor')))))
 
