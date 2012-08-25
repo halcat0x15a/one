@@ -18,7 +18,8 @@ object EditorBuild extends Build {
     resolvers ++= Seq(
       "java" at "http://download.java.net/maven/2",
       "typesafe releases" at "http://repo.typesafe.com/typesafe/releases/",
-      "typesafe snapshots" at "http://repo.typesafe.com/typesafe/snapshots/"
+      "typesafe snapshots" at "http://repo.typesafe.com/typesafe/snapshots/",
+      "fusesource" at "http://repo.fusesource.com/nexus/content/repositories/snapshots"
     ),
     libraryDependencies ++= Seq(
       "org.scalaz" %% "scalaz-core" % scalazVersion,
@@ -44,7 +45,7 @@ object EditorBuild extends Build {
         "javax.servlet" % "servlet-api" % "2.5"
       )
     )
-  ) dependsOn uri("git://github.com/unfiltered/unfiltered-scalate.git")
+  ) dependsOn uri("git://github.com/halcat0x15a/unfiltered-scalate.git")
 
   lazy val client = Project(
     id = "client",

@@ -47,9 +47,9 @@ object Editor extends SafeApp {
 
   lazy val launch: String => Unit = Application.launch(classOf[Editor], _)
 
-  lazy val run: Http => IO[Unit] =
-    _.start.point[IO].bracket(_.stop.destroy.point[IO])(_.url |> launch >>> (_.point[IO]))
+  lazy val run =
+    Kleisli[IO, Http, Unit](_.start.point[IO].bracket(_.stop.destroy.point[IO])(_.url |> launch >>> (_.point[IO])))
 
-  override def runc = client(server(port) >>> run)
+  override def runc = client(server(port) >=> run)
 
 }

@@ -62,13 +62,15 @@ case class Editor(client: nio.Http) extends async.Plan with ServerErrorResponse 
 
 object Editor extends SafeApp {
 
-  def client[A](f: nio.Http => IO[A]) = IO(new nio.Http).bracket(_.shutdown.point[IO])(f)
+  def client[A] = IO(new nio.Http).bracket[Unit, A](_.shutdown.point[IO])_
 
   def construct(port: Int)(editor: Editor) =
-    Http(port).plan(LiveCoding).resources(getClass.getResource("/public")).plan(editor).handler(editor.decoder)
+    IO(Http(port).plan(LiveCoding).resources(getClass.getResource("/public")).plan(editor).handler(editor.decoder))
 
-  def server(port: Int) = Editor.apply _ >>> construct(port)
+  def editor[A](f: Editor => IO[A])(client: nio.Http) = IO(Editor(client)).bracket(_.template.shutdown.point[IO])(f)
 
-  override def runc = client(server(Properties.envOrElse("PORT", "8080").toInt) >>> (_.run.point[IO]))
+  def server(port: Int) = Kleisli(editor(construct(port))_)
+
+  override def runc = client(server(Properties.envOrElse("PORT", "8080").toInt) >==> (_.run.point[IO]))
 
 }
