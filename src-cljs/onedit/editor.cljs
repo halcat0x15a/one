@@ -4,8 +4,7 @@
             [goog.dom :as gdom]
             [goog.style :as gstyle]
             [onedit.core :as core]
-            [onedit.style :as style])
-  (:use-macros [onedit.core :only [fn-map]]))
+            [onedit.style :as style]))
 
 (defn get-strings []
   (->> (dom/ensure-element :buffer)
@@ -24,10 +23,8 @@
   (doto (dom/ensure-element :buffer)
     (gstyle/setStyle (style/buffer-style)))
   (dom/remove-children :buffer)
-  (letfn [(f [e] (dom/append (dom/element :p) e))]
-    (dom/log (core/get-strings editor))
-    (doseq [e (map f (core/get-strings editor))]
-      (dom/append (dom/ensure-element :buffer) e)))
+  (doseq [e (map (partial dom/append (dom/element :p)) (core/get-strings editor))]
+    (dom/append (dom/ensure-element :buffer) e))
   (reset! core/current-editor editor))
 
 (defn get-function [function]
@@ -94,13 +91,3 @@
   (-> editor
       (buffer :sum)
       (core/set-strings [(str (apply + (map int (flatten (map (partial re-seq #"\d+") (core/get-strings editor))))))])))
-
-(def functions
-  (fn-map delete-buffer
-          buffer
-          buffers
-          grep
-          commands
-          count-lines
-          sum
-          apply-buffers))

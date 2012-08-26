@@ -9,17 +9,57 @@
             [onedit.editor :as editor]
             [onedit.buffer :as buffer]
             [onedit.cursor :as cursor]
-            [onedit.file :as file]))
+            [onedit.file :as file])
+  (:use-macros [onedit.core :only [fn-map]]))
 
 (extend-type js/HTMLCollection
   ISeqable
   (-seq [coll] (array-seq coll)))
 
 (def functions
-  (merge editor/functions
-         buffer/functions
-         cursor/functions
-         file/functions))
+  (merge (fn-map cursor/left
+                 cursor/down
+                 cursor/up
+                 cursor/right
+                 cursor/forward
+                 cursor/backward
+                 cursor/start-line
+                 cursor/end-line
+                 cursor/start-buffer
+                 cursor/end-buffer
+                 buffer/insert
+                 buffer/append-newline
+                 buffer/prepend-newline
+                 buffer/delete-forward
+                 buffer/delete-backward
+                 buffer/delete-line
+                 buffer/replace-character
+                 editor/delete-buffer
+                 editor/buffer
+                 editor/buffers
+                 editor/grep
+                 editor/commands
+                 editor/count-lines
+                 editor/sum
+                 editor/apply-buffers
+                 file/open)
+         {:h cursor/left
+          :j cursor/down
+          :k cursor/up
+          :l cursor/right
+          :w cursor/forward
+          :b cursor/backward
+          :| cursor/start-line
+          :$ cursor/end-line
+          :gg cursor/start-buffer
+          :G cursor/end-buffer
+          :i buffer/insert
+          :o buffer/append-newline
+          :O buffer/prepend-newline
+          :x buffer/delete-forward
+          :X buffer/delete-backward
+          :dd buffer/delete-line
+          :r buffer/replace-character}))
 
 (defn click-buffer [event]
   (let [range (grange/createFromWindow)]

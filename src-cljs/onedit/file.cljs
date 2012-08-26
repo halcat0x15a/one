@@ -5,8 +5,7 @@
             [goog.array :as garray]
             [goog.events.EventType :as gevent-type]
             [onedit.core :as core]
-            [onedit.editor :as editor])
-  (:use-macros [onedit.core :only [fn-map]]))
+            [onedit.editor :as editor]))
 
 (declare read)
 
@@ -34,6 +33,3 @@
   editor)
 
 (defn save [editor])
-
-(def functions
-  (fn-map open))

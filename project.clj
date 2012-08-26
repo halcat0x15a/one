@@ -4,6 +4,7 @@
                  [org.clojure/core.logic "0.7.5"]
                  [org.clojure/core.match "0.2.0-alpha10"]]
   :plugins [[lein-cljsbuild "0.2.5"]]
+  :test-path "src-cljs"
   :cljsbuild {
               :builds {
                        :main

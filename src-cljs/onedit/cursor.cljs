@@ -1,7 +1,6 @@
 (ns onedit.cursor
   (:require [clojure.string :as string]
-            [onedit.core :as core])
-  (:use-macros [onedit.core :only [fn-map]]))
+            [onedit.core :as core]))
 
 (defn left [editor]
   (let [cursor (core/get-cursor editor)
@@ -72,25 +71,3 @@
   (-> editor
       (move-while (constantly true) down)
       end-line))
-
-(def functions
-  (merge (fn-map left
-                 down
-                 up
-                 right
-                 forward
-                 backward
-                 start-line
-                 end-line
-                 start-buffer
-                 end-buffer)
-         {:h left
-          :j down
-          :k up
-          :l right
-          :w forward
-          :b backward
-          :| start-line
-          :$ end-line
-          :gg start-buffer
-          :G end-buffer}))
