@@ -2,26 +2,29 @@ body {
   margin: 0;
 }
 
-@-webkit-keyframes blink {
-  from { opacity: 1.0; }
-  to { opacity: 0; }
-}
-
-@-moz-keyframes blink {
-  from { opacity: 1.0; }
-  to { opacity: 0; }
-}
-
 #cursor {
   position: absolute;
+  z-index: 0;
+}
+
+#space {
+  visibility: hidden;
+}
+
+#pointer {
   width: 1ex;
   height: 1em;
-  -webkit-animation: blink 1s infinite;
-  -moz-animation: blink 1s infinite;
+  text-decoration: blink;
 }
 
 #buffer {
+  position: absolute;
+  z-index: 1;
   width: 100%;
+  margin: 0;
+}
+
+#buffer p {
   margin: 0;
 }
 
@@ -29,8 +32,4 @@ body {
   position: fixed;
   bottom: 0;
   width: 100%;
-}
-
-.hidden {
-  display: none;
 }

@@ -36,7 +36,9 @@
 
 (def count-lines (comp count get-strings))
 
-(defn get-line [editor y]
-  (get (get-strings editor) y))
+(defn get-line
+  ([editor] (get-line editor (:y (get-cursor editor))))
+  ([editor y]
+     (get (get-strings editor) y)))
 
 (def count-line (comp count get-line))

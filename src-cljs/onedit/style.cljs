@@ -4,22 +4,34 @@
 
 (def cursor-color "black")
 
-(def background-color "white")
+(def background-color "transparent")
 
 (def text-color "black")
 
 (def font-family "monospace")
 
-(defn cursor-style
-  ([cursor] (cursor-style (:x cursor) (:y cursor)))
-  ([x y]
-     (str "background-color: " cursor-color
-          "; left: " x
-          "ex; top: " y "em;")))
+(def pointer "⃞")
+
+(defn px [n]
+  (str n "px"))
+
+(defn em [n]
+  (str n "em"))
+
+(defn cursor-style [cursor]
+  (js-obj "top" (em (:y cursor))))
+
+(defn space-style []
+  (js-obj "line-height" (px font-size)
+          "font-size" (px font-size)
+          "font-family" font-family))
+
+(defn pointer-style []
+  (js-obj "color" cursor-color))
 
 (defn buffer-style []
-  (str "background-color: " background-color
-       "; color: " text-color
-       "; line-height: " font-size
-       "px; font-size: " font-size
-       "px; font-family: " font-family ";"))
+  (js-obj "background-color" background-color
+          "color" text-color
+          "line-height" (px font-size)
+          "font-size" (px font-size)
+          "font-family" font-family))

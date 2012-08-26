@@ -2,21 +2,32 @@
   (:require [clojure.string :as string]
             [clojure.browser.dom :as dom]
             [goog.dom :as gdom]
-            [goog.array :as garray]
+            [goog.style :as gstyle]
             [onedit.core :as core]
             [onedit.style :as style])
   (:use-macros [onedit.core :only [fn-map]]))
 
 (defn get-strings []
-  (-> (dom/ensure-element :buffer)
-      gdom/getRawTextContent
-      string/split-lines))
+  (->> (dom/ensure-element :buffer)
+       gdom/getChildren
+       (map gdom/getRawTextContent)
+       vec))
 
 (defn update [editor]
-  (dom/set-properties (dom/ensure-element :cursor) {"style" (style/cursor-style (core/get-cursor editor))})
+  (gstyle/setStyle (dom/ensure-element :cursor) (style/cursor-style (core/get-cursor editor)))
+  (doto (dom/ensure-element :pointer)
+    (dom/set-text style/pointer)
+    (gstyle/setStyle (style/pointer-style)))
+  (doto (dom/ensure-element :space)
+    (dom/set-text (subs (core/get-line editor) 0 (:x (core/get-cursor editor))))
+    (gstyle/setStyle (style/space-style)))
   (doto (dom/ensure-element :buffer)
-    (dom/set-properties {"style" (style/buffer-style)})
-    (dom/set-text (string/join (interpose \newline (core/get-strings editor)))))
+    (gstyle/setStyle (style/buffer-style)))
+  (dom/remove-children :buffer)
+  (letfn [(f [e] (dom/append (dom/element :p) e))]
+    (dom/log (core/get-strings editor))
+    (doseq [e (map f (core/get-strings editor))]
+      (dom/append (dom/ensure-element :buffer) e)))
   (reset! core/current-editor editor))
 
 (defn get-function [function]
