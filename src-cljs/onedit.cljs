@@ -16,6 +16,11 @@
   ISeqable
   (-seq [coll] (array-seq coll)))
 
+(extend-type js/FileList
+  ISeqable
+  (-seq [files]
+    (array-seq files)))
+
 (def functions
   (merge (fn-map cursor/left
                  cursor/down

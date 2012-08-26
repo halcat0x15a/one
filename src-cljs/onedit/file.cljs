@@ -2,28 +2,23 @@
   (:require [clojure.string :as string]
             [clojure.browser.dom :as dom]
             [clojure.browser.event :as event]
-            [goog.array :as garray]
             [goog.events.EventType :as gevent-type]
             [onedit.core :as core]
             [onedit.editor :as editor]))
 
-(declare read)
-
 (defn load [file event]
   (reset! core/current-editor
           (-> @core/current-editor
-              (editor/buffer file/name)
-              (core/set-strings (string/split-lines event.target/result))
+              (editor/buffer (.-name file))
+              (core/set-strings (string/split-lines (-> event .-target .-result)))
               (core/set-cursor core/unit-cursor)
               editor/update)))
 
 (defn select [event]
-  (garray/forEach event.target/files
-                  (fn [file]
-                    ((fn [reader]
-                       (set! reader/onload (partial load file))
-                       (.readAsText reader file))
-                     (js/FileReader.)))))
+  (doseq [file (-> event .-target .-files)]
+    (let [reader (js/FileReader.)]
+       (set! (.-onload reader) (partial load file))
+       (.readAsText reader file))))
 
 (defn open [editor]
   (doto (dom/element :input)

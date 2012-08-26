@@ -3,19 +3,18 @@
             [onedit.core :as core]
             [onedit.cursor :as cursor]))
 
-(defn insert-newline [editor y]
+(defn add-newline [editor y]
   (let [[lines lines'] (split-at y (core/get-strings editor))]
-    (-> editor
-        (core/set-strings (concat lines [""] lines')))))
+    (core/set-strings editor (vec (concat lines [""] lines')))))
 
 (defn prepend-newline [editor]
   (-> editor
-      (insert-newline (:y (core/get-cursor editor)))
+      (add-newline (:y (core/get-cursor editor)))
       cursor/start-line))
 
 (defn append-newline [editor]
   (-> editor
-      (insert-newline (inc (:y (core/get-cursor editor))))
+      (add-newline (inc (:y (core/get-cursor editor))))
       cursor/down))
 
 (defn insert-newline [editor]
