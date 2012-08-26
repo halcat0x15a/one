@@ -60,7 +60,7 @@
 (defn end-line [editor]
   (let [cursor (core/get-cursor editor)]
     (core/set-cursor editor
-      (assoc cursor :x (dec (core/count-line editor (:y cursor)))))))
+      (assoc cursor :x (core/count-line editor (:y cursor))))))
 
 (defn start-buffer [editor]
   (-> editor

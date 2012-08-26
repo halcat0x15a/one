@@ -3,25 +3,28 @@ body {
 }
 
 #cursor {
-  position: absolute;
-  z-index: 0;
+  margin: 0;
 }
 
 #space {
-  visibility: hidden;
+  position: absolute;
+  z-index: 1;
+  margin: 0;
 }
 
 #pointer {
-  width: 1ex;
-  height: 1em;
+  position: absolute;
+  z-index: 0;
+  margin: 0;
   text-decoration: blink;
 }
 
 #buffer {
   position: absolute;
-  z-index: 1;
+  z-index: 2;
   width: 100%;
   margin: 0;
+  background-color: transparent;
 }
 
 #buffer p {

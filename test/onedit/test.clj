@@ -16,10 +16,19 @@
 
 (setup)
 
+(deftest buffer
+  (testing "Buffer Functions"
+    (testing "prepend newline"
+      (is (= (prepend-newline (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 1 1))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello" "" "world"] (->Cursor 0 1))} "scratch"))))
+    (testing "append newline"
+      (is (= (append-newline (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 1 1))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello" "world" ""] (->Cursor 0 2))} "scratch"))))))
+
 (deftest cursor
   (testing "Cursor Functions"
     (testing "move left"
-      (is (= (onedit.cursor/left (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 1 1))} "scratch"))
+      (is (= (left (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 1 1))} "scratch"))
              (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 1))} "scratch")))
       (is (= (left (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 1))} "scratch"))
              (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 1))} "scratch"))))
@@ -37,6 +46,12 @@
       (is (= (down (->Editor {"scratch" (->Buffer ["hello" "miku"] (->Cursor 5 0))} "scratch"))
              (->Editor {"scratch" (->Buffer ["hello" "miku"] (->Cursor 4 1))} "scratch")))
       (is (= (down (->Editor {"scratch" (->Buffer ["hello"] (->Cursor 1 0))} "scratch"))
-             (->Editor {"scratch" (->Buffer ["hello"] (->Cursor 1 0))} "scratch"))))))
+             (->Editor {"scratch" (->Buffer ["hello"] (->Cursor 1 0))} "scratch"))))
+    (testing "move start line"
+      (is (= (start-line (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 5 1))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 1))} "scratch"))))
+    (testing "move end line"
+      (is (= (end-line (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 1))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 5 1))} "scratch"))))))
 
 (cleanup)

@@ -13,13 +13,14 @@
        vec))
 
 (defn update [editor]
-  (gstyle/setStyle (dom/ensure-element :cursor) (style/cursor-style (core/get-cursor editor)))
-  (doto (dom/ensure-element :pointer)
-    (dom/set-text style/pointer)
-    (gstyle/setStyle (style/pointer-style)))
-  (doto (dom/ensure-element :space)
-    (dom/set-text (subs (core/get-line editor) 0 (:x (core/get-cursor editor))))
-    (gstyle/setStyle (style/space-style)))
+  (let [space (subs (core/get-line editor) 0 (:x (core/get-cursor editor)))]
+    (gstyle/setStyle (dom/ensure-element :cursor) (style/cursor-style))
+    (doto (dom/ensure-element :space)
+      (gstyle/setStyle (style/space-style (core/get-cursor editor)))
+      (dom/set-text space))
+    (doto (dom/ensure-element :pointer)
+      (gstyle/setStyle (style/pointer-style (core/get-cursor editor)))
+      (dom/set-text (str space style/pointer))))
   (doto (dom/ensure-element :buffer)
     (gstyle/setStyle (style/buffer-style)))
   (dom/remove-children :buffer)
