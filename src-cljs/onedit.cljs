@@ -6,6 +6,7 @@
             [goog.editor.focus :as gfocus]
             [goog.dom.Range :as grange]
             [onedit.core :as core]
+            [onedit.graphics :as graphics]
             [onedit.editor :as editor]
             [onedit.buffer :as buffer]
             [onedit.cursor :as cursor]
@@ -14,7 +15,8 @@
 
 (extend-type js/HTMLCollection
   ISeqable
-  (-seq [coll] (array-seq coll)))
+  (-seq [coll]
+    (array-seq coll)))
 
 (extend-type js/FileList
   ISeqable
@@ -71,6 +73,7 @@
     (reset! core/current-editor (core/set-cursor @core/current-editor (core/->Cursor (.getStartOffset range) 0)))))
 
 (defn main []
+  (graphics/render)
   (editor/update @core/current-editor)
   (doto (dom/ensure-element :buffer)
     (event/listen gevents-type/CLICK click-buffer))
