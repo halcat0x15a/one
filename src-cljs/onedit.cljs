@@ -2,11 +2,12 @@
   (:require [clojure.string :as string]
             [clojure.browser.dom :as dom]
             [clojure.browser.event :as event]
+            [goog.events.InputHandler :as gkey-handler]
             [goog.events.EventType :as gevents-type]
             [goog.editor.focus :as gfocus]
             [goog.dom.Range :as grange]
+            [goog.dom.forms :as gforms]
             [onedit.core :as core]
-            [onedit.graphics :as graphics]
             [onedit.editor :as editor]
             [onedit.buffer :as buffer]
             [onedit.cursor :as cursor]
@@ -72,10 +73,15 @@
   (let [range (grange/createFromWindow)]
     (reset! core/current-editor (core/set-cursor @core/current-editor (core/->Cursor (.getStartOffset range) 0)))))
 
+(defn input-buffer [event]
+  (-> @core/current-editor
+      (core/set-string (gforms/getValue (dom/ensure-element :buffer)))
+      editor/update))
+
 (defn main []
-  (graphics/render)
   (editor/update @core/current-editor)
   (doto (dom/ensure-element :buffer)
+    (-> (goog.events/InputHandler.) (.addEventListener goog.events.InputHandler.EventType/INPUT input-buffer))
     (event/listen gevents-type/CLICK click-buffer))
   (doto (dom/ensure-element :minibuffer)
     (event/listen gevents-type/CHANGE editor/exec)

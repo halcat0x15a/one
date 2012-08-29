@@ -2,33 +2,18 @@ body {
   margin: 0;
 }
 
-#cursor {
-  margin: 0;
-}
-
-#space {
-  position: absolute;
-  z-index: 1;
-  margin: 0;
-}
-
-#pointer {
+#display {
   position: absolute;
   z-index: 0;
-  margin: 0;
-  text-decoration: blink;
 }
 
 #buffer {
   position: absolute;
-  z-index: 2;
+  z-index: 1;
+  border-style: none;
   width: 100%;
-  margin: 0;
+  height: 100%;
   background-color: transparent;
-}
-
-#buffer p {
-  margin: 0;
 }
 
 #minibuffer {

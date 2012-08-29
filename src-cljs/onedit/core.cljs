@@ -1,4 +1,5 @@
-(ns onedit.core)
+(ns onedit.core
+  (:require [clojure.string :as string]))
 
 (defrecord Cursor [x y])
 
@@ -33,6 +34,9 @@
 (defn set-strings [editor strings]
   (set-buffer editor (assoc (get-buffer editor)
                        :strings strings)))
+
+(defn set-string [editor str]
+  (set-strings editor (string/split-lines str)))
 
 (def count-lines (comp count get-strings))
 

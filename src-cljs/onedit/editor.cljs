@@ -2,30 +2,19 @@
   (:require [clojure.string :as string]
             [clojure.browser.dom :as dom]
             [goog.dom :as gdom]
+            [goog.dom.forms :as gforms]
             [goog.style :as gstyle]
             [onedit.core :as core]
+            [onedit.graphics :as graphics]
             [onedit.style :as style]))
 
 (defn get-strings []
-  (->> (dom/ensure-element :buffer)
-       gdom/getChildren
-       (map gdom/getRawTextContent)
-       vec))
+  (dom/log (string/split-lines (gforms/getValue (dom/ensure-element :buffer))))
+  (vec (string/split-lines (gforms/getValue (dom/ensure-element :buffer)))))
 
 (defn update [editor]
-  (let [space (subs (core/get-line editor) 0 (:x (core/get-cursor editor)))]
-    (gstyle/setStyle (dom/ensure-element :cursor) (style/cursor-style))
-    (doto (dom/ensure-element :space)
-      (gstyle/setStyle (style/space-style (core/get-cursor editor)))
-      (dom/set-text space))
-    (doto (dom/ensure-element :pointer)
-      (gstyle/setStyle (style/pointer-style (core/get-cursor editor)))
-      (dom/set-text (str space style/pointer))))
-  (doto (dom/ensure-element :buffer)
-    (gstyle/setStyle (style/buffer-style)))
-  (dom/remove-children :buffer)
-  (doseq [e (map (partial dom/append (dom/element :p)) (core/get-strings editor))]
-    (dom/append (dom/ensure-element :buffer) e))
+  (dom/remove-children :display)
+  (graphics/render editor)
   (reset! core/current-editor editor))
 
 (defn get-function [function]
