@@ -18,22 +18,7 @@
 (defn em [n]
   (str n "em"))
 
-(defn cursor-style []
+(def buffer-style
   (js-obj "line-height" (px font-size)
-          "font-size" (px font-size)
-          "font-family" font-family))
-
-(defn space-style [cursor]
-  (js-obj "top" (em (:y cursor))
-          "color" background-color
-          "background-color" background-color))
-
-(defn pointer-style [cursor]
-  (js-obj "top" (em (:y cursor))
-          "color" cursor-color))
-
-(defn buffer-style []
-  (js-obj "color" text-color
-          "line-height" (px font-size)
           "font-size" (px font-size)
           "font-family" font-family))

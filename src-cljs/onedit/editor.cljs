@@ -9,10 +9,10 @@
             [onedit.style :as style]))
 
 (defn get-strings []
-  (dom/log (string/split-lines (gforms/getValue (dom/ensure-element :buffer))))
   (vec (string/split-lines (gforms/getValue (dom/ensure-element :buffer)))))
 
 (defn update [editor]
+  (gstyle/setStyle (dom/ensure-element :buffer) style/buffer-style)
   (dom/remove-children :display)
   (graphics/render editor)
   (reset! core/current-editor editor))
