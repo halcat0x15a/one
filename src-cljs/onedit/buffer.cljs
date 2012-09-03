@@ -1,10 +1,8 @@
 (ns onedit.buffer
   (:require [clojure.string :as string]
             [clojure.browser.event :as event]
-            [clojure.browser.net :as net]
             [onedit.core :as core]
-            [onedit.cursor :as cursor]
-            [goog.net.EventType :as gevent-type]))
+            [onedit.cursor :as cursor]))
 
 (defn add-newline [editor y]
   (let [[lines lines'] (split-at y (core/get-strings editor))]

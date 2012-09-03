@@ -1,14 +1,6 @@
-sig Character {}
+module core
 
-sig TextContent {
-  string: set Character
-}
-
-sig File {
-  contents: set TextContent
-}
-
-one sig Cursor {
+sig Cursor {
   x: Int,
   y: Int
 } {
@@ -16,31 +8,31 @@ one sig Cursor {
   y >= 0
 }
 
-abstract sig TextField {
-  cursor: lone Cursor,
-  contents: some TextContent
+sig Buffer {
+  cursor: Cursor,
+  strings: set String
 } {
-  cursor.y < #contents
-  cursor.x < #contents.string
+  this in Editor.buffers
 }
-
-one sig Buffer extends TextField {}
-
-one sig MiniBuffer extends TextField {}
 
 one sig Editor {
-  buffer: Buffer,
-  miniBuffer: MiniBuffer
+  buffers: some Buffer,
+  current: Buffer
 } {
-  no buffer.contents & miniBuffer.contents
-  no buffer.cursor & miniBuffer.cursor
-  one buffer.cursor + miniBuffer.cursor
+  current in buffers
 }
 
-pred openFile (buffer: Buffer, file: File) {
-  buffer.contents = file.contents
+sig File {
+  contents: set String
 }
 
+pred openFile (editor: Editor, file: File) {
+  editor.buffers.strings = file.contents
+}
+
+run openFile
+
+/*
 pred h (field, field': TextField) {
   field.cursor.x > 0
   field'.cursor.x = field.cursor.x - 1
@@ -75,3 +67,4 @@ assert moveCursor {
 check moveCursor
 
 run l
+*/

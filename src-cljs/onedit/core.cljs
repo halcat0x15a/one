@@ -22,6 +22,8 @@
 
 (def get-strings (comp :strings get-buffer))
 
+(def get-string (comp (partial string/join "\n") get-strings))
+
 (defn set-buffer [editor buffer]
   (assoc editor
     :buffers (assoc (:buffers editor)

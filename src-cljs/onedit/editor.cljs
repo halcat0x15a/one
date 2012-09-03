@@ -1,9 +1,12 @@
 (ns onedit.editor
   (:require [clojure.string :as string]
             [clojure.browser.dom :as dom]
+            [clojure.browser.net :as net]
             [goog.dom :as gdom]
             [goog.dom.forms :as gforms]
+            [goog.events.InputHandler :as ginput-handler]
             [goog.style :as gstyle]
+            [goog.net.EventType :as gevent-type]
             [onedit.core :as core]
             [onedit.graphics :as graphics]
             [onedit.style :as style]))
@@ -84,6 +87,19 @@
 
 (def pusher (js/Pusher. "001b60ce1d2033e954ab"))
 
-(defn live [editor]
+(defn live [event]
+  (dom/log event)
+  (doto (net/xhr-connection)
+    (net/transmit "/live" "POST" (js-obj "content" (core/get-string @core/current-editor)))))
+
+(defn listen [editor]
+  (doto pusher
+    (.subscribe "live")
+    (-> .-connection (.bind "listen" (fn [x] (core/set-string @core/current-editor (.-content x))))))
+  (-> editor
+      (buffer :listen)))
+
+(defn publish [editor]
   (net/transmit (net/xhr-connection) "/publish" "POST")
+  (event/listen (dom/ensure-element :buffer) goog.events.InputHandler.EventType/INPUT live)
   editor)

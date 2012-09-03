@@ -69,15 +69,7 @@ case class Editor(client: nio.Http) extends async.Plan with ServerErrorResponse 
     index(req, file.name, new String(file.bytes))
   }
 
-  def decoder = async.MultiPartDecoder({
-    case POST(Path("/open") & MultiPart(req)) => {
-      case Decode(binding) => {
-	req.respond(MultiPartParams.Disk(binding).files("file").headOption.map(index(req)) | HtmlContent ~> ResponseString(""))
-      }
-    }
-  })
-
-  def intent = {
+  def intent = Live(this).intent orElse {
     case req@POST(Path(Seg("save" :: _)) & Params(Content(content))) =>
       req.respond(CharContentType("application/octet-stream") ~> ResponseString(content))
 //    case req@GET(Path(Seg("file" :: filename :: Nil))) => req.respond(index(req, filename))
@@ -114,7 +106,7 @@ object Editor extends SafeApp {
   def client[A] = IO(new nio.Http).bracket[Unit, A](_.shutdown.point[IO])_
 
   def construct(port: Int)(editor: Editor) =
-    IO(Http(port).plan(Live(editor)).resources(getClass.getResource("/public")).plan(editor).handler(editor.decoder))
+    IO(Http(port).resources(getClass.getResource("/public")).plan(editor))
 
   def editor[A](f: Editor => IO[A])(client: nio.Http) = IO(Editor(client)).bracket(_.template.shutdown.point[IO])(f)
 
@@ -129,9 +121,11 @@ case class Live(editor: Editor) extends async.Plan with ServerErrorResponse {
   val md5 = MessageDigest getInstance "MD5"
 
   def intent = {
-    case req@GET(Path("/publish") & Cookies(cookies)) =>
+    case req@POST(Path("/publish") & Cookies(cookies)) =>
       req.respond((cookies get "token") >| ResponseString("ok") getOrElse Redirect("/login"))
-    case req@POST(Path("/live")) =>
+    case req@POST(Path("/live") & editor.Content(content)) =>
+      editor.client(trigger("live", "listen", """{"content": """" + content + """"}""", None))
+      req.respond(ResponseString("ok"))
   }
 
   def trigger(name: String, event: String, data: String, socket: Option[String]) = {
@@ -142,7 +136,7 @@ case class Live(editor: Editor) extends async.Plan with ServerErrorResponse {
 		    "name" -> event,
 		    "body_md5" -> (md5 digest data.getBytes map ("%02x".format(_)) mkString)) ++
                 ~(socket map (s => Map("socket_id" -> s)))
-    val signature = List("POST", request.path, query map(_ fold (_ + _)) mkString "=") mkString "\n"
+    val signature = List("POST", request.path, query map (_ fold (_ + _)) mkString "=") mkString "\n"
     request <:<
     Map("Content-Type" -> "application/json") <<
     (query + ("auth_signature" -> signature)) as_str

@@ -51,6 +51,7 @@
                  editor/sum
                  editor/apply-buffers
                  editor/live
+                 editor/listen
                  file/open)
          {:h cursor/left
           :j cursor/down
@@ -82,7 +83,8 @@
 (defn main []
   (editor/update @core/current-editor)
   (doto (dom/ensure-element :buffer)
-    (-> (goog.events/InputHandler.) (.addEventListener goog.events.InputHandler.EventType/INPUT input-buffer))
+    (-> (goog.events/InputHandler.)
+        (.addEventListener goog.events.InputHandler.EventType/INPUT input-buffer))
     (event/listen gevents-type/CLICK click-buffer))
   (doto (dom/ensure-element :minibuffer)
     (event/listen gevents-type/CHANGE editor/exec)
