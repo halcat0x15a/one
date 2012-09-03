@@ -4,8 +4,9 @@ import com.typesafe.startscript.StartScriptPlugin._
 
 object EditorBuild extends Build {
 
-  val scalazVersion = "7.+"
+  val scalazVersion = "7.0-SNAPSHOT"
   val unfilteredVersion = "0.6.+"
+  val dispatchVersion = "0.8.+"
 
   val javafx = file("/usr/lib/jvm/javafx-sdk/rt/lib")
   val jfxrt = javafx / "jfxrt.jar"
@@ -19,13 +20,18 @@ object EditorBuild extends Build {
       "java" at "http://download.java.net/maven/2",
       "typesafe releases" at "http://repo.typesafe.com/typesafe/releases/",
       "typesafe snapshots" at "http://repo.typesafe.com/typesafe/snapshots/",
+      "mth.io releases"  at "http://repo.mth.io/releases",
       "fusesource" at "http://repo.fusesource.com/nexus/content/repositories/snapshots"
     ),
     libraryDependencies ++= Seq(
       "org.scalaz" %% "scalaz-core" % scalazVersion,
-      "org.scalaz" %% "scalaz-effect" % scalazVersion
+      "org.scalaz" %% "scalaz-effect" % scalazVersion,
+      "com.typesafe" % "config" % "0.5.0"
     ),
-    scalacOptions += "-unchecked"
+    scalacOptions ++= Seq(
+      "-unchecked",
+      "-deprecation"
+    )
   )
 
   lazy val root = Project(
@@ -38,9 +44,11 @@ object EditorBuild extends Build {
     base = file("server"),
     settings = defaultSettings ++ startScriptForClassesSettings ++ Seq(
       libraryDependencies ++= Seq(
+	"com.ephox" %% "argonaut" % "4.0" withSources,
         "net.databinder" %% "unfiltered-netty-websockets" % unfilteredVersion,
         "net.databinder" %% "unfiltered-netty-uploads" % unfilteredVersion,
-	"net.databinder" %% "dispatch-nio" % "0.8.+",
+	"net.databinder" %% "dispatch-nio" % dispatchVersion,
+	"net.databinder" %% "dispatch-http-json" % dispatchVersion,
         "org.slf4j" % "slf4j-nop" % "1.6.+",
         "javax.servlet" % "servlet-api" % "2.5"
       )

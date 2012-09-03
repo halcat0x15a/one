@@ -50,6 +50,7 @@
                  editor/count-lines
                  editor/sum
                  editor/apply-buffers
+                 editor/live
                  file/open)
          {:h cursor/left
           :j cursor/down

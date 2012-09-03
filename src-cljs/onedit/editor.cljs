@@ -81,3 +81,9 @@
   (-> editor
       (buffer :sum)
       (core/set-strings [(str (apply + (map int (flatten (map (partial re-seq #"\d+") (core/get-strings editor))))))])))
+
+(def pusher (js/Pusher. "001b60ce1d2033e954ab"))
+
+(defn live [editor]
+  (net/transmit (net/xhr-connection) "/publish" "POST")
+  editor)
