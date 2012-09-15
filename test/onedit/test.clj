@@ -20,13 +20,15 @@
   (doseq [name names]
     (io/delete-file (cljfile name))))
 
+(try
+  (cleanup)
+  (catch Throwable _ _))
+
 (setup)
 
 (defn fixture [f]
-  (try
-    (f)
-    (finally
-      (cleanup))))
+  (f)
+  (cleanup))
 
 (use-fixtures :once fixture)
 
