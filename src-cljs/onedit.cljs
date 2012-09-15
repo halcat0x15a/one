@@ -4,6 +4,7 @@
             [onedit.buffer :as buffer]
             [onedit.cursor :as cursor]
             [onedit.editor :as editor]
+            [onedit.command :as command]
             [onedit.file :as file]))
 
 (extend-type js/HTMLCollection
@@ -51,7 +52,13 @@
    "delete-line" buffer/delete-line
    "dd" buffer/delete-line
    "replace-character" buffer/replace-character
-   "r" buffer/replace-character))
+   "r" buffer/replace-character
+   "commands" command/commands
+   "apply-buffers" command/apply-buffers
+   "grep" command/grep
+   "count-lines" command/count-lines
+   "sum" command/sum
+   "open" file/open))
 
 (defn main []
   (set! core/functions functions)

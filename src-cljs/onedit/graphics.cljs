@@ -1,17 +1,21 @@
 (ns onedit.graphics
   (:require [clojure.browser.dom :as dom]
+            [goog.dom.DomHelper :as dom-helper]
             [goog.graphics :as graphics]
+            [goog.graphics.CanvasGraphics :as gcanvas]
             [onedit.core :as core]
             [onedit.style :as style]))
 
 (defn render [editor]
-  (dom/remove-children :display)
-  (let [g (graphics/createSimpleGraphics 1024 1024)
+  (let [canvas (dom/ensure-element :display)
+        g (.getContext canvas "2d")
         strings (core/get-strings editor)
         {:keys [x y]} (core/get-cursor editor)
-        font (graphics/Font. style/font-size style/font-family)]
+        font (graphics/Font. style/font-size style/font-family)
+        color (graphics/SolidFill. style/text-color)]
+    (set! (.-font g) (str style/font-size "px " style/font-family))
+    (.clearRect g 0 0 1024 1024)
     (dotimes [n (count strings)]
-      (.drawText g (strings n) 0 (* n style/font-size) nil nil nil nil font nil (graphics/SolidFill. style/text-color)))
+      (.fillText g (strings n) 0 (* (inc n) style/font-size)))
     (doto g
-      (.drawText (str (subs (strings y) 0 x) style/pointer) 0 (* y style/font-size) nil nil nil nil font nil (graphics/SolidFill. style/text-color))
-      (.render (dom/ensure-element :display)))))
+      (.fillText (str (subs (strings y) 0 x) style/pointer) 0 (* (inc y) style/font-size)))))

@@ -4,7 +4,8 @@
             [clojure.browser.event :as event]
             [goog.events.EventType :as gevent-type]
             [onedit.core :as core]
-            [onedit.editor :as editor]))
+            [onedit.editor :as editor]
+            [onedit.system :as system]))
 
 (defn load [file event]
   (reset! core/current-editor
@@ -12,7 +13,7 @@
               (editor/buffer (.-name file))
               (core/set-strings (string/split-lines (-> event .-target .-result)))
               (core/set-cursor core/unit-cursor)
-              editor/update)))
+              system/update)))
 
 (defn select [event]
   (doseq [file (-> event .-target .-files)]

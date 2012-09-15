@@ -2,21 +2,10 @@
   (:require [onedit.core :as core]
             [onedit.editor :as editor]))
 
-(defn grep [this string]
-  (let [re (re-pattern string)]
-    (-> this
-        (editor/buffer :grep)
-        (core/set-strings (filter (partial re-find re) (core/get-strings this))))))
-
 (defn commands [this]
   (-> this
       (editor/buffer :commands)
-      (core/set-strings (map name (keys onedit/functions)))))
-
-(defn count-lines [this]
-  (-> this
-      (editor/buffer :count-lines)
-      (core/set-strings [(str (core/count-lines this))])))
+      (core/set-strings (map name (keys core/functions)))))
 
 (defn apply-buffers [this command & args]
   (let [[f & _] (core/parse-command command)]
@@ -28,6 +17,17 @@
         (let [[k v] (first buffers)
               this' (apply f (-> this (editor/buffer k)) args)]
           (recur this' (rest buffers) (concat result (core/get-strings this'))))))))
+
+(defn grep [this string]
+  (let [re (re-pattern string)]
+    (-> this
+        (editor/buffer :grep)
+        (core/set-strings (filter (partial re-find re) (core/get-strings this))))))
+
+(defn count-lines [this]
+  (-> this
+      (editor/buffer :count-lines)
+      (core/set-strings [(str (core/count-lines this))])))
 
 (defn sum [this]
   (-> this
