@@ -5,11 +5,13 @@
             [onedit.style :as style]))
 
 (defn render [editor]
+  (dom/remove-children :display)
   (let [g (graphics/createSimpleGraphics 1024 1024)
         strings (core/get-strings editor)
-        cursor (core/get-cursor editor)]
+        {:keys [x y]} (core/get-cursor editor)
+        font (graphics/Font. style/font-size style/font-family)]
     (dotimes [n (count strings)]
-      (.drawText g (strings n) 0 (* n style/font-size) nil nil "left" "top" (graphics/Font. style/font-size style/font-family) nil (graphics/SolidFill. style/text-color)))
+      (.drawText g (strings n) 0 (* n style/font-size) nil nil nil nil font nil (graphics/SolidFill. style/text-color)))
     (doto g
-      (.drawText style/pointer (* (:x cursor) style/font-size) (* (:y cursor) style/font-size) nil nil "left" "top" (graphics/Font. style/font-size style/font-family) nil (graphics/SolidFill. style/text-color))
+      (.drawText (str (subs (strings y) 0 x) style/pointer) 0 (* y style/font-size) nil nil nil nil font nil (graphics/SolidFill. style/text-color))
       (.render (dom/ensure-element :display)))))

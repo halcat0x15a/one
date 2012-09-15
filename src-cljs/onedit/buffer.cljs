@@ -1,6 +1,5 @@
 (ns onedit.buffer
   (:require [clojure.string :as string]
-            [clojure.browser.event :as event]
             [onedit.core :as core]
             [onedit.cursor :as cursor]))
 

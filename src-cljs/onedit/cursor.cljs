@@ -4,33 +4,49 @@
 
 (defn left [editor]
   (let [cursor (core/get-cursor editor)
-        x (:x cursor)]
+        {:keys [x y]} cursor]
     (if (> x 0)
-      (core/set-cursor editor (assoc cursor :x (dec x)))
-      editor)))
+      (let [x' (dec x)]
+        (core/set-cursor editor (core/set-saved cursor x')))
+      (let [y' (dec y)]
+        (if-let [length (core/count-line editor y')]
+          (core/set-cursor editor (core/saved-cursor length y'))
+          editor)))))
 
 (defn down [editor]
-  (let [{:keys [x y]} (core/get-cursor editor)
-        y' (inc y)
-        length (core/count-line editor y')]
-    (if (< y (dec (core/count-lines editor)))
-      (core/set-cursor editor (core/->Cursor (min x length) y'))
-      editor)))
+  (let [cursor (core/get-cursor editor)
+        {:keys [x y]} cursor]
+    (core/set-cursor
+     editor
+     (if (< y (dec (core/count-lines editor)))
+       (let [y' (inc y)]
+         (assoc cursor
+           :x (min (max x (:saved cursor)) (core/count-line editor y'))
+           :y y'))
+       (assoc cursor :x (core/count-line editor y))))))
 
 (defn up [editor]
-  (let [{:keys [x y]} (core/get-cursor editor)
-        y' (dec y)
-        length (core/count-line editor y')]
-    (if (> y 0)
-      (core/set-cursor editor (core/->Cursor (min x length) y'))
-      editor)))
+  (let [cursor (core/get-cursor editor)
+        {:keys [x y]} cursor]
+    (core/set-cursor
+     editor
+     (if (> y 0)
+       (let [y' (dec y)]
+         (assoc cursor
+           :x (min (max x (:saved cursor)) (core/count-line editor y'))
+           :y y'))
+       (assoc cursor :x 0)))))
 
 (defn right [editor]
   (let [cursor (core/get-cursor editor)
-        x (:x cursor)]
+        {:keys [x y]} cursor]
     (if (< x (core/count-line editor (:y cursor)))
-      (core/set-cursor editor (assoc cursor :x (inc x)))
-      editor)))
+      (let [x' (inc x)]
+        (core/set-cursor editor (core/set-saved cursor x')))
+      (let [y' (inc y)]
+        (if (< y' (core/count-lines editor))
+          (core/set-cursor editor (core/saved-cursor 0 y'))
+          editor)))))
 
 (defn move-while [editor pred f]
   (loop [editor editor]
@@ -55,12 +71,13 @@
       (move-while string/blank? right)))
 
 (defn start-line [editor]
-  (core/set-cursor editor (assoc (core/get-cursor editor) :x 0)))
+  (core/set-cursor editor (core/set-saved (core/get-cursor editor) 0)))
 
 (defn end-line [editor]
-  (let [cursor (core/get-cursor editor)]
+  (let [cursor (core/get-cursor editor)
+        length (core/count-line editor (:y cursor))]
     (core/set-cursor editor
-      (assoc cursor :x (core/count-line editor (:y cursor))))))
+      (assoc cursor :x length :saved length))))
 
 (defn start-buffer [editor]
   (-> editor

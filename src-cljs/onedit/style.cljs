@@ -10,7 +10,7 @@
 
 (def font-family "monospace")
 
-(def pointer "\u25AF")
+(def pointer "\u20DE")
 
 (defn px [n]
   (str n "px"))

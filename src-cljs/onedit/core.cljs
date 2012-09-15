@@ -1,9 +1,9 @@
 (ns onedit.core
   (:require [clojure.string :as string]))
 
-(defrecord Cursor [x y])
+(defrecord Cursor [x y saved])
 
-(def unit-cursor (Cursor. 0 0))
+(def unit-cursor (Cursor. 0 0 0))
 
 (defrecord Buffer [strings cursor])
 
@@ -40,6 +40,12 @@
 (defn set-string [editor str]
   (set-strings editor (string/split-lines str)))
 
+(defn saved-cursor [x y]
+  (Cursor. x y x))
+
+(defn set-saved [cursor x]
+  (assoc cursor :x x :saved x))
+
 (def count-lines (comp count get-strings))
 
 (defn get-line
@@ -47,4 +53,15 @@
   ([editor y]
      (get (get-strings editor) y)))
 
-(def count-line (comp count get-line))
+(def count-line
+  (comp
+   #(when-let [line %]
+      (count line))
+   get-line))
+
+(def functions nil)
+
+(defn parse-command [s]
+  (let [[f & args] (string/split s #"\s+")]
+    (when-let [f (aget functions f)]
+      (cons f args))))
