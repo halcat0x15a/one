@@ -21,7 +21,7 @@
 
 (defn get-cursor [value element]
   (let [values (string/split-lines (subs value 0 (gselection/getStart element)))]
-    (core/->Cursor (count (last values)) (dec (count values)))))
+    (core/saved-cursor (count (last values)) (dec (count values)))))
 
 (def get-strings (comp vec string/split-lines))
 

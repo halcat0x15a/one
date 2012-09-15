@@ -74,7 +74,7 @@
       (is (= (up (->Editor {"scratch" (->Buffer ["hello"] (->Cursor 1 1 1))} "scratch"))
              (->Editor {"scratch" (->Buffer ["hello"] (->Cursor 1 0 1))} "scratch")))
       (is (= (up (->Editor {"scratch" (->Buffer ["hello"] (->Cursor 1 0 1))} "scratch"))
-             (->Editor {"scratch" (->Buffer ["hello"] (->Cursor 0 0 1))} "scratch")))
+             (->Editor {"scratch" (->Buffer ["hello"] (->Cursor 0 0 0))} "scratch")))
       (is (= (up (->Editor {"scratch" (->Buffer ["miku" "hello"] (->Cursor 5 1 5))} "scratch"))
              (->Editor {"scratch" (->Buffer ["miku" "hello"] (->Cursor 4 0 5))} "scratch"))))
     (testing "move down"
@@ -83,7 +83,7 @@
       (is (= (down (->Editor {"scratch" (->Buffer ["hello" "miku"] (->Cursor 5 0 5))} "scratch"))
              (->Editor {"scratch" (->Buffer ["hello" "miku"] (->Cursor 4 1 5))} "scratch")))
       (is (= (down (->Editor {"scratch" (->Buffer ["hello"] (->Cursor 1 0 1))} "scratch"))
-             (->Editor {"scratch" (->Buffer ["hello"] (->Cursor 5 0 1))} "scratch"))))
+             (->Editor {"scratch" (->Buffer ["hello"] (->Cursor 5 0 5))} "scratch"))))
     (testing "move start line"
       (is (= (start-line (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 5 1 5))} "scratch"))
              (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 1 0))} "scratch"))))

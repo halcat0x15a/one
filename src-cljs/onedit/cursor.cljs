@@ -23,7 +23,7 @@
          (assoc cursor
            :x (min (max x (:saved cursor)) (core/count-line editor y'))
            :y y'))
-       (assoc cursor :x (core/count-line editor y))))))
+       (core/set-saved cursor (core/count-line editor y))))))
 
 (defn up [editor]
   (let [cursor (core/get-cursor editor)
@@ -35,7 +35,7 @@
          (assoc cursor
            :x (min (max x (:saved cursor)) (core/count-line editor y'))
            :y y'))
-       (assoc cursor :x 0)))))
+       (core/set-saved cursor 0)))))
 
 (defn right [editor]
   (let [cursor (core/get-cursor editor)
