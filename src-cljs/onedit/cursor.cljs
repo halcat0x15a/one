@@ -52,7 +52,7 @@
   (loop [editor editor]
     (let [{:keys [x y]} (core/get-cursor editor)
           editor' (f editor)]
-      (if-let [character ((core/get-line editor y) x)]
+      (if-let [character (str (get (core/get-line editor y) x))]
         (if (and (not= editor' editor) (pred character))
           (recur editor')
           editor)

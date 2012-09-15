@@ -54,7 +54,10 @@
              (->Editor {"scratch" (->Buffer ["hello" "" "world"] (->Cursor 0 1 0))} "scratch"))))
     (testing "append newline"
       (is (= (append-newline (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 1 1 1))} "scratch"))
-             (->Editor {"scratch" (->Buffer ["hello" "world" ""] (->Cursor 0 2 1))} "scratch"))))))
+             (->Editor {"scratch" (->Buffer ["hello" "world" ""] (->Cursor 0 2 1))} "scratch"))))
+    (testing "insert newline"
+      (is (= (insert-newline (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 5 0 5))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello" " world"] (->Cursor 0 1 0))} "scratch"))))))
 
 (deftest cursor
   (testing "Cursor Functions"
@@ -87,8 +90,40 @@
       (is (= (down (->Editor {"scratch" (->Buffer ["hello"] (->Cursor 1 0 1))} "scratch"))
              (->Editor {"scratch" (->Buffer ["hello"] (->Cursor 5 0 5))} "scratch"))))
     (testing "move start line"
+      (is (= (start-line (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 5 0 5))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 0 0))} "scratch")))
       (is (= (start-line (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 5 1 5))} "scratch"))
              (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 1 0))} "scratch"))))
     (testing "move end line"
+      (is (= (end-line (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 0 0))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 5 0 5))} "scratch")))
       (is (= (end-line (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 1 0))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 5 1 5))} "scratch"))))
+    (testing "move next word"
+      (is (= (forward (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 1 0 1))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 5 0 5))} "scratch")))
+      (is (= (forward (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 5 0 5))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 11 0 11))} "scratch")))
+      (is (= (forward (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 6 0 6))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 11 0 11))} "scratch")))
+      (is (= (forward (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 10 0 10))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 11 0 11))} "scratch"))))
+    (testing "move prev word"
+      (is (= (backward (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 1 0 1))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 0 0 0))} "scratch")))
+      (is (= (backward (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 5 0 5))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 0 0 0))} "scratch")))
+      (is (= (backward (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 6 0 6))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 0 0 0))} "scratch")))
+      (is (= (backward (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 10 0 10))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 6 0 6))} "scratch"))))
+    (testing "move start buffer"
+      (is (= (start-buffer (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 5 0 5))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 0 0))} "scratch")))
+      (is (= (start-buffer (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 5 1 5))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 0 0))} "scratch"))))
+    (testing "move end buffer"
+      (is (= (end-buffer (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 0 0))} "scratch"))
+             (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 5 1 5))} "scratch")))
+      (is (= (end-buffer (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 1 0))} "scratch"))
              (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 5 1 5))} "scratch"))))))
