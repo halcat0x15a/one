@@ -2,6 +2,16 @@
   (:require [clojure.string :as string]
             [onedit.core :as core]))
 
+(defn buffer [this id]
+  (let [key (keyword id)
+        buffers (:buffers this)]
+    (assoc (if (contains? buffers key)
+             this
+             (assoc this
+               :buffers (assoc buffers
+                          key core/unit-buffer)))
+      :current key)))
+
 (defn create-buffer [this id]
   (let [id (keyword id)]
     (assoc this
@@ -14,16 +24,6 @@
     (if (contains? (:buffers this) id)
       (assoc this :current id)
       this)))
-
-(defn buffer [this id]
-  (let [key (keyword id)
-        buffers (:buffers this)]
-    (assoc (if (contains? buffers key)
-             this
-             (assoc this
-               :buffers (assoc buffers
-                          key core/unit-buffer)))
-      :current key)))
 
 (defn delete-buffer [this id]
   (assoc this

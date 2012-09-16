@@ -53,6 +53,8 @@
    "replace-character" buffer/replace-character
    "r" buffer/replace-character
    "buffer" editor/buffer
+   "create-buffer" editor/create-buffer
+   "change-buffer" editor/change-buffer
    "delete-buffer" editor/delete-buffer
    "buffers" editor/buffers
    "commands" tool/commands
