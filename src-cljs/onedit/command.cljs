@@ -1,35 +1,49 @@
-(ns onedit.command
-  (:require [onedit.core :as core]
-            [onedit.editor :as editor]))
+(ns onedit.command)
 
-(defn commands [this]
-  (-> this
-      (editor/buffer :commands)
-      (core/set-strings (map name (keys core/functions)))))
+(defn update-history [editor f]
+  (let [history (:history editor)]
+    (assoc editor
+      :history (assoc history
+                 :commands (f (:commands history))))))
 
-(defn apply-buffers [this command & args]
-  (let [[f & _] (core/parse-command this command)]
-    (loop [this this buffers (:buffers this) result []]
-      (if (empty? buffers)
-        (-> this
-            (editor/buffer :apply-buffers)
-            (core/set-strings result))
-        (let [[k v] (first buffers)
-              this' (apply f (-> this (editor/buffer k)) args)]
-          (recur this' (rest buffers) (concat result (core/get-strings this'))))))))
+(defn add-history [editor command]
+  (update-history editor (partial cons command)))
 
-(defn grep [this string]
-  (let [re (re-pattern string)]
-    (-> this
-        (editor/buffer :grep)
-        (core/set-strings (filter (partial re-find re) (core/get-strings this))))))
+(defn set-current-command [editor command]
+  (update-history editor (comp (partial cons command) rest)))
 
-(defn count-lines [this]
-  (-> this
-      (editor/buffer :count-lines)
-      (core/set-strings [(str (core/count-lines this))])))
+(defn set-history-cursor [editor cursor]
+  (assoc editor
+    :history (assoc (:history editor)
+               :cursor cursor)))
 
-(defn sum [this]
-  (-> this
-      (editor/buffer :sum)
-      (core/set-strings [(str (apply + (map int (flatten (map (partial re-seq #"\d+") (core/get-strings this))))))])))
+(defn reset-history [editor]
+  (-> editor
+      (set-current-command "")
+      (set-history-cursor 0)))
+
+(defn get-command [editor]
+  (let [history (:history editor)]
+    (nth (:commands history) (:cursor history) nil)))
+
+(defn prev-command [editor]
+  (let [{:keys [commands cursor]} (:history editor)
+        cursor' (inc cursor)]
+    (when (< cursor' (count commands))
+      (set-history-cursor editor cursor'))))
+
+(defn next-command [editor]
+  (let [cursor (:cursor (:history editor))
+        cursor' (dec cursor)]
+    (when (> cursor 0)
+      (set-history-cursor editor cursor'))))
+
+(defn set-prev-command [editor]
+  (if-let [editor' (prev-command editor)]
+    (set-current-command editor' (get-command editor'))
+    editor))
+
+(defn set-next-command [editor]
+  (if-let [editor' (next-command editor)]
+    (set-current-command editor' (get-command editor'))
+    (set-current-command editor "")))

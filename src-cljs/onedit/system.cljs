@@ -10,6 +10,7 @@
             [goog.editor.focus :as gfocus]
             [onedit.core :as core]
             [onedit.cursor :as cursor]
+            [onedit.command :as command]
             [onedit.graphics :as graphics]
             [onedit.style :as style]))
 
@@ -44,8 +45,8 @@
       (let [this (apply f @core/current-editor args)]
         (dom/set-value minibuffer "")
         (-> this
-            (core/add-history value)
-            core/reset-history
+            (command/add-history value)
+            command/reset-history
             update)))))
 
 (defn init []
@@ -68,13 +69,13 @@
                   move
                   update)))
           (set-command [f]
-            (when-let [this (f @core/current-editor)]
-              (dom/set-value (minibuffer-element) (core/get-command this))
+            (let [this (f @core/current-editor)]
+              (dom/set-value (minibuffer-element) (command/get-command this))
               (update this)))
           (minibuffer-key-handler [event]
             (case (.-keyCode event)
-              goog.events.KeyCodes/UP (set-command core/set-prev-command)
-              goog.events.KeyCodes/DOWN (set-command core/set-next-command)
+              goog.events.KeyCodes/UP (set-command command/set-prev-command)
+              goog.events.KeyCodes/DOWN (set-command command/set-next-command)
               goog.events.KeyCodes/ENTER (exec)
               nil))
           (buffer-input-handler [event]
@@ -83,7 +84,7 @@
                 update))
           (minibuffer-input-handler [event]
             (-> @core/current-editor
-                (core/set-current-command (dom/get-value (minibuffer-element)))
+                (command/set-current-command (dom/get-value (minibuffer-element)))
                 update)
             (dom/log (:history @core/current-editor)))]
     (doto (buffer-element)
