@@ -1,4 +1,4 @@
-NAMES="core buffer cursor command editor"
+NAMES="core buffer cursor command editor util"
 
 for name in $NAMES
 do

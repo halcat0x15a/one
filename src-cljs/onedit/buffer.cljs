@@ -1,7 +1,8 @@
 (ns onedit.buffer
   (:require [clojure.string :as string]
             [onedit.core :as core]
-            [onedit.cursor :as cursor]))
+            [onedit.cursor :as cursor]
+            [onedit.util :as util]))
 
 (defn add-newline [editor y]
   (let [[lines lines'] (split-at y (core/get-strings editor))]
@@ -45,8 +46,7 @@
         length (count line)]
     (if (> length 0)
       (core/set-strings editor (assoc buffer
-                                 y
-                                 (str (subs line 0 x) (subs line (inc x) (count line)))))
+                                 y (util/drop-string x (inc x) line)))
       editor)))
 
 (defn backspace [editor]
@@ -57,8 +57,7 @@
     (if (> length 0)
       (-> editor
           (core/set-strings (assoc buffer
-                              y
-                              (str (subs line 0 (dec x)) (subs line x (count line)))))
+                              y (util/drop-string (dec x) x line)))
           cursor/left)
       editor)))
 
