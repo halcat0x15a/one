@@ -85,8 +85,7 @@
           (minibuffer-input-handler [event]
             (-> @core/current-editor
                 (command/set-current-command (dom/get-value (minibuffer-element)))
-                update)
-            (dom/log (:history @core/current-editor)))]
+                update))]
     (doto (buffer-element)
       (listen-key-event buffer-key-handler)
       (listen-input-event buffer-input-handler)

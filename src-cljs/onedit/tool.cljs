@@ -5,7 +5,12 @@
 (defn commands [this]
   (-> this
       (editor/buffer :commands)
-      (core/set-strings (map name (keys core/functions)))))
+      (core/set-strings (map name (keys (:functions this))))))
+
+(defn history [this]
+  (-> this
+      (editor/buffer :history)
+      (core/set-strings (vec (:commands (:history this))))))
 
 (defn apply-buffers [this command & args]
   (let [[f & _] (core/parse-command this command)]

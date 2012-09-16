@@ -65,5 +65,5 @@
 
 (defn parse-command [editor s]
   (let [[f & args] (string/split s #"\s+")]
-    (when-let [f (aget (:functions editor) f)]
+    (when-let [f ((:functions editor) f)]
       (cons f args))))

@@ -24,7 +24,7 @@
 
 (defn get-command [editor]
   (let [history (:history editor)]
-    (nth (:commands history) (:cursor history) nil)))
+    (nth (:commands history) (:cursor history))))
 
 (defn prev-command [editor]
   (let [{:keys [commands cursor]} (:history editor)

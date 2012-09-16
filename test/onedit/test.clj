@@ -57,7 +57,10 @@
              (->Editor {"scratch" (->Buffer ["hello" "world" ""] (->Cursor 0 2 1))} "scratch" unit-history nil))))
     (testing "insert newline"
       (is (= (insert-newline (->Editor {"scratch" (->Buffer ["hello world"] (->Cursor 5 0 5))} "scratch" unit-history nil))
-             (->Editor {"scratch" (->Buffer ["hello" " world"] (->Cursor 0 1 0))} "scratch" unit-history nil))))))
+             (->Editor {"scratch" (->Buffer ["hello" " world"] (->Cursor 0 1 0))} "scratch" unit-history nil))))
+    (testing "insert"
+      (is (= (insert (->Editor {"scratch" (->Buffer ["hello"] (->Cursor 5 0 5))} "scratch" unit-history nil) "world")
+             (->Editor {"scratch" (->Buffer ["helloworld"] (->Cursor 10 0 10))} "scratch" unit-history nil))))))
 
 (deftest cursor
   (testing "Cursor Functions"

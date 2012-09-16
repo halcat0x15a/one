@@ -18,8 +18,7 @@
     (array-seq files)))
 
 (def functions
-  (js-obj
-   "left" cursor/left
+  {"left" cursor/left
    "h" cursor/left
    "down" cursor/down
    "j" cursor/down
@@ -54,11 +53,12 @@
    "replace-character" buffer/replace-character
    "r" buffer/replace-character
    "commands" tool/commands
+   "history" tool/history
    "apply-buffers" tool/apply-buffers
    "grep" tool/grep
    "count-lines" tool/count-lines
    "sum" tool/sum
-   "open" file/open))
+   "open" file/open})
 
 (defn main []
   (swap! core/current-editor #(assoc % :functions functions))
