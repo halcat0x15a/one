@@ -174,10 +174,55 @@
 
 (deftest editor
   (testing "editor"
+    (testing "create buffer"
+      (is (= (editor/create-buffer (assoc core/unit-editor
+                                     :buffers {:hello core/unit-buffer}
+                                     :current :hello) "world")
+             (assoc core/unit-editor
+               :buffers {:hello core/unit-buffer
+                         :world core/unit-buffer}
+               :current :world)))
+      (is (= (editor/create-buffer (assoc core/unit-editor
+                                     :buffers {:hello core/unit-buffer}
+                                     :current :hello) "hello")
+             (assoc core/unit-editor
+               :buffers {:hello core/unit-buffer}
+               :current :hello))))
+    (testing "change buffer"
+      (is (= (editor/change-buffer (assoc core/unit-editor
+                                     :buffers {:hello core/unit-buffer
+                                               :world core/unit-buffer}
+                                     :current :hello) "world")
+             (assoc core/unit-editor
+               :buffers {:hello core/unit-buffer
+                         :world core/unit-buffer}
+               :current :world)))
+      (is (= (editor/change-buffer (assoc core/unit-editor
+                                     :buffers {:hello core/unit-buffer}
+                                     :current :hello) "world")
+             (assoc core/unit-editor
+               :buffers {:hello core/unit-buffer}
+               :current :hello))))
+    (testing "create or change buffer"
+      (is (= (editor/buffer (assoc core/unit-editor
+                              :buffers {:hello core/unit-buffer}
+                              :current :hello) "world")
+             (assoc core/unit-editor
+               :buffers {:hello core/unit-buffer
+                         :world core/unit-buffer}
+               :current :world)))
+      (is (= (editor/buffer (assoc core/unit-editor
+                              :buffers {:hello core/unit-buffer
+                                        :world core/unit-buffer}
+                              :current :hello) "world")
+             (assoc core/unit-editor
+               :buffers {:hello core/unit-buffer
+                         :world core/unit-buffer}
+               :current :world))))
     (testing "rename buffer"
       (is (= (editor/rename-buffer (assoc core/unit-editor
-                                     :buffers {:hello []}
+                                     :buffers {:hello core/unit-buffer}
                                      :current :hello) :world)
              (assoc core/unit-editor
-               :buffers {:world []}
+               :buffers {:world core/unit-buffer}
                :current :world))))))

@@ -2,6 +2,19 @@
   (:require [clojure.string :as string]
             [onedit.core :as core]))
 
+(defn create-buffer [this id]
+  (let [id (keyword id)]
+    (assoc this
+      :buffers (assoc (:buffers this)
+                 id core/unit-buffer)
+      :current id)))
+
+(defn change-buffer [this id]
+  (let [id (keyword id)]
+    (if (contains? (:buffers this) id)
+      (assoc this :current id)
+      this)))
+
 (defn buffer [this id]
   (let [key (keyword id)
         buffers (:buffers this)]
