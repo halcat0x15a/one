@@ -15,7 +15,7 @@
 
 (defrecord Editor [buffers current history functions])
 
-(def unit-editor (Editor. {:scratch unit-buffer} :scratch unit-history {}))
+(def unit-editor (Editor. {"scratch" unit-buffer} "scratch" unit-history {}))
 
 (def current-editor (atom unit-editor))
 

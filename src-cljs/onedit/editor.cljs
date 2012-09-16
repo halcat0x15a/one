@@ -3,27 +3,24 @@
             [onedit.core :as core]))
 
 (defn buffer [this id]
-  (let [key (keyword id)
-        buffers (:buffers this)]
-    (assoc (if (contains? buffers key)
+  (let [buffers (:buffers this)]
+    (assoc (if (contains? buffers id)
              this
              (assoc this
                :buffers (assoc buffers
-                          key core/unit-buffer)))
-      :current key)))
-
-(defn create-buffer [this id]
-  (let [id (keyword id)]
-    (assoc this
-      :buffers (assoc (:buffers this)
-                 id core/unit-buffer)
+                          id core/unit-buffer)))
       :current id)))
 
+(defn create-buffer [this id]
+  (assoc this
+    :buffers (assoc (:buffers this)
+               id core/unit-buffer)
+    :current id))
+
 (defn change-buffer [this id]
-  (let [id (keyword id)]
-    (if (contains? (:buffers this) id)
-      (assoc this :current id)
-      this)))
+  (if (contains? (:buffers this) id)
+    (assoc this :current id)
+    this))
 
 (defn delete-buffer [this id]
   (assoc this
@@ -31,11 +28,10 @@
 
 (defn rename-buffer [this id]
   (let [buffers (:buffers this)
-        current (:current this)
-        id (keyword id)]
+        current (:current this)]
     (assoc this
       :buffers (assoc (dissoc buffers current)
-                 id (current buffers))
+                 id (buffers current))
       :current id)))
 
 (defn buffers [this]
