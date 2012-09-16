@@ -61,7 +61,7 @@
    "open" file/open))
 
 (defn main []
-  (set! core/functions functions)
+  (swap! core/current-editor #(assoc % :functions functions))
   (system/init))
 
 (main)

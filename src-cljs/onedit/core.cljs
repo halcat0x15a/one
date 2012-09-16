@@ -9,9 +9,9 @@
 
 (def unit-buffer (Buffer. [""] unit-cursor))
 
-(defrecord Editor [buffers current])
+(defrecord Editor [buffers current functions])
 
-(def unit-editor (Editor. {:scratch unit-buffer} :scratch))
+(def unit-editor (Editor. {:scratch unit-buffer} :scratch (js-obj)))
 
 (def current-editor (atom unit-editor))
 
@@ -59,9 +59,7 @@
       (count line))
    get-line))
 
-(def functions nil)
-
-(defn parse-command [s]
+(defn parse-command [editor s]
   (let [[f & args] (string/split s #"\s+")]
-    (when-let [f (aget functions f)]
+    (when-let [f (aget (:functions editor) f)]
       (cons f args))))

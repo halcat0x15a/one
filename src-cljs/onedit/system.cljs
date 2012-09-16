@@ -37,38 +37,58 @@
     (graphics/render this)
     (reset! core/current-editor this)))
 
-(defn exec [event]
+(defrecord History [commands cursor])
+
+(def history (atom (History. (list) 0)))
+
+(defn exec []
   (let [minibuffer (minibuffer-element)
         value (dom/get-value minibuffer)]
-    (when-let [[f & args] (core/parse-command value)]
+    (when-let [[f & args] (core/parse-command @core/current-editor value)]
       (let [this (apply f @core/current-editor args)]
+        (swap! history #(->History (cons value (:commands %)) 0))
+        (dom/log history)
         (dom/set-value minibuffer "")
         (update this)))))
 
-(defn input-handler [event]
-  (-> @core/current-editor
-      (core/set-buffer (get-buffer))
-      update))
-
-(defn key-handler [event]
-  (let [move (case (.-keyCode event)
-               goog.events.KeyCodes/LEFT cursor/left
-               goog.events.KeyCodes/DOWN cursor/down
-               goog.events.KeyCodes/UP cursor/up
-               goog.events.KeyCodes/RIGHT cursor/right
-               identity)]
-    (-> @core/current-editor
-        move
-        update)))
+(defn set-history [pred f]
+  (let [{:keys [commands cursor]} @history
+        cursor' (f cursor)]
+    (when (pred cursor commands)
+      (dom/set-value (minibuffer-element) (nth commands (dec cursor') nil))
+      (swap! history #(assoc % :cursor cursor')))))
 
 (defn init []
-  (doto (buffer-element)
-    (-> (goog.events/KeyHandler.)
-        (.addEventListener goog.events.KeyHandler.EventType/KEY key-handler))
-    (-> (goog.events/InputHandler.)
-        (.addEventListener goog.events.InputHandler.EventType/INPUT input-handler))
-    (event/listen gevents-type/CLICK input-handler))
-  (doto (minibuffer-element)
-    (event/listen gevents-type/CHANGE exec)
-    (gfocus/focusInputField))
-  (update @core/current-editor))
+  (letfn [(listen-key-event [element handler]
+            (-> element
+                (goog.events/KeyHandler.)
+                (.addEventListener (.-KEY gkey-handler/EventType) handler)))
+          (buffer-key-handler [event]
+            (let [move (case (.-keyCode event)
+                         goog.events.KeyCodes/LEFT cursor/left
+                         goog.events.KeyCodes/DOWN cursor/down
+                         goog.events.KeyCodes/UP cursor/up
+                         goog.events.KeyCodes/RIGHT cursor/right
+                         identity)]
+              (-> @core/current-editor
+                  move
+                  update)))
+          (minibuffer-key-handler [event]
+            (case (.-keyCode event)
+              goog.events.KeyCodes/UP (set-history #(< %1 (count %2)) inc)
+              goog.events.KeyCodes/DOWN (set-history #(> %1 0) dec)
+              goog.events.KeyCodes/ENTER (exec)
+              nil))
+          (input-handler [event]
+            (-> @core/current-editor
+                (core/set-buffer (get-buffer))
+                update))]
+    (doto (buffer-element)
+      (listen-key-event buffer-key-handler)
+      (-> (goog.events/InputHandler.)
+          (.addEventListener (.-INPUT ginput-handler/EventType) input-handler))
+      (event/listen gevents-type/CLICK input-handler))
+    (doto (minibuffer-element)
+      (listen-key-event minibuffer-key-handler)
+      (gfocus/focusInputField))
+    (update @core/current-editor)))

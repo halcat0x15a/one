@@ -8,7 +8,7 @@
       (core/set-strings (map name (keys core/functions)))))
 
 (defn apply-buffers [this command & args]
-  (let [[f & _] (core/parse-command command)]
+  (let [[f & _] (core/parse-command this command)]
     (loop [this this buffers (:buffers this) result []]
       (if (empty? buffers)
         (-> this
