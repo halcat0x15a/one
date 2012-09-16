@@ -38,7 +38,7 @@
         (core/set-strings (assoc buffer y line'))
         (core/set-cursor (core/set-saved cursor (+ x (count string)))))))
 
-(defn delete-forward [editor]
+(defn delete [editor]
   (let [{:keys [x y]} (core/get-cursor editor)
         buffer (core/get-strings editor)
         line (get buffer y)
@@ -49,7 +49,7 @@
                                  (str (subs line 0 x) (subs line (inc x) (count line)))))
       editor)))
 
-(defn delete-backward [editor]
+(defn backspace [editor]
   (let [{:keys [x y]} (core/get-cursor editor)
         buffer (core/get-strings editor)
         line (get buffer y)
@@ -65,7 +65,7 @@
 (defn delete-line [editor]
   (let [[lines lines'] (split-at (:y (core/get-cursor editor)) (core/get-strings editor))]
     (-> editor
-        (core/set-strings (vec (concat lines (rest lines'))))
+        (core/set-strings (vec (cons "" (concat lines (rest lines')))))
         cursor/up
         cursor/down
         cursor/start-line)))

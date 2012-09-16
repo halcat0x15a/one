@@ -44,10 +44,10 @@
    "o" buffer/append-newline
    "prepend-newline" buffer/prepend-newline
    "O" buffer/prepend-newline
-   "delete-forward" buffer/delete-forward
-   "x" buffer/delete-forward
-   "delete-backward" buffer/delete-backward
-   "X" buffer/delete-backward
+   "delete" buffer/delete
+   "x" buffer/delete
+   "backspace" buffer/backspace
+   "X" buffer/backspace
    "delete-line" buffer/delete-line
    "dd" buffer/delete-line
    "replace-character" buffer/replace-character

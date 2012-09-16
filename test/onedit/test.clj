@@ -34,7 +34,16 @@
              (core/set-buffer core/unit-editor (core/->Buffer ["hello" " world"] (core/->Cursor 0 1 0))))))
     (testing "insert"
       (is (= (buffer/insert (core/set-buffer core/unit-editor (core/->Buffer ["hello"] (core/->Cursor 5 0 5))) "world")
-             (core/set-buffer core/unit-editor (core/->Buffer ["helloworld"] (core/->Cursor 10 0 10))))))))
+             (core/set-buffer core/unit-editor (core/->Buffer ["helloworld"] (core/->Cursor 10 0 10))))))
+    (testing "delete forward"
+      (is (= (buffer/delete (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/->Cursor 5 0 5))))
+             (core/set-buffer core/unit-editor (core/->Buffer ["helloworld"] (core/->Cursor 5 0 5))))))
+    (testing "delete backward"
+      (is (= (buffer/backspace (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/->Cursor 6 0 6))))
+             (core/set-buffer core/unit-editor (core/->Buffer ["helloworld"] (core/->Cursor 5 0 5))))))
+    (testing "delete line"
+      (is (= (buffer/delete-line (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/->Cursor 5 0 5))))
+             (core/set-buffer core/unit-editor (core/->Buffer [""] (core/->Cursor 0 0 0))))))))
 
 (deftest cursor
   (testing "Cursor Functions"

@@ -24,6 +24,10 @@
 
 (def get-cursor (comp :cursor get-buffer))
 
+(def get-cursor-x (comp :x get-cursor))
+
+(def get-cursor-y (comp :y get-cursor))
+
 (def get-strings (comp :strings get-buffer))
 
 (def get-string (comp (partial string/join "\n") get-strings))
