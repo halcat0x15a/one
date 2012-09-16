@@ -12,6 +12,8 @@
 (defn set-current-command [editor command]
   (update-history editor (comp (partial cons command) rest)))
 
+(def get-history-cursor (comp :cursor :history))
+
 (defn set-history-cursor [editor cursor]
   (assoc editor
     :history (assoc (:history editor)
@@ -45,5 +47,7 @@
 
 (defn set-next-command [editor]
   (if-let [editor' (next-command editor)]
-    (set-current-command editor' (get-command editor'))
-    (set-current-command editor "")))
+    (if (zero? (get-history-cursor editor'))
+      (set-current-command editor' "")
+      (set-current-command editor' (get-command editor')))
+    editor))

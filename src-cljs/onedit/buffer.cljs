@@ -36,7 +36,7 @@
         line' (str (subs line 0 x) string (subs line x (count line)))]
     (-> editor
         (core/set-strings (assoc buffer y line'))
-        (core/set-cursor (assoc cursor :x (+ x (count string)))))))
+        (core/set-cursor (core/set-saved cursor (+ x (count string)))))))
 
 (defn delete-forward [editor]
   (let [{:keys [x y]} (core/get-cursor editor)

@@ -35,16 +35,16 @@
 (deftest core
   (testing "Core Functions"
     (testing "get line"
-      (is (= (get-line (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 0 0))} "scratch" unit-history nil) 0)
+      (is (= (get-line (set-buffer unit-editor (->Buffer ["hello" "world"] (->Cursor 0 0 0))) 0)
              "hello"))
       (testing "index out of bounds"
-        (is (= (get-line (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 0 0))} "scratch" unit-history nil) 2)
+        (is (= (get-line (set-buffer unit-editor (->Buffer ["hello" "world"] (->Cursor 0 0 0))) 2)
                nil))))
     (testing "count line"
-      (is (= (count-line (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 0 0))} "scratch" unit-history nil) 0)
+      (is (= (count-line (set-buffer unit-editor (->Buffer ["hello" "world"] (->Cursor 0 0 0))) 0)
              5))
       (testing "index out of bounds"
-        (is (= (count-line (->Editor {"scratch" (->Buffer ["hello" "world"] (->Cursor 0 0 0))} "scratch" unit-history nil) 2)
+        (is (= (count-line (set-buffer unit-editor (->Buffer ["hello" "world"] (->Cursor 0 0 0))) 2)
                nil))))))
 
 (deftest buffer
@@ -158,7 +158,7 @@
                                  :history (->History ["hello" "world"] 1)))
              (assoc unit-editor
                :history (->History ["hello" "world"] 1)))))
-    (testing "next command"
+    (testing "set next command"
       (is (= (set-next-command (assoc unit-editor
                                  :history (->History ["" "hello" "world"] 2)))
              (assoc unit-editor
@@ -166,8 +166,8 @@
       (is (= (set-next-command (assoc unit-editor
                                  :history (->History ["hello" "world"] 1)))
              (assoc unit-editor
-               :history (->History ["hello" "world"] 0))))
+               :history (->History ["" "world"] 0))))
       (is (= (set-next-command (assoc unit-editor
-                                 :history (->History ["hello" "world"] 0)))
+                                 :history (->History ["" "world"] 0)))
              (assoc unit-editor
                :history (->History ["" "world"] 0)))))))
