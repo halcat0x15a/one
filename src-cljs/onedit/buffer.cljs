@@ -5,7 +5,7 @@
 
 (defn add-newline [editor y]
   (let [[lines lines'] (split-at y (core/get-strings editor))]
-    (core/set-strings editor (vec (concat lines [""] lines')))))
+    (core/set-strings editor (vec (concat lines (list "") lines')))))
 
 (defn prepend-newline [editor]
   (-> editor

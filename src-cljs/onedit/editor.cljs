@@ -16,9 +16,18 @@
   (assoc this
     :buffers (dissoc (:buffers this) id)))
 
+(defn rename-buffer [this id]
+  (let [buffers (:buffers this)
+        current (:current this)
+        id (keyword id)]
+    (assoc this
+      :buffers (assoc (dissoc buffers current)
+                 id (current buffers))
+      :current id)))
+
 (defn buffers [this]
   (letfn [(set-buffers [this]
-            (core/set-strings this (map name (keys (:buffers this)))))]
+            (core/set-strings this (vec (map name (keys (:buffers this))))))]
     (-> this
         (buffer :buffers)
         set-buffers)))

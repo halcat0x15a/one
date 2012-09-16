@@ -5,7 +5,7 @@
 (defn commands [this]
   (-> this
       (editor/buffer :commands)
-      (core/set-strings (map name (keys (:functions this))))))
+      (core/set-strings (vec (map name (keys (:functions this)))))))
 
 (defn history [this]
   (-> this
@@ -27,7 +27,7 @@
   (let [re (re-pattern string)]
     (-> this
         (editor/buffer :grep)
-        (core/set-strings (filter (partial re-find re) (core/get-strings this))))))
+        (core/set-strings (vec (filter (partial re-find re) (core/get-strings this)))))))
 
 (defn count-lines [this]
   (-> this

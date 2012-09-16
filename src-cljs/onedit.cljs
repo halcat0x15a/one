@@ -52,6 +52,9 @@
    "dd" buffer/delete-line
    "replace-character" buffer/replace-character
    "r" buffer/replace-character
+   "buffer" editor/buffer
+   "delete-buffer" editor/delete-buffer
+   "buffers" editor/buffers
    "commands" tool/commands
    "history" tool/history
    "apply-buffers" tool/apply-buffers
