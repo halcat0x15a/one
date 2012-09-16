@@ -1,36 +1,10 @@
 (ns onedit.test
-  (:require [clojure.java.io :as io])
+  (:require [onedit.core :as core]
+            [onedit.buffer :as buffer]
+            [onedit.cursor :as cursor]
+            [onedit.editor :as editor]
+            [onedit.command :as command])
   (:use clojure.test))
-
-(def names ["core" "buffer" "cursor" "command" "editor"])
-
-(defn cljfile [name]
-  (io/file (str "test/onedit/" name ".clj")))
-
-(defn cljsfile [name]
-  (io/file (str "src-cljs/onedit/" name ".cljs")))
-
-(defn setup []
-  (doseq [name names]
-    (io/copy (cljsfile name) (cljfile name)))
-  (doseq [name names]
-    (require `[~(symbol (str "onedit." name)) :as ~(symbol name)])))
-
-(defn cleanup []
-  (doseq [name names]
-    (io/delete-file (cljfile name))))
-
-(try
-  (cleanup)
-  (catch Throwable _ _))
-
-(setup)
-
-(defn fixture [f]
-  (f)
-  (cleanup))
-
-(use-fixtures :once fixture)
 
 (deftest core
   (testing "Core Functions"

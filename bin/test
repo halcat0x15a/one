@@ -1,0 +1,13 @@
+NAMES="core buffer cursor command editor"
+
+for name in $NAMES
+do
+  cp src-cljs/onedit/$name.cljs test/onedit/$name.clj
+done
+
+lein test
+
+for name in $NAMES
+do
+  rm test/onedit/$name.clj
+done
