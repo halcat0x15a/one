@@ -1,13 +1,7 @@
-NAMES="core buffer cursor command editor util"
+export CLJS="core buffer cursor command editor util"
 
-for name in $NAMES
-do
-  cp src-cljs/onedit/$name.cljs test/onedit/$name.clj
-done
+bin/before
 
 lein test
 
-for name in $NAMES
-do
-  rm test/onedit/$name.clj
-done
+bin/after

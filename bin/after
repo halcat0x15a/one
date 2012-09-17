@@ -1,0 +1,4 @@
+for name in $CLJS
+do
+  rm test/onedit/$name.clj
+done

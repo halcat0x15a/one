@@ -1,0 +1,4 @@
+for name in $CLJS
+do
+  cp src-cljs/onedit/$name.cljs test/onedit/$name.clj
+done

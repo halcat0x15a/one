@@ -10,12 +10,12 @@
 
 (defn prepend-newline [editor]
   (-> editor
-      (add-newline (core/get-y editor))
+      (add-newline (core/get-cursor-y editor))
       cursor/start-line))
 
 (defn append-newline [editor]
   (-> editor
-      (add-newline (inc (core/get-y editor)))
+      (add-newline (inc (core/get-cursor-y editor)))
       cursor/down))
 
 (defn insert-newline [editor]
