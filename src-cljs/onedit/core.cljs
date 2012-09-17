@@ -19,7 +19,7 @@
 
 (def current-editor (atom unit-editor))
 
-(defn get-buffer [editor]
+(defn get-buffer [^Editor editor]
   ((:buffers editor) (:current editor)))
 
 (def get-cursor (comp :cursor get-buffer))

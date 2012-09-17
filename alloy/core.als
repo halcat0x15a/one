@@ -8,49 +8,73 @@ sig Cursor {
   y >= 0
 }
 
+sig Text {}
+
+sig Name {}
+
 sig Buffer {
   cursor: Cursor,
-  strings: set String
+  contents: Text
 } {
-  this in Editor.buffers
+  some name: Name | name -> this in Editor.buffers
 }
 
-one sig Editor {
-  buffers: some Buffer,
-  current: Buffer
+sig Editor {
+  buffers: Name -> one Buffer,
+  current: Name
 } {
-  current in buffers
+  some buffer: Buffer | current -> buffer in buffers
 }
 
 sig File {
-  contents: set String
+  contents: Text
 }
 
-pred openFile (editor: Editor, file: File) {
-  editor.buffers.strings = file.contents
+pred currentBuffer (editor: Editor, buffer: Buffer) {
+  editor.current -> buffer in editor.buffers
 }
 
-run openFile
+pred updateBuffer (editor, editor': Editor, buffer, buffer': Buffer) {
+  currentBuffer [editor, buffer]
+  currentBuffer [editor', buffer']
+  editor'.current = editor.current
+  editor'.buffers - editor'.current -> buffer' = editor.buffers - editor.current -> buffer
+}
+
+run {
+  some disj editor, editor': Editor, disj buffer, buffer': Buffer |
+    updateBuffer [editor, editor', buffer, buffer']
+} for 3 but exactly 2 Editor, exactly 3 Buffer
 
 /*
-pred h (field, field': TextField) {
-  field.cursor.x > 0
-  field'.cursor.x = field.cursor.x - 1
+pred updateContents (editor, editor': Editor, buffer, buffer': Buffer, contens: Text) {
+  updateBuffer [editor, editor', buffer, buffer']
+  buffer'.contents = contents
+
+pred openFile (editor, editor': Editor, buffer: Buffer, file: File) {
+  currentBuffer [editor, buffer]
+  currentBuffer [editor', buffer]
+  buffer.contents = file.contents
 }
 
-pred j (field, field': TextField) {
-  field.cursor.y < #field.contents.string - 1
-  field'.cursor.y = field.cursor.y + 1
+pred h (editor: Editor, buffer) {
+  editor.current.cursor.x > 0
+  editor'.current.cursor.x = editor.cursor.x - 1
 }
 
-pred k (field, field': TextField) {
-  field.cursor.y > 0
-  field'.cursor.y = field.cursor.y - 1
+pred j (editor, editor': Editor) {
+  editor.cursor.y < #editor.contents.string - 1
+  editor'.cursor.y = editor.cursor.y + 1
 }
 
-pred l (field, field': TextField) {
-  field.cursor.x < #field.contents.string - 1
-  field'.cursor.x = field.cursor.x + 1
+pred k (editor, editor': Editor) {
+  editor.cursor.y > 0
+  editor'.cursor.y = editor.cursor.y - 1
+}
+
+pred l (editor, editor': Editor) {
+  editor.cursor.x < #editor.contents.string - 1
+  editor'.cursor.x = editor.cursor.x + 1
 }
 
 assert moveCursor {
