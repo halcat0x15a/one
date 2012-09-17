@@ -24,7 +24,7 @@
   (dom/ensure-element :display))
 
 (defn get-cursor [value element]
-  (let [values (string/split-lines (subs value 0 (gselection/getStart element)))]
+  (let [values (string/split-lines (subs value 0 (gselection/getEnd element)))]
     (core/saved-cursor (count (last values)) (dec (count values)))))
 
 (def get-strings (comp vec string/split-lines))
@@ -42,7 +42,7 @@
     (dom/set-properties
      canvas
      {"width" (.-width (gstyle/getSize buffer))
-      "height" (* (count (core/get-string this)) style/font-size)})
+      "height" (* (inc (count (core/get-string this))) style/font-size)})
     (graphics/render this canvas)
     (reset! core/current-editor this)))
 
@@ -67,15 +67,21 @@
                 (goog.events/InputHandler.)
                 (.addEventListener (.-INPUT ginput-handler/EventType) handler)))
           (buffer-key-handler [event]
-            (let [move (case (.-keyCode event)
-                         goog.events.KeyCodes/LEFT cursor/left
-                         goog.events.KeyCodes/DOWN cursor/down
-                         goog.events.KeyCodes/UP cursor/up
-                         goog.events.KeyCodes/RIGHT cursor/right
-                         identity)]
-              (-> @core/current-editor
-                  move
-                  update)))
+            (if-let [mode (:mode @core/current-editor)]
+              (when-let [f (mode (.fromCharCode js/String (.-charCode event)))]
+                (.preventDefault event)
+                (-> @core/current-editor
+                    f
+                    update))
+              (let [move (case (.-keyCode event)
+                           goog.events.KeyCodes/LEFT cursor/left
+                           goog.events.KeyCodes/DOWN cursor/down
+                           goog.events.KeyCodes/UP cursor/up
+                           goog.events.KeyCodes/RIGHT cursor/right
+                           identity)]
+                (-> @core/current-editor
+                    move
+                    update))))
           (set-command [f]
             (let [this (f @core/current-editor)]
               (dom/set-value (minibuffer-element) (command/get-command this))

@@ -13,9 +13,9 @@
 
 (def unit-history (History. (list "") 0))
 
-(defrecord Editor [buffers current history functions])
+(defrecord Editor [buffers current history functions mode])
 
-(def unit-editor (Editor. {"scratch" unit-buffer} "scratch" unit-history {}))
+(def unit-editor (Editor. {"scratch" unit-buffer} "scratch" unit-history {} nil))
 
 (def current-editor (atom unit-editor))
 
@@ -68,7 +68,7 @@
 (def count-lines (comp count get-strings))
 
 (defn get-line
-  ([editor] (get-line editor (:y (get-cursor editor))))
+  ([editor] (get-line editor (get-cursor-y editor)))
   ([editor y]
      (get (get-strings editor) y)))
 

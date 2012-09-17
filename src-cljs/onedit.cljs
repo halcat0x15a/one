@@ -5,7 +5,8 @@
             [onedit.cursor :as cursor]
             [onedit.editor :as editor]
             [onedit.tool :as tool]
-            [onedit.file :as file]))
+            [onedit.file :as file]
+            [onedit.vi :as vi]))
 
 (extend-type js/HTMLCollection
   ISeqable
@@ -18,7 +19,8 @@
     (array-seq files)))
 
 (def functions
-  {"left" cursor/left
+  {"vi" vi/mode
+   "left" cursor/left
    "h" cursor/left
    "down" cursor/down
    "j" cursor/down
