@@ -6,9 +6,8 @@
             [onedit.core :as core]
             [onedit.style :as style]))
 
-(defn render [editor]
-  (let [canvas (dom/ensure-element :display)
-        g (.getContext canvas "2d")
+(defn render [editor canvas]
+  (let [g (.getContext canvas "2d")
         strings (core/get-strings editor)
         {:keys [x y]} (core/get-cursor editor)
         font (graphics/Font. style/font-size style/font-family)

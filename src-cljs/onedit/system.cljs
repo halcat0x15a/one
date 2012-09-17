@@ -20,6 +20,9 @@
 (defn minibuffer-element []
   (dom/ensure-element :minibuffer))
 
+(defn canvas-element []
+  (dom/ensure-element :display))
+
 (defn get-cursor [value element]
   (let [values (string/split-lines (subs value 0 (gselection/getStart element)))]
     (core/saved-cursor (count (last values)) (dec (count values)))))
@@ -32,10 +35,15 @@
     (core/->Buffer (get-strings value) (get-cursor value element))))
 
 (defn update [this]
-  (let [buffer (buffer-element)]
+  (let [buffer (buffer-element)
+        canvas (canvas-element)]
     (gstyle/setStyle buffer style/buffer-style)
     (dom/set-value buffer (core/get-string this))
-    (graphics/render this)
+    (dom/set-properties
+     canvas
+     {"width" (.-width (gstyle/getSize buffer))
+      "height" (* (count (core/get-string this)) style/font-size)})
+    (graphics/render this canvas)
     (reset! core/current-editor this)))
 
 (defn exec []

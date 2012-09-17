@@ -30,8 +30,8 @@
       (is (= (buffer/append-newline (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world"] (core/->Cursor 1 1 1))))
              (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world" ""] (core/->Cursor 0 2 1))))))
     (testing "insert newline"
-      (is (= (buffer/insert-newline (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/->Cursor 5 0 5))))
-             (core/set-buffer core/unit-editor (core/->Buffer ["hello" " world"] (core/->Cursor 0 1 0))))))
+      (is (= (buffer/insert-newline (core/set-buffer core/unit-editor (core/->Buffer ["foo" "hello world" "bar"] (core/->Cursor 5 1 5))))
+             (core/set-buffer core/unit-editor (core/->Buffer ["foo" "hello" " world" "bar"] (core/->Cursor 0 2 0))))))
     (testing "insert"
       (is (= (buffer/insert (core/set-buffer core/unit-editor (core/->Buffer ["hello"] (core/->Cursor 5 0 5))) "world")
              (core/set-buffer core/unit-editor (core/->Buffer ["helloworld"] (core/->Cursor 10 0 10))))))
@@ -42,6 +42,10 @@
       (is (= (buffer/backspace (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/->Cursor 6 0 6))))
              (core/set-buffer core/unit-editor (core/->Buffer ["helloworld"] (core/->Cursor 5 0 5))))))
     (testing "delete line"
+      (is (= (buffer/delete-line (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world"] (core/->Cursor 5 0 5))))
+             (core/set-buffer core/unit-editor (core/->Buffer ["world"] (core/->Cursor 0 0 0)))))
+      (is (= (buffer/delete-line (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world"] (core/->Cursor 5 1 5))))
+             (core/set-buffer core/unit-editor (core/->Buffer ["hello"] (core/->Cursor 0 0 0)))))
       (is (= (buffer/delete-line (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/->Cursor 5 0 5))))
              (core/set-buffer core/unit-editor (core/->Buffer [""] (core/->Cursor 0 0 0))))))))
 

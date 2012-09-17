@@ -5,8 +5,9 @@
             [onedit.util :as util]))
 
 (defn add-newline [editor y]
-  (let [[lines lines'] (split-at y (core/get-strings editor))]
-    (core/set-strings editor (vec (concat lines (list "") lines')))))
+  (core/update-strings
+   editor
+   (comp vec (partial util/insert (list "") y))))
 
 (defn prepend-newline [editor]
   (-> editor
@@ -20,11 +21,9 @@
 
 (defn insert-newline [editor]
   (let [{:keys [x y]} (core/get-cursor editor)
-        buffer (core/get-strings editor)
-        line (get buffer y)
-        [lines lines'] (split-at y buffer)]
+        [lines lines'] (split-at y (core/get-strings editor))]
     (-> editor
-        (core/set-strings (vec (concat lines [(subs line 0 x) (subs line x (count line))])))
+        (core/set-strings (vec (concat lines (util/cut x (first lines')) (rest lines'))))
         cursor/down
         cursor/start-line)))
 
@@ -62,15 +61,16 @@
       editor)))
 
 (defn delete-line [editor]
-  (let [[lines lines'] (split-at (:y (core/get-cursor editor)) (core/get-strings editor))]
+  (let [[lines lines'] (split-at (:y (core/get-cursor editor)) (core/get-strings editor))
+        lines (concat lines (rest lines'))]
     (-> editor
-        (core/set-strings (vec (cons "" (concat lines (rest lines')))))
+        (core/set-strings (if (empty? lines) [""] (vec lines)))
         cursor/up
         cursor/down
         cursor/start-line)))
 
-(defn replace-character [editor string]
+(defn replace-string [editor string]
   (let [{:keys [x y]} (core/get-cursor editor)
         buffer (core/get-strings editor)
         line (get buffer y)]
-    (core/set-strings editor (assoc buffer y (str (subs line 0 x) string (subs line (inc x) (count line)))))))
+    (core/set-strings editor (assoc buffer y (str (subs line 0 x) string (subs line (+ x (count string))))))))

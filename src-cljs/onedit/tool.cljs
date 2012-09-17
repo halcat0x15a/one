@@ -18,7 +18,7 @@
       (if (empty? buffers)
         (-> this
             (editor/buffer "apply-buffers")
-            (core/set-strings result))
+            (core/set-strings (vec result)))
         (let [[k v] (first buffers)
               this' (apply f (-> this (editor/buffer k)) args)]
           (recur this' (rest buffers) (concat result (core/get-strings this'))))))))

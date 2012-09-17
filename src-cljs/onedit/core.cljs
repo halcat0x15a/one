@@ -54,6 +54,17 @@
 (defn set-saved [cursor x]
   (assoc cursor :x x :saved x))
 
+(defn update-buffer [editor f]
+  (let [buffers (:buffers editor)
+        current (:current editor)]
+    (assoc editor
+      :buffers (assoc buffers
+                 current (f (buffers current))))))
+
+(defn update-strings [editor f]
+  (update-buffer editor #(assoc %
+                           :strings (f (:strings %)))))
+
 (def count-lines (comp count get-strings))
 
 (defn get-line

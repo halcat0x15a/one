@@ -50,8 +50,8 @@
    "X" buffer/backspace
    "delete-line" buffer/delete-line
    "dd" buffer/delete-line
-   "replace-character" buffer/replace-character
-   "r" buffer/replace-character
+   "replace-string" buffer/replace-string
+   "r" buffer/replace-string
    "buffer" editor/buffer
    "create-buffer" editor/create-buffer
    "change-buffer" editor/change-buffer
