@@ -3,7 +3,9 @@
             [onedit.buffer :as buffer]
             [onedit.cursor :as cursor]
             [onedit.editor :as editor]
-            [onedit.command :as command])
+            [onedit.command :as command]
+            [onedit.parser :as parser]
+            [onedit.syntax :as syntax])
   (:use clojure.test))
 
 (deftest core
@@ -213,3 +215,8 @@
              (assoc core/unit-editor
                :buffers {"world" core/unit-buffer}
                :current "world"))))))
+
+(deftest syntax
+  (testing "parser"
+    (is (= (syntax/clojure (parser/parser (slurp "test/onedit/test.clj")))
+           (parser/->Parser {0 [:define "defn"]} 4 "")))))
