@@ -12,7 +12,7 @@
 
 (def keyword (parser/sym :keyword #"^:\w+"))
 
-(def name (parser/sym :name #"^\w+"))
+(def name (parser/sym :name #"^[^\(\[\{\)\]\}\d\s]+"))
 
 (def define (parser/sym :define #"^(defn)|(def)"))
 
