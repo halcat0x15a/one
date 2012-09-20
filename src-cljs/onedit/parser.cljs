@@ -1,10 +1,10 @@
 (ns onedit.parser
   (:require [clojure.string :as string]))
 
-(defrecord Parser [table cursor success source])
+(defrecord Input [table cursor success source])
 
 (defn parse [parser source]
-  (let [result (parser (Parser. {} 0 false source))]
+  (let [result (parser (Input. {} 0 false source))]
     (assoc result
       :table (:table result))))
 
@@ -24,43 +24,44 @@
 (defn sym
   ([regex] (partial consume regex))
   ([type regex]
-     (fn [this]
-       (let [parser (consume regex this)]
-         (if (:success parser)
-           (assoc parser
-             :table (merge-with concat (:table parser) {type (list [(:cursor this) (:cursor parser)])}))
-           parser)))))
+     (fn [input]
+       (let [result (consume regex input)]
+         (if (:success result)
+           (assoc result
+             :table (merge-with concat (:table result) {type (list [(:cursor input) (:cursor result)])}))
+           result)))))
 
-(defn exp [sym & syms]
-  (fn [this]
-    (loop [parser this syms (cons sym syms)]
-      (if (empty? syms) parser
-          (let [parser ((first syms) parser)]
-            (if (:success parser)
-              (recur parser (rest syms))
-              parser))))))
+(defn exp [parser & parsers]
+  (fn [input]
+    (loop [input input parsers (cons parser parsers)]
+      (if (empty? parsers) input
+          (let [result ((first parsers) input)]
+            (if (:success result)
+              (recur result (rest parsers))
+              result))))))
 
 (defn select [parser & parsers]
   (fn [input]
-    (loop [parser this syms (cons sym syms)]
-      (if (empty? syms) parser
-          (let [parser' ((first syms) parser)]
-            (if (:success parser')
-              parser'
-              (recur parser' (rest syms))))))))
+    (loop [input input parsers (cons parser parsers)]
+      (if (empty? parsers) input
+          (let [result ((first parsers) input)]
+            (if (:success result)
+              result
+              (recur result (rest parsers))))))))
 
-(defn opt [sym]
-  (fn [this]
-    (let [parser (sym this)]
-      (if (:success parser)
-        parser
-        (assoc parser
-          :success true)))))
+(defn success [input]
+  (assoc input :success true))
 
-(defn rep [sym]
-  (fn [this]
-    (let [parser (sym this)]
-      (if (:success parser)
-        (recur parser)
-        (assoc parser
-          :success true)))))
+(defn opt [parser]
+  (fn [input]
+    (let [result (parser input)]
+      (if (:success result)
+        result
+        (success result)))))
+
+(defn rep [parser]
+  (fn [input]
+    (let [result (parser input)]
+      (if (:success result)
+        (recur result)
+        (success result)))))

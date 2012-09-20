@@ -24,7 +24,6 @@
           "font-family" font-family))
 
 (def highlight
-  {:keyword "aqua"
-   :name "blue"
-   :string "fuchsia"
-   :number "lime"})
+  {:keyword-literal "aqua"
+   :string-literal "fuchsia"
+   :number-literal "lime"})

@@ -25,8 +25,8 @@
   ((parser/select
     literal
     name
-    (parser/exp name expression)
-    (parser/exp open (parser/rep (parser/exp expression (parser/opt space))) close))
+    (parser/exp open (parser/rep (parser/exp expression (parser/opt space))) close)
+    (parser/exp name expression))
    this))
 
 (def clojure (parser/rep (parser/exp (parser/opt space) expression (parser/opt space))))
