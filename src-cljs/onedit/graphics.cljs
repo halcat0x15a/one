@@ -11,14 +11,14 @@
 (defn text-width [s g]
   (-> g (.measureText s) .-width))
 
-(defn render [editor canvas]
+(defn render [editor canvas width height]
   (let [g (.getContext canvas "2d")
         {:keys [x y]} (core/get-cursor editor)
         strings (core/get-strings editor)
         string (util/join-newline strings)]
     (set! (.-fillStyle g) style/text-color)
     (set! (.-font g) (str style/font-size "px " style/font-family))
-    (.clearRect g 0 0 1024 1024)
+    (.clearRect g 0 0 width height)
     (dotimes [n (count strings)]
       (.fillText g (strings n) 0 (* (inc n) style/font-size)))
     (.fillText g style/pointer (text-width (subs (strings y) 0 x) g) (* (inc y) style/font-size))

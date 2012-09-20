@@ -36,14 +36,13 @@
 
 (defn update [this]
   (let [buffer (buffer-element)
-        canvas (canvas-element)]
+        canvas (canvas-element)
+        width (.-width (gstyle/getSize buffer))
+        height (* (inc (core/count-lines this)) style/font-size)]
     (gstyle/setStyle buffer style/buffer-style)
     (dom/set-value buffer (core/get-string this))
-    (dom/set-properties
-     canvas
-     {"width" (.-width (gstyle/getSize buffer))
-      "height" (* (inc (count (core/get-string this))) style/font-size)})
-    (graphics/render this canvas)
+    (dom/set-properties canvas {"width" width "height" height})
+    (graphics/render this canvas width height)
     (reset! core/current-editor this)))
 
 (defn exec []
