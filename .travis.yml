@@ -1,4 +1,4 @@
 language: clojure
-env: CLJS="core buffer cursor command editor util"
+env: CLJS="core buffer cursor command editor util parser syntax"
 before_script: bin/before
 after_script: bin/after

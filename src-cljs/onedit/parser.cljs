@@ -4,9 +4,9 @@
 (defrecord Input [table cursor success source])
 
 (defn parse [parser source]
-  (let [result (parser (Input. {} 0 false source))]
+  (let [result (parser (Input. (transient []) 0 false source))]
     (assoc result
-      :table (:table result))))
+      :table (apply merge-with concat (persistent! (:table result))))))
 
 (defn consume [regex this]
   (let [source (:source this)
@@ -26,10 +26,9 @@
   ([type regex]
      (fn [input]
        (let [result (consume regex input)]
-         (if (:success result)
-           (assoc result
-             :table (merge-with concat (:table result) {type (list [(:cursor input) (:cursor result)])}))
-           result)))))
+         (when (:success result)
+           (conj! (:table result) {type (list [(:cursor input) (:cursor result)])}))
+         result))))
 
 (defn exp [parser & parsers]
   (fn [input]
