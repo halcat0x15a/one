@@ -12,9 +12,7 @@
 
 (def keyword (parser/sym :keyword #"^:\w+"))
 
-(def name (parser/sym :name #"^[^\(\[\{\)\]\}\d\s]+"))
-
-(def define (parser/sym :define #"^(defn)|(def)"))
+(def name (parser/sym :name #"^[^\(\[\{\)\]\}\s\d][^\(\[\{\)\]\}\s]*"))
 
 (def open (parser/sym #"^[\(\[\{]"))
 
@@ -27,7 +25,7 @@
   ((parser/select
     literal
     name
-    (parser/exp open define space name space expression close))
+    (parser/exp open (parser/rep (parser/exp expression (parser/opt space))) close))
    this))
 
 (def clojure (parser/rep (parser/exp (parser/opt space) expression (parser/opt space))))

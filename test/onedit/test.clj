@@ -218,5 +218,6 @@
 
 (deftest syntax
   (testing "parser"
-    (is (= (syntax/clojure (parser/parser (slurp "test/onedit/test.clj")))
-           (parser/->Parser {0 [:define "defn"]} 4 "")))))
+    (is (= (syntax/expression (parser/parser "(def a 100)"))
+           (parser/->Parser {:number '([7 10]) :name '([1 4] [5 6])} 11 true "")))
+    (is (time (syntax/clojure (parser/parser (slurp "test/onedit/test.clj")))))))
