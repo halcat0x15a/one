@@ -3,7 +3,10 @@
 
 (defrecord Parser [table cursor success source])
 
-(def parser (partial ->Parser {} 0 false))
+(defn parse [parser source]
+  (let [result (parser (Parser. {} 0 false source))]
+    (assoc result
+      :table (:table result))))
 
 (defn consume [regex this]
   (let [source (:source this)
@@ -16,7 +19,7 @@
                   :source (subs source token-size))))]
       (cond (string? token) (consume token)
             (coll? token) (consume (first token))
-            (nil? token) (assoc this :success false)))))
+            :else (assoc this :success false)))))
 
 (defn sym
   ([regex] (partial consume regex))
@@ -37,8 +40,8 @@
               (recur parser (rest syms))
               parser))))))
 
-(defn select [sym & syms]
-  (fn [this]
+(defn select [parser & parsers]
+  (fn [input]
     (loop [parser this syms (cons sym syms)]
       (if (empty? syms) parser
           (let [parser' ((first syms) parser)]
@@ -57,7 +60,7 @@
 (defn rep [sym]
   (fn [this]
     (let [parser (sym this)]
-      (if (and (:success parser) (not= this parser))
+      (if (:success parser)
         (recur parser)
         (assoc parser
           :success true)))))

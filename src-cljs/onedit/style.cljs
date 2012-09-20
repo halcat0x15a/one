@@ -22,3 +22,9 @@
   (js-obj "line-height" (px font-size)
           "font-size" (px font-size)
           "font-family" font-family))
+
+(def highlight
+  {:keyword "aqua"
+   :name "blue"
+   :string "fuchsia"
+   :number "lime"})

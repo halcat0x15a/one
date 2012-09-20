@@ -1,5 +1,6 @@
 (ns onedit.core
-  (:require [clojure.string :as string]))
+  (:require [clojure.string :as string]
+            [onedit.util :as util]))
 
 (defrecord Cursor [x y saved])
 
@@ -30,7 +31,7 @@
 
 (def get-strings (comp :strings get-buffer))
 
-(def get-string (comp (partial string/join "\n") get-strings))
+(def get-string (comp util/join-newline get-strings))
 
 (defn set-buffer [editor buffer]
   (assoc editor

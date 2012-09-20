@@ -1,4 +1,5 @@
-(ns onedit.util)
+(ns onedit.util
+  (:require [clojure.string :as string]))
 
 (defn apply-center [f a p]
   (let [[x y] p]
@@ -19,3 +20,5 @@
 
 (defn drop-string [m n s]
   (str (subs s 0 m) (subs s n)))
+
+(def join-newline (partial string/join \newline))

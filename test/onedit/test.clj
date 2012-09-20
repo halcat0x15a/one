@@ -218,6 +218,6 @@
 
 (deftest syntax
   (testing "parser"
-    (is (= (syntax/expression (parser/parser "(def a 100)"))
-           (parser/->Parser {:number '([7 10]) :name '([1 4] [5 6])} 11 true "")))
-    (is (time (syntax/clojure (parser/parser (slurp "test/onedit/test.clj")))))))
+    (is (= (parser/parse syntax/expression "(def a 100)")
+           {:table {:number '([7 10]) :name '([1 4] [5 6])} :cursor 11 :success true :source ""}))
+    (is (time (parser/parse syntax/clojure (slurp "test/onedit/test.clj"))))))
