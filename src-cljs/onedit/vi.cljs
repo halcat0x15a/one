@@ -18,7 +18,7 @@
   {:esc normal-mode
    :d buffer/delete})
 
-(def insert-mode (mode insert))
+(def delete-mode (mode delete))
 
 (def normal
   {:h cursor/left

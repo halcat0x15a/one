@@ -1,5 +1,6 @@
 (ns onedit
-  (:require [onedit.core :as core]
+  (:require [clojure.browser.dom :as dom]
+            [onedit.core :as core]
             [onedit.system :as system]
             [onedit.buffer :as buffer]
             [onedit.cursor :as cursor]
@@ -7,6 +8,8 @@
             [onedit.tool :as tool]
             [onedit.file :as file]
             [onedit.vi :as vi]))
+
+(set! *print-fn* dom/log)
 
 (extend-type js/HTMLCollection
   ISeqable

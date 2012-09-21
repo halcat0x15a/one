@@ -1,34 +1,29 @@
 (ns onedit.parser
   (:require [clojure.string :as string]))
 
-(defrecord Input [table cursor success source])
+(defrecord Input [tokens cursor success source])
+
+(defrecord Token [type text])
 
 (defn parse [parser source]
   (let [result (parser (Input. (transient []) 0 false source))]
     (assoc result
-      :table (apply merge-with concat (persistent! (:table result))))))
+      :tokens (persistent! (:tokens result)))))
 
-(defn consume [regex this]
-  (let [source (:source this)
-        token (re-find regex source)]
-    (letfn [(consume [token]
-              (let [token-size (count token)]
-                (assoc this
-                  :success true
-                  :cursor (+ (:cursor this) token-size)
-                  :source (subs source token-size))))]
-      (cond (string? token) (consume token)
-            (coll? token) (consume (first token))
-            :else (assoc this :success false)))))
-
-(defn sym
-  ([regex] (partial consume regex))
-  ([type regex]
-     (fn [input]
-       (let [result (consume regex input)]
-         (when (:success result)
-           (conj! (:table result) {type (list [(:cursor input) (:cursor result)])}))
-         result))))
+(defn sym [type regex]
+  (fn [input]
+    (let [source (:source input)
+          token (re-find regex source)]
+      (letfn [(consume [token]
+                (let [token-size (count token)]
+                  (conj! (:tokens input) (Token. type token))
+                  (assoc input
+                    :success true
+                    :cursor (+ (:cursor input) token-size)
+                    :source (subs source token-size))))]
+        (cond (string? token) (consume token)
+              (coll? token) (consume (first token))
+              :else (assoc input :success false))))))
 
 (defn exp [parser & parsers]
   (fn [input]
