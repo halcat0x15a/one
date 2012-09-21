@@ -9,10 +9,12 @@
             [goog.style :as gstyle]
             [goog.editor.focus :as gfocus]
             [onedit.core :as core]
+            [onedit.util :as util]
             [onedit.cursor :as cursor]
             [onedit.command :as command]
-            [onedit.graphics :as graphics]
-            [onedit.style :as style]))
+            [onedit.style :as style]
+            [onedit.parser :as parser]
+            [onedit.syntax :as syntax]))
 
 (defn buffer-element []
   (dom/ensure-element :buffer))
@@ -34,6 +36,26 @@
         value (dom/get-value element)]
     (core/->Buffer (get-strings value) (get-cursor value element))))
 
+(defn text-width [s g]
+  (-> g (.measureText s) .-width))
+
+(defn render [editor canvas width height]
+  (let [g (.getContext canvas "2d")
+        {:keys [x y]} (core/get-cursor editor)
+        strings (core/get-strings editor)
+        string (util/join-newline strings)]
+    (set! (.-fillStyle g) style/text-color)
+    (set! (.-font g) (str style/font-size "px " style/font-family))
+    (.clearRect g 0 0 width height)
+    (dotimes [n (count strings)]
+      (.fillText g (strings n) 0 (* (inc n) style/font-size)))
+    (.fillText g style/pointer (text-width (subs (strings y) 0 x) g) (* (inc y) style/font-size))
+    (doseq [[k c] (:table (parser/parse syntax/clojure string))]
+      (doseq [[a b] c]
+        (set! (.-fillStyle g) (k style/highlight))
+        (let [substrings (string/split-lines (subs string 0 a))]
+          (.fillText g (subs string a b) (text-width (last substrings) g) (* (count substrings) style/font-size)))))))
+
 (defn update [this]
   (let [buffer (buffer-element)
         canvas (canvas-element)
@@ -44,7 +66,7 @@
     (gstyle/setStyle buffer style/buffer-style)
     (dom/set-value buffer (core/get-string this))
     (dom/set-properties canvas {"width" width "height" height})
-    (graphics/render this canvas width height)
+    (render this canvas width height)
     (reset! core/current-editor this)))
 
 (defn exec []
