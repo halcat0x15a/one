@@ -39,6 +39,8 @@
         canvas (canvas-element)
         width (.-width (gstyle/getSize buffer))
         height (* (inc (core/count-lines this)) style/font-size)]
+    (dom/log (core/get-cursor this))
+    (dom/log (core/get-strings this))
     (gstyle/setStyle buffer style/buffer-style)
     (dom/set-value buffer (core/get-string this))
     (dom/set-properties canvas {"width" width "height" height})
@@ -66,18 +68,19 @@
                 (goog.events/InputHandler.)
                 (.addEventListener (.-INPUT ginput-handler/EventType) handler)))
           (buffer-key-handler [event]
+            (dom/log (.fromCharCode js/String (.-charCode event)))
             (if-let [mode (:mode @core/current-editor)]
-              (when-let [f (mode (.fromCharCode js/String (.-charCode event)))]
+              (when-let [f (mode (keyword (.fromCharCode js/String (.-charCode event))))]
                 (.preventDefault event)
                 (-> @core/current-editor
                     f
                     update))
-              (let [move (case (.-keyCode event)
-                           goog.events.KeyCodes/LEFT cursor/left
-                           goog.events.KeyCodes/DOWN cursor/down
-                           goog.events.KeyCodes/UP cursor/up
-                           goog.events.KeyCodes/RIGHT cursor/right
-                           identity)]
+              (when-let [move (case (.-keyCode event)
+                                goog.events.KeyCodes/LEFT cursor/left
+                                goog.events.KeyCodes/DOWN cursor/down
+                                goog.events.KeyCodes/UP cursor/up
+                                goog.events.KeyCodes/RIGHT cursor/right
+                                nil)]
                 (-> @core/current-editor
                     move
                     update))))
