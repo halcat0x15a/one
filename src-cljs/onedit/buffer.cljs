@@ -69,6 +69,9 @@
         cursor/down
         cursor/start-line)))
 
+(defn delete-forward [editor]
+  (core/set-line editor (util/drop-string (core/get-cursor-x editor) (core/get-cursor-x (cursor/forward editor)) (core/get-line editor))))
+
 (defn replace-string [editor string]
   (let [{:keys [x y]} (core/get-cursor editor)
         buffer (core/get-strings editor)

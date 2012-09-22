@@ -11,16 +11,19 @@
 (deftest core
   (testing "Core Functions"
     (testing "get line"
-      (is (= (core/get-line (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world"] (core/->Cursor 0 0 0))) 0)
+      (is (= (core/get-line (core/set-strings core/unit-editor ["hello" "world"]) 0)
              "hello"))
       (testing "index out of bounds"
-        (is (= (core/get-line (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world"] (core/->Cursor 0 0 0))) 2)
+        (is (= (core/get-line (core/set-strings core/unit-editor ["hello" "world"]) 2)
                nil))))
+    (testing "set line"
+      (is (= (core/set-line (core/set-strings core/unit-editor ["hello" "world"]) 1 "miku")
+             (core/set-strings core/unit-editor ["hello" "miku"]))))
     (testing "count line"
-      (is (= (core/count-line (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world"] (core/->Cursor 0 0 0))) 0)
+      (is (= (core/count-line (core/set-strings core/unit-editor ["hello" "world"]) 0)
              5))
       (testing "index out of bounds"
-        (is (= (core/count-line (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world"] (core/->Cursor 0 0 0))) 2)
+        (is (= (core/count-line (core/set-strings core/unit-editor ["hello" "world"]) 2)
                nil))))
     (testing "calculate cursor position"
       (is (= (core/cursor-position (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world"] (core/->Cursor 3 0 3))))
@@ -42,10 +45,10 @@
     (testing "insert"
       (is (= (buffer/insert (core/set-buffer core/unit-editor (core/->Buffer ["hello"] (core/->Cursor 5 0 5))) "world")
              (core/set-buffer core/unit-editor (core/->Buffer ["helloworld"] (core/->Cursor 10 0 10))))))
-    (testing "delete forward"
+    (testing "delete"
       (is (= (buffer/delete (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/->Cursor 5 0 5))))
              (core/set-buffer core/unit-editor (core/->Buffer ["helloworld"] (core/->Cursor 5 0 5))))))
-    (testing "delete backward"
+    (testing "backspace"
       (is (= (buffer/backspace (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/->Cursor 6 0 6))))
              (core/set-buffer core/unit-editor (core/->Buffer ["helloworld"] (core/->Cursor 5 0 5))))))
     (testing "delete line"
@@ -54,7 +57,10 @@
       (is (= (buffer/delete-line (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world"] (core/->Cursor 5 1 5))))
              (core/set-buffer core/unit-editor (core/->Buffer ["hello"] (core/->Cursor 0 0 0)))))
       (is (= (buffer/delete-line (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/->Cursor 5 0 5))))
-             (core/set-buffer core/unit-editor (core/->Buffer [""] (core/->Cursor 0 0 0))))))))
+             (core/set-buffer core/unit-editor (core/->Buffer [""] (core/->Cursor 0 0 0))))))
+    (testing "delete forward"
+      (is (= (buffer/delete-forward (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/->Cursor 3 0 3))))
+             (core/set-buffer core/unit-editor (core/->Buffer ["hel world"] (core/->Cursor 3 0 3))))))))
 
 (deftest cursor
   (testing "Cursor Functions"

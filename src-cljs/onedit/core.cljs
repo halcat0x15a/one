@@ -77,6 +77,13 @@
   ([editor y]
      (get (get-strings editor) y)))
 
+(defn set-line
+  ([editor string] (set-line editor (get-cursor-y editor) string))
+  ([editor y string]
+     (update-strings editor
+                     (fn [strings]
+                       (concat (take y strings) (list string) (drop (inc y) strings))))))
+
 (def count-line
   (comp
    #(when-let [line %]
