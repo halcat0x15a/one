@@ -67,8 +67,7 @@
                  current (f (buffers current))))))
 
 (defn update-strings [editor f]
-  (update-buffer editor #(assoc %
-                           :strings (f (:strings %)))))
+  (update-buffer editor #(assoc % :strings (f (:strings %)))))
 
 (def count-lines (comp count get-strings))
 
@@ -80,9 +79,12 @@
 (defn set-line
   ([editor string] (set-line editor (get-cursor-y editor) string))
   ([editor y string]
-     (update-strings editor
-                     (fn [strings]
-                       (concat (take y strings) (list string) (drop (inc y) strings))))))
+     (update-strings editor #(concat (take y %) (list string) (drop (inc y) %)))))
+
+(defn update-line
+  ([editor f] (update-line editor (get-cursor-y editor) f))
+  ([editor y f]
+     (update-strings editor #(concat (take y %) (list (f (get % y))) (drop (inc y) %)))))
 
 (def count-line
   (comp
