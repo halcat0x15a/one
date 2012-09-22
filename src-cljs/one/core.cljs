@@ -1,6 +1,6 @@
-(ns onedit.core
+(ns one.core
   (:require [clojure.string :as string]
-            [onedit.util :as util]))
+            [one.util :as util]))
 
 (defrecord Cursor [x y saved])
 

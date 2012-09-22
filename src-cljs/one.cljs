@@ -1,13 +1,13 @@
-(ns onedit
+(ns one
   (:require [clojure.browser.dom :as dom]
-            [onedit.core :as core]
-            [onedit.system :as system]
-            [onedit.buffer :as buffer]
-            [onedit.cursor :as cursor]
-            [onedit.editor :as editor]
-            [onedit.tool :as tool]
-            [onedit.file :as file]
-            [onedit.vi :as vi]))
+            [one.core :as core]
+            [one.system :as system]
+            [one.buffer :as buffer]
+            [one.cursor :as cursor]
+            [one.editor :as editor]
+            [one.tool :as tool]
+            [one.file :as file]
+            [one.vi :as vi]))
 
 (set! *print-fn* dom/log)
 

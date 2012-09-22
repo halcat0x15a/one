@@ -1,4 +1,4 @@
-(ns onedit.parser
+(ns one.parser
   (:require [clojure.string :as string]))
 
 (defrecord Input [tokens cursor success source])

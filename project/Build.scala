@@ -2,7 +2,7 @@ import sbt._
 import Keys._
 import com.typesafe.startscript.StartScriptPlugin._
 
-object EditorBuild extends Build {
+object OneBuild extends Build {
 
   val scalazVersion = "7.0-SNAPSHOT"
   val unfilteredVersion = "0.6.+"
@@ -35,7 +35,7 @@ object EditorBuild extends Build {
   )
 
   lazy val root = Project(
-    id = "onedit",
+    id = "one",
     base = file(".")
   ) aggregate (server, client)
 

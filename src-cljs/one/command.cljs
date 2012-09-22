@@ -1,4 +1,4 @@
-(ns onedit.command)
+(ns one.command)
 
 (defn update-history [editor f]
   (let [history (:history editor)]

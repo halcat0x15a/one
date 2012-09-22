@@ -1,11 +1,11 @@
-(ns onedit.file
+(ns one.file
   (:require [clojure.string :as string]
             [clojure.browser.dom :as dom]
             [clojure.browser.event :as event]
             [goog.events.EventType :as gevent-type]
-            [onedit.core :as core]
-            [onedit.editor :as editor]
-            [onedit.system :as system]))
+            [one.core :as core]
+            [one.editor :as editor]
+            [one.system :as system]))
 
 (defn load [file event]
   (reset! core/current-editor

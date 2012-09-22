@@ -1,4 +1,4 @@
-(ns onedit.style)
+(ns one.style)
 
 (def font-size 16)
 

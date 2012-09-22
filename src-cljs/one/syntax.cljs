@@ -1,5 +1,5 @@
-(ns onedit.syntax
-  (:require [onedit.parser :as parser])
+(ns one.syntax
+  (:require [one.parser :as parser])
   (:refer-clojure :exclude [name keyword newline]))
 
 (def re-newline #"^\n")

@@ -1,18 +1,16 @@
-(defproject onedit "0.1-SNAPSHOT"
-  :description "online editor"
-  :dependencies [[org.clojure/clojure "1.4.0"]
-                 [org.clojure/core.logic "0.7.5"]
-                 [org.clojure/core.match "0.2.0-alpha10"]]
+(defproject one"0.1-SNAPSHOT"
+  :description "online text editor"
+  :dependencies [[org.clojure/clojure "1.4.0"]]
   :plugins [[lein-cljsbuild "0.2.7"]]
   :cljsbuild {
               :builds {
                        :main
                        {
                         :compiler {
-                                   :output-to "server/src/main/resources/public/onedit.js"
+                                   :output-to "server/src/main/resources/public/one.js"
                                    :optimizations :advanced}}
                        :debug
                        {
                         :compiler {
-                                   :output-to "server/target/scala-2.9.2/classes/public/onedit.js"
+                                   :output-to "server/target/scala-2.9.2/classes/public/one.js"
                                    :pretty-print true}}}})

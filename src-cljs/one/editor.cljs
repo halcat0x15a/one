@@ -1,6 +1,6 @@
-(ns onedit.editor
+(ns one.editor
   (:require [clojure.string :as string]
-            [onedit.core :as core]))
+            [one.core :as core]))
 
 (defn buffer [this id]
   (let [buffers (:buffers this)]

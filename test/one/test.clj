@@ -1,11 +1,11 @@
-(ns onedit.test
-  (:require [onedit.core :as core]
-            [onedit.buffer :as buffer]
-            [onedit.cursor :as cursor]
-            [onedit.editor :as editor]
-            [onedit.command :as command]
-            [onedit.parser :as parser]
-            [onedit.syntax :as syntax])
+(ns one.test
+  (:require [one.core :as core]
+            [one.buffer :as buffer]
+            [one.cursor :as cursor]
+            [one.editor :as editor]
+            [one.command :as command]
+            [one.parser :as parser]
+            [one.syntax :as syntax])
   (:use clojure.test))
 
 (deftest core
@@ -232,4 +232,4 @@
 
 (deftest syntax
   (testing "parser"
-    (is (time (parser/parse syntax/clojure (slurp "test/onedit/test.clj"))))))
+    (is (time (parser/parse syntax/clojure (slurp "test/one/test.clj"))))))

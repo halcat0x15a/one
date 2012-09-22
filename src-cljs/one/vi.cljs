@@ -1,7 +1,7 @@
-(ns onedit.vi
-  (:require [onedit.core :as core]
-            [onedit.cursor :as cursor]
-            [onedit.buffer :as buffer]))
+(ns one.vi
+  (:require [one.core :as core]
+            [one.cursor :as cursor]
+            [one.buffer :as buffer]))
 
 (declare normal-mode)
 

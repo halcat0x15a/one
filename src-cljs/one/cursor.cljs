@@ -1,6 +1,6 @@
-(ns onedit.cursor
+(ns one.cursor
   (:require [clojure.string :as string]
-            [onedit.core :as core]))
+            [one.core :as core]))
 
 (defn left [editor]
   (let [cursor (core/get-cursor editor)

@@ -1,8 +1,8 @@
-(ns onedit.live
+(ns one.live
   (:require [clojure.browser.dom :as dom]
             [clojure.browser.net :as net]
-            [onedit.core :as core]
-            [onedit.editor :as editor]))
+            [one.core :as core]
+            [one.editor :as editor]))
 
 (def pusher (delay (js/Pusher. "001b60ce1d2033e954ab")))
 

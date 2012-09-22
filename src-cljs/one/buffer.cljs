@@ -1,8 +1,8 @@
-(ns onedit.buffer
+(ns one.buffer
   (:require [clojure.string :as string]
-            [onedit.core :as core]
-            [onedit.cursor :as cursor]
-            [onedit.util :as util]))
+            [one.core :as core]
+            [one.cursor :as cursor]
+            [one.util :as util]))
 
 (defn add-newline [editor y]
   (core/update-strings

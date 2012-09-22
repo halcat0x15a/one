@@ -1,4 +1,4 @@
-(ns onedit.system
+(ns one.system
   (:require [clojure.string :as string]
             [clojure.browser.event :as event]
             [clojure.browser.dom :as dom]
@@ -8,13 +8,13 @@
             [goog.events.EventType :as gevents-type]
             [goog.style :as gstyle]
             [goog.editor.focus :as gfocus]
-            [onedit.core :as core]
-            [onedit.util :as util]
-            [onedit.cursor :as cursor]
-            [onedit.command :as command]
-            [onedit.style :as style]
-            [onedit.parser :as parser]
-            [onedit.syntax :as syntax]))
+            [one.core :as core]
+            [one.util :as util]
+            [one.cursor :as cursor]
+            [one.command :as command]
+            [one.style :as style]
+            [one.parser :as parser]
+            [one.syntax :as syntax]))
 
 (defn buffer-element []
   (dom/ensure-element :buffer))

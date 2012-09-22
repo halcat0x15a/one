@@ -1,4 +1,4 @@
-(ns onedit.util
+(ns one.util
   (:require [clojure.string :as string]))
 
 (defn apply-center [f a p]
