@@ -22,7 +22,7 @@
     (array-seq files)))
 
 (def functions
-  {"vi" vi/mode
+  {"vi" vi/normal-mode
    "left" cursor/left
    "h" cursor/left
    "down" cursor/down

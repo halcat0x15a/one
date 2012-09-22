@@ -14,9 +14,13 @@
 
 (def unit-history (History. (list "") 0))
 
+(defrecord Mode [name keymap])
+
+(def unit-mode (Mode. :one {}))
+
 (defrecord Editor [buffers current history functions mode])
 
-(def unit-editor (Editor. {"scratch" unit-buffer} "scratch" unit-history {} nil))
+(def unit-editor (Editor. {"scratch" unit-buffer} "scratch" unit-history {} unit-mode))
 
 (def current-editor (atom unit-editor))
 
@@ -83,3 +87,12 @@
   (let [[f & args] (string/split s #"\s+")]
     (when-let [f ((:functions editor) f)]
       (cons f args))))
+
+(defn mode [editor name keymap]
+  (assoc editor
+    :mode (Mode. name keymap)))
+
+(defn cursor-position [one]
+  (let [{:keys [x y]} (get-cursor one)
+        strings (get-strings one)]
+    (+ x (count strings) (apply + (map count (take y strings))))))

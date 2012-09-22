@@ -1,24 +1,23 @@
 (ns onedit.vi
-  (:require [onedit.cursor :as cursor]
+  (:require [onedit.core :as core]
+            [onedit.cursor :as cursor]
             [onedit.buffer :as buffer]))
 
 (declare normal-mode)
 
-(defn mode [keymap]
-  (fn [editor]
-    (assoc editor
-      :mode keymap)))
+(defn escape [keymap]
+  (assoc keymap :esc normal-mode))
 
-(def insert
-  {:esc normal-mode})
+(def insert {})
 
-(def insert-mode (mode insert))
+(defn insert-mode [editor]
+  (core/mode editor :insert (escape insert)))
 
 (def delete
-  {:esc normal-mode
-   :d buffer/delete})
+  {:d buffer/delete})
 
-(def delete-mode (mode delete))
+(defn delete-mode [editor]
+  (core/mode editor :delete (escape delete)))
 
 (def normal
   {:h cursor/left
@@ -39,4 +38,5 @@
    :d delete-mode
    :r buffer/replace-string})
 
-(def normal-mode (mode normal))
+(defn normal-mode [editor]
+  (core/mode editor :normal normal))

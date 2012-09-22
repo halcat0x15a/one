@@ -2,7 +2,7 @@
   (:require [onedit.parser :as parser])
   (:refer-clojure :exclude [name keyword newline]))
 
-(def re-newline #"^\n+")
+(def re-newline #"^\n")
 
 (def newline (parser/sym nil re-newline))
 
@@ -31,7 +31,7 @@
     (parser/select
      literal
      name
-     (parser/exp open (parser/rep (parser/exp expression (parser/opt space))) close)
+     (parser/exp open (parser/rep expression) close)
      (parser/exp name expression))
     (parser/opt space))
    this))
