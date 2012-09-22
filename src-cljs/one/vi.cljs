@@ -3,21 +3,27 @@
             [one.cursor :as cursor]
             [one.buffer :as buffer]))
 
-(declare normal-mode)
+(declare normal)
 
-(defn escape [keymap]
-  (assoc keymap :esc normal-mode))
+(defn normal-mode [editor]
+  (core/mode editor :normal normal))
 
-(def insert {})
+(def insert
+  {:esc normal-mode})
 
 (defn insert-mode [editor]
-  (core/mode editor :insert (escape insert)))
+  (core/mode editor :insert insert))
 
 (def delete
-  {:d buffer/delete})
+  {:esc normal-mode
+   :d (comp normal-mode buffer/delete-line)
+   :w (comp normal-mode buffer/delete-forward)
+   :b (comp normal-mode buffer/delete-backward)
+   :| (comp normal-mode buffer/delete-to)
+   :$ (comp normal-mode buffer/delete-from)})
 
 (defn delete-mode [editor]
-  (core/mode editor :delete (escape delete)))
+  (core/mode editor :delete delete))
 
 (def normal
   {:h cursor/left
@@ -37,6 +43,3 @@
    :X buffer/backspace
    :d delete-mode
    :r buffer/replace-string})
-
-(defn normal-mode [editor]
-  (core/mode editor :normal normal))

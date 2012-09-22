@@ -60,9 +60,19 @@
              (core/set-buffer core/unit-editor (core/->Buffer [""] (core/saved-cursor 0 0))))))
     (testing "delete forward"
       (is (= (buffer/delete-forward (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/saved-cursor 3 0))))
-             (core/set-buffer core/unit-editor (core/->Buffer ["hel world"] (core/saved-cursor 3 0))))))
+             (core/set-buffer core/unit-editor (core/->Buffer ["hel world"] (core/saved-cursor 3 0)))))
+      (is (= (buffer/delete-forward (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/saved-cursor 5 0))))
+             (core/set-buffer core/unit-editor (core/->Buffer ["hello"] (core/saved-cursor 5 0))))))
     (testing "delete backward"
       (is (= (buffer/delete-backward (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/saved-cursor 3 0))))
+             (core/set-buffer core/unit-editor (core/->Buffer ["lo world"] (core/saved-cursor 0 0)))))
+      (is (= (buffer/delete-backward (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/saved-cursor 6 0))))
+             (core/set-buffer core/unit-editor (core/->Buffer ["world"] (core/saved-cursor 0 0))))))
+    (testing "delete from cursor"
+      (is (= (buffer/delete-from (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/saved-cursor 3 0))))
+             (core/set-buffer core/unit-editor (core/->Buffer ["hel"] (core/saved-cursor 3 0))))))
+    (testing "delete to cursor"
+      (is (= (buffer/delete-to (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/saved-cursor 3 0))))
              (core/set-buffer core/unit-editor (core/->Buffer ["lo world"] (core/saved-cursor 0 0))))))))
 
 (deftest cursor

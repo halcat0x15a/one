@@ -79,12 +79,12 @@
 (defn set-line
   ([editor string] (set-line editor (get-cursor-y editor) string))
   ([editor y string]
-     (update-strings editor #(concat (take y %) (list string) (drop (inc y) %)))))
+     (update-strings editor #(vec (concat (take y %) (list string) (drop (inc y) %))))))
 
 (defn update-line
   ([editor f] (update-line editor (get-cursor-y editor) f))
   ([editor y f]
-     (update-strings editor #(concat (take y %) (list (f (get % y))) (drop (inc y) %)))))
+     (update-strings editor #(vec (concat (take y %) (list (f (get % y))) (drop (inc y) %))))))
 
 (def count-line
   (comp
@@ -92,9 +92,9 @@
       (count line))
    get-line))
 
-(defn cursor-position [one]
-  (let [{:keys [x y]} (get-cursor one)
-        strings (take y (get-strings one))]
+(defn cursor-position [editor]
+  (let [{:keys [x y]} (get-cursor editor)
+        strings (take y (get-strings editor))]
     (+ x (count strings) (apply + (map count strings)))))
 
 (defn parse-command [editor s]
