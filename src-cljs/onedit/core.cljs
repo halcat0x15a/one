@@ -83,6 +83,11 @@
       (count line))
    get-line))
 
+(defn cursor-position [one]
+  (let [{:keys [x y]} (get-cursor one)
+        strings (take y (get-strings one))]
+    (+ x (count strings) (apply + (map count strings)))))
+
 (defn parse-command [editor s]
   (let [[f & args] (string/split s #"\s+")]
     (when-let [f ((:functions editor) f)]
@@ -91,8 +96,3 @@
 (defn mode [editor name keymap]
   (assoc editor
     :mode (Mode. name keymap)))
-
-(defn cursor-position [one]
-  (let [{:keys [x y]} (get-cursor one)
-        strings (get-strings one)]
-    (+ x (count strings) (apply + (map count (take y strings))))))

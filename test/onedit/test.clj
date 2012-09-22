@@ -21,7 +21,12 @@
              5))
       (testing "index out of bounds"
         (is (= (core/count-line (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world"] (core/->Cursor 0 0 0))) 2)
-               nil))))))
+               nil))))
+    (testing "calculate cursor position"
+      (is (= (core/cursor-position (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world"] (core/->Cursor 3 0 3))))
+             3)
+          (= (core/cursor-position (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world"] (core/->Cursor 3 1 3))))
+             9)))))
 
 (deftest buffer
   (testing "Buffer Functions"
