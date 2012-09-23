@@ -10,6 +10,10 @@
 
 (deftest core
   (testing "Core Functions"
+    (testing "parse command"
+      (is (= (core/parse-command (assoc core/unit-editor
+                                   :functions {:f "function"}) "f a")
+             (list "function" "a"))))
     (testing "get line"
       (is (= (core/get-line (core/set-strings core/unit-editor ["hello" "world"]) 0)
              "hello"))

@@ -99,7 +99,7 @@
 
 (defn parse-command [editor s]
   (let [[f & args] (string/split s #"\s+")]
-    (when-let [f ((:functions editor) f)]
+    (when-let [f ((:functions editor) (keyword f))]
       (cons f args))))
 
 (defn mode [editor name keymap]
