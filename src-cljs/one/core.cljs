@@ -1,12 +1,17 @@
 (ns one.core
-  (:require [clojure.string :as string]
-            [one.util :as util]))
+  (:require [clojure.string :as string]))
 
-(defrecord Cursor [x y saved])
+(defrecord Cursor [^int x ^int y ^int saved])
 
 (def unit-cursor (Cursor. 0 0 0))
 
-(defrecord Buffer [strings cursor])
+(defn saved-cursor [x y]
+  (Cursor. x y x))
+
+(defn set-saved [^Cursor cursor x]
+  (assoc cursor :x x :saved x))
+
+(defrecord Buffer [strings ^Cursor cursor])
 
 (def unit-buffer (Buffer. [""] unit-cursor))
 
@@ -14,11 +19,11 @@
 
 (def unit-history (History. (list "") 0))
 
-(defrecord Mode [name keymap])
+(defrecord Mode [^clojure.lang.Keyword name keymap])
 
 (def unit-mode (Mode. :one {}))
 
-(defrecord Editor [buffers current history functions mode])
+(defrecord Editor [buffers ^clojure.lang.Keyword current ^History history functions ^Mode mode])
 
 (def unit-editor (Editor. {"scratch" unit-buffer} "scratch" unit-history {} unit-mode))
 
@@ -27,81 +32,69 @@
 (defn get-buffer [^Editor editor]
   ((:buffers editor) (:current editor)))
 
-(def get-cursor (comp :cursor get-buffer))
-
-(def get-cursor-x (comp :x get-cursor))
-
-(def get-cursor-y (comp :y get-cursor))
-
-(def get-strings (comp :strings get-buffer))
-
-(def get-string (comp util/join-newline get-strings))
-
-(defn set-buffer [editor buffer]
-  (assoc editor
-    :buffers (assoc (:buffers editor)
-               (:current editor) buffer)))
-
-(defn set-cursor [editor cursor]
-  (set-buffer editor (assoc (get-buffer editor)
-                       :cursor cursor)))
-
-(defn set-strings [editor strings]
-  (set-buffer editor (assoc (get-buffer editor)
-                       :strings strings)))
-
-(defn set-string [editor str]
-  (set-strings editor (string/split-lines str)))
-
-(defn saved-cursor [x y]
-  (Cursor. x y x))
-
-(defn set-saved [cursor x]
-  (assoc cursor :x x :saved x))
-
-(defn update-buffer [editor f]
+(defn update-buffer [^Editor editor f]
   (let [buffers (:buffers editor)
         current (:current editor)]
     (assoc editor
       :buffers (assoc buffers
                  current (f (buffers current))))))
 
-(defn update-strings [editor f]
+(defn set-buffer [^Editor editor ^Buffer buffer]
+  (assoc editor
+    :buffers (assoc (:buffers editor)
+               (:current editor) buffer)))
+
+(def get-cursor (comp :cursor get-buffer))
+
+(def get-cursor-x (comp :x get-cursor))
+
+(def get-cursor-y (comp :y get-cursor))
+
+(defn set-cursor [^Editor editor cursor]
+  (update-buffer editor #(assoc % :cursor cursor)))
+
+(def get-strings (comp :strings get-buffer))
+
+(def get-string (comp (partial string/join \newline) get-strings))
+
+(defn update-strings [^Editor editor f]
   (update-buffer editor #(assoc % :strings (f (:strings %)))))
+
+(defn set-strings [^Editor editor strings]
+  (update-buffer editor #(assoc % :strings strings)))
+
+(defn set-string [^Editor editor ^String str]
+  (set-strings editor (string/split-lines str)))
 
 (def count-lines (comp count get-strings))
 
 (defn get-line
-  ([editor] (get-line editor (get-cursor-y editor)))
-  ([editor y]
+  ([^Editor editor] (get-line editor (get-cursor-y editor)))
+  ([^Editor editor y]
      (get (get-strings editor) y)))
 
 (defn set-line
-  ([editor string] (set-line editor (get-cursor-y editor) string))
-  ([editor y string]
-     (update-strings editor #(vec (concat (take y %) (list string) (drop (inc y) %))))))
+  ([^Editor editor string] (set-line editor (get-cursor-y editor) string))
+  ([^Editor editor y string]
+     (update-strings editor #(assoc % y string))))
 
 (defn update-line
-  ([editor f] (update-line editor (get-cursor-y editor) f))
-  ([editor y f]
-     (update-strings editor #(vec (concat (take y %) (list (f (get % y))) (drop (inc y) %))))))
+  ([^Editor editor f] (update-line editor (get-cursor-y editor) f))
+  ([^Editor editor y f]
+     (update-strings editor #(assoc % y (f (get % y))))))
 
 (def count-line
-  (comp
-   #(when-let [line %]
-      (count line))
-   get-line))
+  (comp #(when-let [line %] (count line)) get-line))
 
-(defn cursor-position [editor]
-  (let [{:keys [x y]} (get-cursor editor)
-        strings (take y (get-strings editor))]
-    (+ x (count strings) (apply + (map count strings)))))
+(defn cursor-position [^Editor editor]
+  (let [{:keys [cursor strings]} (get-buffer editor)
+        strings (take (:y cursor) strings)]
+    (+ (:x cursor) (count strings) (apply + (map count strings)))))
 
-(defn parse-command [editor s]
+(defn parse-command [^Editor editor ^String s]
   (let [[f & args] (string/split s #"\s+")]
     (when-let [f ((:functions editor) (keyword f))]
       (cons f args))))
 
-(defn mode [editor name keymap]
-  (assoc editor
-    :mode (Mode. name keymap)))
+(defn mode [^Editor editor ^clojure.lang.Keyword name keymap]
+  (assoc editor :mode (Mode. name keymap)))

@@ -5,9 +5,7 @@
             [one.util :as util]))
 
 (defn add-newline [editor y]
-  (core/update-strings
-   editor
-   (comp vec (partial util/insert (list "") y))))
+  (core/update-strings editor #(vec (concat (take y %) (list "") (drop y %)))))
 
 (defn prepend-newline [editor]
   (-> editor
@@ -39,24 +37,21 @@
         (core/set-cursor (core/set-saved cursor (+ x (count string)))))))
 
 (defn delete [editor]
-  (let [{:keys [x y]} (core/get-cursor editor)
-        buffer (core/get-strings editor)
-        line (get buffer y)
+  (let [{:keys [cursor strings]} (core/get-buffer editor)
+        {:keys [x y]} cursor
+        line (strings y)
         length (count line)]
-    (if (> length 0)
-      (core/set-strings editor (assoc buffer
-                                 y (util/drop-string x (inc x) line)))
+    (if (> length x)
+      (core/set-line editor (str (subs line 0 x) (subs line (inc x))))
       editor)))
 
 (defn backspace [editor]
-  (let [{:keys [x y]} (core/get-cursor editor)
-        buffer (core/get-strings editor)
-        line (get buffer y)
-        length (count line)]
-    (if (> length 0)
+  (let [{:keys [cursor strings]} (core/get-buffer editor)
+        {:keys [x y]} cursor
+        line (strings y)]
+    (if (> x 0)
       (-> editor
-          (core/set-strings (assoc buffer
-                              y (util/drop-string (dec x) x line)))
+          (core/set-line (str (subs line 0 (dec x)) (subs line x)))
           cursor/left)
       editor)))
 

@@ -10,10 +10,6 @@
 
 (deftest core
   (testing "Core Functions"
-    (testing "parse command"
-      (is (= (core/parse-command (assoc core/unit-editor
-                                   :functions {:f "function"}) "f a")
-             (list "function" "a"))))
     (testing "get line"
       (is (= (core/get-line (core/set-strings core/unit-editor ["hello" "world"]) 0)
              "hello"))
@@ -33,7 +29,11 @@
       (is (= (core/cursor-position (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world"] (core/saved-cursor 3 0))))
              3)
           (= (core/cursor-position (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world"] (core/saved-cursor 3 1))))
-             9)))))
+             9)))
+    (testing "parse command"
+      (is (= (core/parse-command (assoc core/unit-editor
+                                   :functions {:f "function"}) "f a")
+             (list "function" "a"))))))
 
 (deftest buffer
   (testing "Buffer Functions"
@@ -50,11 +50,15 @@
       (is (= (buffer/insert (core/set-buffer core/unit-editor (core/->Buffer ["hello"] (core/saved-cursor 5 0))) "world")
              (core/set-buffer core/unit-editor (core/->Buffer ["helloworld"] (core/saved-cursor 10 0))))))
     (testing "delete"
-      (is (= (buffer/delete (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/saved-cursor 5 0))))
-             (core/set-buffer core/unit-editor (core/->Buffer ["helloworld"] (core/saved-cursor 5 0))))))
+      (is (= (buffer/delete (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/saved-cursor 10 0))))
+             (core/set-buffer core/unit-editor (core/->Buffer ["hello worl"] (core/saved-cursor 10 0)))))
+      (is (= (buffer/delete (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/saved-cursor 11 0))))
+             (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/saved-cursor 11 0))))))
     (testing "backspace"
-      (is (= (buffer/backspace (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/saved-cursor 6 0))))
-             (core/set-buffer core/unit-editor (core/->Buffer ["helloworld"] (core/saved-cursor 5 0))))))
+      (is (= (buffer/backspace (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/saved-cursor 1 0))))
+             (core/set-buffer core/unit-editor (core/->Buffer ["ello world"] (core/saved-cursor 0 0)))))
+      (is (= (buffer/backspace (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/saved-cursor 0 0))))
+             (core/set-buffer core/unit-editor (core/->Buffer ["hello world"] (core/saved-cursor 0 0))))))
     (testing "delete line"
       (is (= (buffer/delete-line (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world"] (core/saved-cursor 5 0))))
              (core/set-buffer core/unit-editor (core/->Buffer ["world"] (core/saved-cursor 0 0)))))
