@@ -25,6 +25,11 @@
 (defn delete-mode [editor]
   (core/mode editor :delete delete))
 
+(def replace {})
+
+(defn replace-mode [editor]
+  (core/mode editor :replace replace))
+
 (def normal
   {:h cursor/left
    :j cursor/down
@@ -37,9 +42,12 @@
    :gg cursor/start-buffer
    :G cursor/end-buffer
    :i insert-mode
+   :I (comp insert-mode cursor/start-line)
+   :a (comp insert-mode cursor/right)
+   :A (comp insert-mode cursor/end-line)
    :o (comp insert-mode buffer/append-newline)
    :O (comp insert-mode buffer/prepend-newline)
    :x buffer/delete
    :X buffer/backspace
    :d delete-mode
-   :r buffer/replace-string})
+   :r replace-mode})

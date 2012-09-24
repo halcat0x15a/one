@@ -66,7 +66,6 @@
         width (.-width (gstyle/getSize buffer))
         height (* (inc (core/count-lines this)) style/font-size)]
     (gstyle/setStyle buffer style/buffer-style)
-    (pr (core/cursor-position this))
     (gselection/setCursorPosition buffer (core/cursor-position this))
     (dom/set-value buffer (core/get-string this))
     (dom/set-properties canvas {"width" width "height" height})
@@ -84,58 +83,64 @@
             command/reset-history
             update)))))
 
+(defn listen [handler type element f]
+  (.addEventListener (handler element) type f))
+
+(def listen-key
+  (partial listen #(goog.events/KeyHandler. %) (.-KEY gkey-handler/EventType)))
+
+(def listen-input
+  (partial listen #(goog.events/InputHandler. %) (.-INPUT ginput-handler/EventType)))
+
+(defn buffer-key [event]
+  (if-let [keymap (:keymap (:mode @core/current-editor))]
+    (let [key (case (.-keyCode event)
+                goog.events.KeyCodes/ESC :esc
+                (keyword (.fromCharCode js/String (.-charCode event))))]
+      (when-let [f (keymap key)]
+        (.preventDefault event)
+        (-> @core/current-editor
+            f
+            update)))
+    (when-let [move (case (.-keyCode event)
+                      goog.events.KeyCodes/LEFT cursor/left
+                      goog.events.KeyCodes/DOWN cursor/down
+                      goog.events.KeyCodes/UP cursor/up
+                      goog.events.KeyCodes/RIGHT cursor/right
+                      nil)]
+      (-> @core/current-editor
+          move
+          update))))
+
+(defn set-command [f]
+  (let [this (f @core/current-editor)]
+    (dom/set-value (minibuffer-element) (command/get-command this))
+    (update this)))
+
+(defn minibuffer-key [event]
+  (case (.-keyCode event)
+    goog.events.KeyCodes/UP (set-command command/set-prev-command)
+    goog.events.KeyCodes/DOWN (set-command command/set-next-command)
+    goog.events.KeyCodes/ENTER (exec)
+    nil))
+
+(defn buffer-input [event]
+  (-> @core/current-editor
+      (core/set-buffer (get-buffer))
+      update))
+
+(defn minibuffer-input [event]
+  (-> @core/current-editor
+      (command/set-current-command (dom/get-value (minibuffer-element)))
+      update))
+
 (defn init []
-  (letfn [(listen-key-event [element handler]
-            (-> element
-                (goog.events/KeyHandler.)
-                (.addEventListener (.-KEY gkey-handler/EventType) handler)))
-          (listen-input-event [element handler]
-            (-> element
-                (goog.events/InputHandler.)
-                (.addEventListener (.-INPUT ginput-handler/EventType) handler)))
-          (buffer-key-handler [event]
-            (if-let [keymap (:keymap (:mode @core/current-editor))]
-              (let [key (case (.-keyCode event)
-                          goog.events.KeyCodes/ESC :esc
-                          (keyword (.fromCharCode js/String (.-charCode event))))]
-                (when-let [f (keymap key)]
-                  (.preventDefault event)
-                  (-> @core/current-editor
-                      f
-                      update)))
-              (when-let [move (case (.-keyCode event)
-                                goog.events.KeyCodes/LEFT cursor/left
-                                goog.events.KeyCodes/DOWN cursor/down
-                                goog.events.KeyCodes/UP cursor/up
-                                goog.events.KeyCodes/RIGHT cursor/right
-                                nil)]
-                (-> @core/current-editor
-                    move
-                    update))))
-          (set-command [f]
-            (let [this (f @core/current-editor)]
-              (dom/set-value (minibuffer-element) (command/get-command this))
-              (update this)))
-          (minibuffer-key-handler [event]
-            (case (.-keyCode event)
-              goog.events.KeyCodes/UP (set-command command/set-prev-command)
-              goog.events.KeyCodes/DOWN (set-command command/set-next-command)
-              goog.events.KeyCodes/ENTER (exec)
-              nil))
-          (buffer-input-handler [event]
-            (-> @core/current-editor
-                (core/set-buffer (get-buffer))
-                update))
-          (minibuffer-input-handler [event]
-            (-> @core/current-editor
-                (command/set-current-command (dom/get-value (minibuffer-element)))
-                update))]
-    (doto (buffer-element)
-      (listen-key-event buffer-key-handler)
-      (listen-input-event buffer-input-handler)
-      (event/listen gevents-type/CLICK buffer-input-handler))
-    (doto (minibuffer-element)
-      (listen-key-event minibuffer-key-handler)
-      (listen-input-event minibuffer-input-handler)
-      (gfocus/focusInputField))
-    (update @core/current-editor)))
+  (doto (buffer-element)
+    (listen-key buffer-key)
+    (listen-input buffer-input)
+    (event/listen gevents-type/CLICK buffer-input))
+  (doto (minibuffer-element)
+    (listen-key minibuffer-key)
+    (listen-input minibuffer-input)
+    (gfocus/focusInputField))
+  (update @core/current-editor))

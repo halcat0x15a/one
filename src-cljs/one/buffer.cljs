@@ -25,15 +25,11 @@
         cursor/down
         cursor/start-line)))
 
-(defn insert [editor string]
+(defn insert [editor ^String string]
   (let [cursor (core/get-cursor editor)
-        x (:x cursor)
-        y (:y cursor)
-        buffer (core/get-strings editor)
-        line (get buffer y)
-        line' (str (subs line 0 x) string (subs line x (count line)))]
+        x (:x cursor)]
     (-> editor
-        (core/set-strings (assoc buffer y line'))
+        (core/update-line #(str (subs % 0 x) string (subs % x)))
         (core/set-cursor (core/set-saved cursor (+ x (count string)))))))
 
 (defn delete [editor]
@@ -56,7 +52,8 @@
       editor)))
 
 (defn delete-line [editor]
-  (let [[lines lines'] (split-at (:y (core/get-cursor editor)) (core/get-strings editor))
+  (let [{:keys [cursor strings]} (core/get-buffer editor)
+        [lines lines'] (split-at (:y cursor) strings)
         lines (concat lines (rest lines'))]
     (-> editor
         (core/set-strings (if (empty? lines) [""] (vec lines)))
@@ -85,7 +82,5 @@
         (core/set-cursor (core/set-saved cursor 0)))))
 
 (defn replace-string [editor string]
-  (let [{:keys [x y]} (core/get-cursor editor)
-        buffer (core/get-strings editor)
-        line (get buffer y)]
-    (core/set-strings editor (assoc buffer y (str (subs line 0 x) string (subs line (+ x (count string))))))))
+  (let [x (core/get-cursor-x editor)]
+    (core/update-line editor #(str (subs % 0 x) string (subs % (+ x (count string)))))))
