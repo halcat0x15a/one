@@ -1,16 +1,16 @@
 (ns one.parser
   (:require [clojure.string :as string]))
 
-(defrecord Input [tokens ^long cursor ^boolean success ^String source])
+(defrecord Input [tokens cursor success source])
 
-(defrecord Token [^clojure.lang.Keyword type ^String text])
+(defrecord Token [type text])
 
-(defn parse [parser ^String source]
+(defn parse [parser source]
   (let [result (parser (Input. (transient []) 0 false source))]
     (persistent! (:tokens result))))
 
-(defn sym [^clojure.lang.Keyword type ^java.util.regex.Pattern regex]
-  (fn [^Input input]
+(defn sym [type regex]
+  (fn [input]
     (let [source (:source input)
           token (re-find regex source)]
       (letfn [(consume [token]
@@ -25,7 +25,7 @@
               :else (assoc input :success false))))))
 
 (defn exp [parser & parsers]
-  (fn [^Input input]
+  (fn [input]
     (loop [input input parsers (cons parser parsers)]
       (if (empty? parsers) input
           (let [result ((first parsers) input)]
@@ -34,7 +34,7 @@
               result))))))
 
 (defn select [parser & parsers]
-  (fn [^Input input]
+  (fn [input]
     (loop [input input parsers (cons parser parsers)]
       (if (empty? parsers) input
           (let [result ((first parsers) input)]
@@ -42,18 +42,18 @@
               result
               (recur result (rest parsers))))))))
 
-(defn success [^Input input]
+(defn success [input]
   (assoc input :success true))
 
 (defn opt [parser]
-  (fn [^Input input]
+  (fn [input]
     (let [result (parser input)]
       (if (:success result)
         result
         (success result)))))
 
 (defn rep [parser]
-  (fn [^Input input]
+  (fn [input]
     (let [result (parser input)]
       (if (:success result)
         (recur result)

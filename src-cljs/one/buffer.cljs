@@ -25,7 +25,7 @@
         cursor/down
         cursor/start-line)))
 
-(defn insert [editor ^String string]
+(defn insert [editor string]
   (let [cursor (core/get-cursor editor)
         x (:x cursor)]
     (-> editor
