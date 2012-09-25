@@ -10,7 +10,7 @@
 
 (def number-literal (parser/sym :number-literal #"^\d+"))
 
-(def string-literal (parser/sym :string-literal #"^\".*\""))
+(def string-literal (parser/sym :string-literal #"^\"[^\"]*\""))
 
 (def character-literal (parser/sym :character-literal #"^\\\w+"))
 

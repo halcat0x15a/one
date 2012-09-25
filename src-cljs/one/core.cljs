@@ -15,6 +15,10 @@
 
 (def unit-buffer (Buffer. [""] unit-cursor))
 
+(defrecord View [x y width height])
+
+(def unit-view (View. 0 0 0 0))
+
 (defrecord History [commands cursor])
 
 (def unit-history (History. (list "") 0))
