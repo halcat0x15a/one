@@ -46,7 +46,7 @@
         string (util/join-newline strings)]
     (set! (.-font g) (str style/font-size "px " style/font-family))
     (.clearRect g 0 0 width height)
-    (loop [tokens (:tokens (parser/parse syntax/clojure string)) s "" y 0]
+    (loop [tokens (parser/parse syntax/clojure string) s "" y 0]
       (if (empty? tokens)
         nil
         (let [{:keys [type text]} (first tokens)

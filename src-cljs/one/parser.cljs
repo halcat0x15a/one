@@ -7,8 +7,7 @@
 
 (defn parse [parser ^String source]
   (let [result (parser (Input. (transient []) 0 false source))]
-    (assoc result
-      :tokens (persistent! (:tokens result)))))
+    (persistent! (:tokens result))))
 
 (defn sym [^clojure.lang.Keyword type ^java.util.regex.Pattern regex]
   (fn [^Input input]

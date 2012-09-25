@@ -8,11 +8,11 @@
 
 (def space (parser/select newline (parser/sym nil #"^\s+")))
 
-(def number-literal (parser/sym :number-literal #"^\d+"))
+(def number (parser/sym :number #"^\d+"))
 
-(def string-literal (parser/sym :string-literal #"^\"[^\"]*\""))
+(def string (parser/sym :string #"^\"[^\"]*\""))
 
-(def character-literal (parser/sym :character-literal #"^\\\w+"))
+(def character (parser/sym :character #"^\\\w+"))
 
 (def keyword-literal (parser/sym :keyword-literal #"^:\w+"))
 
@@ -23,7 +23,7 @@
 (def close (parser/sym nil #"^[\)\]\}]"))
 
 (def literal
-  (parser/select number-literal string-literal character-literal keyword-literal))
+  (parser/select number string character keyword-literal))
 
 (defn expression [this]
   ((parser/exp

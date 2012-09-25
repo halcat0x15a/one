@@ -251,5 +251,5 @@
 (deftest syntax
   (testing "parser"
     (is (= (parser/parse syntax/clojure "\"a\" \"b\"")
-           (parser/->Input [(parser/->Token :string-literal "\"a\"") (parser/->Token nil " ") (parser/->Token :string-literal "\"b\"")] 7 true "")))
+           [(parser/->Token :string "\"a\"") (parser/->Token nil " ") (parser/->Token :string "\"b\"")]))
     (is (time (parser/parse syntax/clojure (slurp "test/one/test.clj"))))))
