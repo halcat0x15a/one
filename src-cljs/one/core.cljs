@@ -19,9 +19,9 @@
 
 (def unit-view (View. 0 0 0 0))
 
-(defrecord History [commands cursor])
+(defrecord History [current commands cursor])
 
-(def unit-history (History. (list "") 0))
+(def unit-history (History. "" (list) 0))
 
 (defrecord Mode [name function])
 

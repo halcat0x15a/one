@@ -1,16 +1,15 @@
 (ns one.command)
 
 (defn update-history [editor f]
-  (let [history (:history editor)]
-    (assoc editor
-      :history (assoc history
-                 :commands (f (:commands history))))))
+  (assoc editor
+    :history (f (:history editor))))
 
 (defn add-history [editor command]
-  (update-history editor (partial cons command)))
+  (update-history editor #(assoc %
+                            :commands (cons command (:commands %)))))
 
 (defn set-current-command [editor command]
-  (update-history editor (comp (partial cons command) rest)))
+  (update-history editor #(assoc % :current command)))
 
 (def get-history-cursor (comp :cursor :history))
 
