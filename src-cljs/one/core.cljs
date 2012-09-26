@@ -23,7 +23,7 @@
 
 (def unit-history (History. (list "") 0))
 
-(defrecord Mode [name keymap])
+(defrecord Mode [name function])
 
 (def unit-mode (Mode. :one {}))
 
@@ -102,5 +102,5 @@
     (when-let [f ((:functions editor) (keyword f))]
       (cons f args))))
 
-(defn mode [editor name keymap]
-  (assoc editor :mode (Mode. name keymap)))
+(defn mode [editor name f]
+  (assoc editor :mode (Mode. name f)))
