@@ -1,14 +1,19 @@
-(ns one.vi
+(ns one.mode
   (:require [one.core :as core]
             [one.cursor :as cursor]
             [one.buffer :as buffer]))
 
+(def general-mode
+  (core/->Mode :general (fn [editor key]
+                          (buffer/insert editor (name key)))))
+
 (declare normal-keymap)
 
-(defn normal-mode [editor]
-  (core/mode editor :normal #(if-let [f (% @normal-keymap)]
-                               (f editor)
-                               editor)))
+(def normal-mode
+  (core/->Mode :normal (fn [editor key]
+                         (if-let [f (key @normal-keymap)]
+                           (f editor)
+                           editor))))
 
 (def insert-keymap
   (atom {:esc normal-mode
@@ -17,10 +22,11 @@
          :up cursor/up
          :right cursor/right}))
 
-(defn insert-mode [editor]
-  (core/mode editor :insert #(if-let [f (% @insert-keymap)]
-                               (f editor)
-                               (buffer/insert editor (name %)))))
+(def insert-mode
+  (core/->Mode :insert (fn [editor key]
+                         (if-let [f (key @insert-keymap)]
+                           (f editor)
+                           (buffer/insert editor (name key))))))
 
 (def delete-keymap
   (atom {:esc normal-mode
@@ -34,10 +40,11 @@
          :| (comp normal-mode buffer/delete-to)
          :$ (comp normal-mode buffer/delete-from)}))
 
-(defn delete-mode [editor]
-  (core/mode editor :delete #(if-let [f (% @delete-keymap)]
-                               (f editor)
-                               (normal-mode editor))))
+(def delete-mode
+  (core/->Mode :delete (fn [editor key]
+                         (if-let [f (key @delete-keymap)]
+                           (f editor)
+                           (normal-mode editor)))))
 
 (def replace-keymap
   (atom {:esc normal-mode
@@ -46,12 +53,13 @@
          :up normal-mode
          :right normal-mode}))
 
-(defn replace-mode [editor]
-  (core/mode editor :replace #(if-let [f (% replace-keymap)]
-                                (f editor)
-                                (-> editor
-                                    (buffer/replace-string (name %))
-                                    normal-mode))))
+(def replace-mode
+  (core/->Mode :replace (fn [editor key]
+                          (if-let [f (key replace-keymap)]
+                            (f editor)
+                            (-> editor
+                                (buffer/replace-string (name key))
+                                normal-mode)))))
 
 (def normal
   (atom {:h cursor/left

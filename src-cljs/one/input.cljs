@@ -2,7 +2,5 @@
   (:require [one.core :as core]
             [one.cursor :as cursor]))
 
-(defrecord Input [key])
-
-(defn input-buffer [editor input]
-  ((:function (:mode editor)) (:key input)))
+(defn input-buffer [editor key]
+  ((:function (:mode editor)) editor key))

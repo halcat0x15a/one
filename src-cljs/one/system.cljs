@@ -92,8 +92,17 @@
 (def listen-input
   (partial listen #(goog.events/InputHandler. %) (.-INPUT ginput-handler/EventType)))
 
+(defn code->key [event]
+  (case (.-keyCode event)
+    goog.events.KeyCodes/ESC :esc
+    goog.events.KeyCodes/LEFT :left
+    goog.events.KeyCodes/DOWN :down
+    goog.events.KeyCodes/UP :up
+    goog.events.KeyCodes/RIGHT :right
+    (keyword (.fromCharCode js/String (.-charCode event)))))
+
 (defn buffer-key [event]
-  (if-let [keymap (:keymap (:mode @core/current-editor))]
+  (if-let [keymap (:function (:mode @core/current-editor))]
     (let [key (case (.-keyCode event)
                 goog.events.KeyCodes/ESC :esc
                 (keyword (.fromCharCode js/String (.-charCode event))))]

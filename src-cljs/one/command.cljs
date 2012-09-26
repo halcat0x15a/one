@@ -47,7 +47,5 @@
 
 (defn set-next-command [editor]
   (if-let [editor' (next-command editor)]
-    (if (zero? (get-history-cursor editor'))
-      (set-current-command editor' "")
-      (set-current-command editor' (get-command editor')))
+    (set-current-command editor' (get-command editor'))
     editor))

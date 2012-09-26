@@ -25,7 +25,7 @@
 
 (defrecord Mode [name function])
 
-(def unit-mode (Mode. :one {}))
+(def unit-mode (Mode. :one identity))
 
 (defrecord Editor [buffers current view history functions mode])
 
@@ -101,6 +101,3 @@
   (let [[f & args] (string/split s #"\s+")]
     (when-let [f ((:functions editor) (keyword f))]
       (cons f args))))
-
-(defn mode [editor name f]
-  (assoc editor :mode (Mode. name f)))

@@ -7,7 +7,7 @@
             [one.editor :as editor]
             [one.tool :as tool]
             [one.file :as file]
-            [one.vi :as vi]))
+            [one.mode :as mode]))
 
 (set! *print-fn* dom/log)
 
@@ -22,7 +22,7 @@
     (array-seq files)))
 
 (def functions
-  {:vi vi/normal-mode
+  {:vi #(assoc % :mode mode/normal-mode)
    :buffer editor/buffer
    :create-buffer editor/create-buffer
    :change-buffer editor/change-buffer
