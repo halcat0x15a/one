@@ -1,5 +1,5 @@
 language: clojure
 before_script:
   - bin/before
-  - rename .cljs .clj test/one/core/*.cljs
+  - rename cljs clj test/one/core/*
 after_script: bin/after
