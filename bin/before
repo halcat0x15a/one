@@ -3,3 +3,8 @@ mkdir test/one/core
 cp src-cljs/one/core.cljs test/one/core.clj
 
 cp src-cljs/one/core/*.cljs test/one/core/
+
+for name in test/one/core/*.cljs
+do
+  mv $name ${name%.cljs}.clj
+done
