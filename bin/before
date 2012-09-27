@@ -1,7 +1,7 @@
-mkdir 'test/one/core'
+mkdir test/one/core
 
 cp src-cljs/one/core.cljs test/one/core.clj
 
 cp src-cljs/one/core/*.cljs test/one/core/
 
-rename .cljs .clj test/one/core/*.cljs
+rename '.cljs' '.clj' test/one/core/*.cljs
