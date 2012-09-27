@@ -1,6 +1,6 @@
 language: clojure
 before_install:
  - sudo apt-get update
- - sudo apt-get rename
+ - sudo apt-get install linux-util
 before_script: bin/before
 after_script: bin/after
