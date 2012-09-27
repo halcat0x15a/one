@@ -2,7 +2,7 @@
   (:require [clojure.browser.dom :as dom]
             [clojure.browser.net :as net]
             [one.core :as core]
-            [one.editor :as editor]))
+            [one.core.editor :as editor]))
 
 (def pusher (delay (js/Pusher. "001b60ce1d2033e954ab")))
 

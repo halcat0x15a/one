@@ -2,12 +2,10 @@
   (:require [clojure.browser.dom :as dom]
             [one.core :as core]
             [one.system :as system]
-            [one.buffer :as buffer]
-            [one.cursor :as cursor]
-            [one.editor :as editor]
-            [one.tool :as tool]
+            [one.core.editor :as editor]
+            [one.core.tool :as tool]
             [one.file :as file]
-            [one.mode :as mode]))
+            [one.core.mode :as mode]))
 
 (set! *print-fn* dom/log)
 

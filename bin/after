@@ -1,4 +1,2 @@
-for name in $CLJS
-do
-  rm test/one/$name.clj
-done
+rm test/one/core.clj
+rm -r test/one/core

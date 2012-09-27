@@ -1,7 +1,7 @@
-(ns one.buffer
+(ns one.core.buffer
   (:require [clojure.string :as string]
             [one.core :as core]
-            [one.cursor :as cursor]))
+            [one.core.cursor :as cursor]))
 
 (defn add-newline [editor y]
   (core/update-strings editor #(vec (concat (take y %) (list "") (drop y %)))))

@@ -1,4 +1,4 @@
-(ns one.editor
+(ns one.core.editor
   (:require [clojure.string :as string]
             [one.core :as core]))
 

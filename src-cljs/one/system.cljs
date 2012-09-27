@@ -9,11 +9,16 @@
             [goog.style :as gstyle]
             [goog.editor.focus :as gfocus]
             [one.core :as core]
-            [one.cursor :as cursor]
-            [one.command :as command]
-            [one.style :as style]
-            [one.parser :as parser]
-            [one.syntax :as syntax]))
+            [one.core.cursor :as cursor]
+            [one.core.command :as command]
+            [one.core.style :as style]
+            [one.core.parser :as parser]
+            [one.core.syntax :as syntax]))
+
+(def buffer-style
+  (js-obj "line-height" (px font-size)
+          "font-size" (px font-size)
+          "font-family" font-family))
 
 (defn buffer-element []
   (dom/ensure-element :buffer))
@@ -43,7 +48,7 @@
         {:keys [x y]} (core/get-cursor editor)
         strings (core/get-strings editor)
         string (string/join \newline strings)]
-    (set! (.-font g) (str style/font-size "px " style/font-family))
+    (set! (.-font g) (str @style/font-size "px " @style/font-family))
     (.clearRect g 0 0 width height)
     (loop [tokens (parser/parse syntax/clojure string) s "" y 0]
       (if (empty? tokens)
@@ -53,18 +58,18 @@
           (if (re-matches syntax/re-newline text)
             (recur nexts "" (inc y))
             (do
-              (set! (.-fillStyle g) (if (nil? type) style/text-color (type style/highlight)))
-              (.fillText g text (text-width s g) (* (inc y) style/font-size))
+              (set! (.-fillStyle g) (if (nil? type) @style/text-color (type @style/highlight)))
+              (.fillText g text (text-width s g) (* (inc y) @style/font-size))
               (recur nexts (str s text) y))))))
-    (set! (.-fillStyle g) style/text-color)
-    (.fillText g style/pointer (text-width (subs (strings y) 0 x) g) (* (inc y) style/font-size))))
+    (set! (.-fillStyle g) @style/text-color)
+    (.fillText g @style/pointer (text-width (subs (strings y) 0 x) g) (* (inc y) @style/font-size))))
 
 (defn update [this]
   (let [buffer (buffer-element)
         canvas (canvas-element)
         width (.-width (gstyle/getSize buffer))
-        height (* (inc (core/count-lines this)) style/font-size)]
-    (gstyle/setStyle buffer style/buffer-style)
+        height (* (inc (core/count-lines this)) @style/font-size)]
+    (gstyle/setStyle buffer buffer-style)
     (gselection/setCursorPosition buffer (core/cursor-position this))
     (dom/set-value buffer (core/get-string this))
     (dom/set-properties canvas {"width" width "height" height})

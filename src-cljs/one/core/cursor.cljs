@@ -1,4 +1,4 @@
-(ns one.cursor
+(ns one.core.cursor
   (:require [clojure.string :as string]
             [one.core :as core]))
 

@@ -4,7 +4,7 @@
             [clojure.browser.event :as event]
             [goog.events.EventType :as gevent-type]
             [one.core :as core]
-            [one.editor :as editor]
+            [one.core.editor :as editor]
             [one.system :as system]))
 
 (defn load [file event]

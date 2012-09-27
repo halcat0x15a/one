@@ -1,6 +1,6 @@
-(ns one.tool
+(ns one.core.tool
   (:require [one.core :as core]
-            [one.editor :as editor]))
+            [one.core.editor :as editor]))
 
 (defn commands [this]
   (-> this

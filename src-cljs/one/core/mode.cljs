@@ -1,7 +1,7 @@
-(ns one.mode
+(ns one.core.mode
   (:require [one.core :as core]
-            [one.cursor :as cursor]
-            [one.buffer :as buffer]))
+            [one.core.cursor :as cursor]
+            [one.core.buffer :as buffer]))
 
 (def general-mode
   (core/->Mode :general (fn [editor key]

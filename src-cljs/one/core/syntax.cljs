@@ -1,5 +1,5 @@
-(ns one.syntax
-  (:require [one.parser :as parser])
+(ns one.core.syntax
+  (:require [one.core.parser :as parser])
   (:refer-clojure :exclude [name keyword newline]))
 
 (def re-newline #"^\n")

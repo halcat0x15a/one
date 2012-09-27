@@ -1,5 +1,6 @@
-(defproject one"0.1-SNAPSHOT"
+(defproject one "0.1-SNAPSHOT"
   :description "online text editor"
+  :url "http://github.com/halcat0x15a/one"
   :dependencies [[org.clojure/clojure "1.4.0"]]
   :plugins [[lein-cljsbuild "0.2.7"]]
   :cljsbuild {

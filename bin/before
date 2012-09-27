@@ -1,4 +1,4 @@
-for name in $CLJS
-do
-  cp src-cljs/one/$name.cljs test/one/$name.clj
-done
+mkdir test/one/core
+cp src-cljs/one/core.cljs test/one/core.clj
+cp src-cljs/one/core/*.cljs test/one/core/
+rename .cljs .clj test/one/core/*.cljs

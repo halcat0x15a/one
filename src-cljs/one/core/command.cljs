@@ -1,4 +1,4 @@
-(ns one.command)
+(ns one.core.command)
 
 (defn update-history [editor f]
   (assoc editor

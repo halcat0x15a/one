@@ -1,13 +1,13 @@
 (ns one.test
   (:require [one.core :as core]
-            [one.buffer :as buffer]
-            [one.cursor :as cursor]
-            [one.editor :as editor]
-            [one.command :as command]
-            [one.mode :as mode]
-            [one.input :as input]
-            [one.parser :as parser]
-            [one.syntax :as syntax])
+            [one.core.buffer :as buffer]
+            [one.core.cursor :as cursor]
+            [one.core.editor :as editor]
+            [one.core.command :as command]
+            [one.core.mode :as mode]
+            [one.core.input :as input]
+            [one.core.parser :as parser]
+            [one.core.syntax :as syntax])
   (:use clojure.test))
 
 (deftest core
