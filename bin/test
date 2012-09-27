@@ -1,4 +1,4 @@
-export CLJS="core buffer cursor command editor util syntax parser input mode"
+export CLJS="core buffer cursor command editor syntax parser input mode"
 
 bin/before
 

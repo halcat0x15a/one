@@ -1,8 +1,7 @@
 (ns one.buffer
   (:require [clojure.string :as string]
             [one.core :as core]
-            [one.cursor :as cursor]
-            [one.util :as util]))
+            [one.cursor :as cursor]))
 
 (defn add-newline [editor y]
   (core/update-strings editor #(vec (concat (take y %) (list "") (drop y %)))))
@@ -19,9 +18,10 @@
 
 (defn insert-newline [editor]
   (let [{:keys [x y]} (core/get-cursor editor)
-        [lines lines'] (split-at y (core/get-strings editor))]
+        [lines lines'] (split-at y (core/get-strings editor))
+        line (first lines')]
     (-> editor
-        (core/set-strings (vec (concat lines (util/cut x (first lines')) (rest lines'))))
+        (core/set-strings (vec (concat lines (list (subs line 0 x) (subs line x)) (rest lines'))))
         cursor/down
         cursor/start-line)))
 

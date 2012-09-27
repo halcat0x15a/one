@@ -9,7 +9,6 @@
             [goog.style :as gstyle]
             [goog.editor.focus :as gfocus]
             [one.core :as core]
-            [one.util :as util]
             [one.cursor :as cursor]
             [one.command :as command]
             [one.style :as style]
@@ -43,7 +42,7 @@
   (let [g (.getContext canvas "2d")
         {:keys [x y]} (core/get-cursor editor)
         strings (core/get-strings editor)
-        string (util/join-newline strings)]
+        string (string/join \newline strings)]
     (set! (.-font g) (str style/font-size "px " style/font-family))
     (.clearRect g 0 0 width height)
     (loop [tokens (parser/parse syntax/clojure string) s "" y 0]
