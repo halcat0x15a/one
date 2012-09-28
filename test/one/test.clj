@@ -11,18 +11,18 @@
 
 (deftest core
   (testing "get line"
-    (is (= (core/get-line (core/set-strings core/unit-editor ["hello" "world"]) 0)
+    (is (= (core/get-line (core/set-text core/unit-editor ["hello" "world"]) 0)
            "hello"))
     (testing "with index out of bounds"
-      (is (nil? (core/get-line (core/set-strings core/unit-editor ["hello" "world"]) 2)))))
+      (is (nil? (core/get-line (core/set-text core/unit-editor ["hello" "world"]) 2)))))
   (testing "set line"
-    (is (= (core/set-line (core/set-strings core/unit-editor ["hello" "world"]) 1 "miku")
-           (core/set-strings core/unit-editor ["hello" "miku"]))))
+    (is (= (core/set-line (core/set-text core/unit-editor ["hello" "world"]) 1 "miku")
+           (core/set-text core/unit-editor ["hello" "miku"]))))
   (testing "count line"
-    (is (= (core/count-line (core/set-strings core/unit-editor ["hello" "world"]) 0)
+    (is (= (core/count-line (core/set-text core/unit-editor ["hello" "world"]) 0)
            5))
     (testing "with index out of bounds"
-      (is (nil? (core/count-line (core/set-strings core/unit-editor ["hello" "world"]) 2)))))
+      (is (nil? (core/count-line (core/set-text core/unit-editor ["hello" "world"]) 2)))))
   (testing "calculate cursor position"
     (are [x y] (= x y)
          (core/cursor-position (core/set-buffer core/unit-editor (core/->Buffer ["hello" "world"] (core/saved-cursor 3 0))))

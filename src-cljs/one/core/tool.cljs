@@ -5,12 +5,12 @@
 (defn commands [this]
   (-> this
       (editor/buffer :commands)
-      (core/set-strings (vec (map name (keys (:functions this)))))))
+      (core/set-text (vec (map name (keys (:functions this)))))))
 
 (defn history [this]
   (-> this
       (editor/buffer :history)
-      (core/set-strings (vec (:commands (:history this))))))
+      (core/set-text (vec (:commands (:history this))))))
 
 (defn apply-buffers [this command & args]
   (let [[f & _] (core/parse-command this command)]
@@ -18,23 +18,23 @@
       (if (empty? buffers)
         (-> this
             (editor/buffer :apply-buffers)
-            (core/set-strings (vec result)))
+            (core/set-text (vec result)))
         (let [[k v] (first buffers)
               this' (apply f (-> this (editor/buffer k)) args)]
-          (recur this' (rest buffers) (concat result (core/get-strings this'))))))))
+          (recur this' (rest buffers) (concat result (core/get-text this'))))))))
 
-(defn grep [this string]
-  (let [re (re-pattern string)]
+(defn grep [this pattern]
+  (let [re (re-pattern pattern)]
     (-> this
         (editor/buffer :grep)
-        (core/set-strings (vec (filter (partial re-find re) (core/get-strings this)))))))
+        (core/set-text (vec (filter (partial re-find re) (core/get-text this)))))))
 
 (defn count-lines [this]
   (-> this
       (editor/buffer :count-lines)
-      (core/set-strings [(str (core/count-lines this))])))
+      (core/set-text [(str (core/count-lines this))])))
 
 (defn sum [this]
   (-> this
       (editor/buffer :sum)
-      (core/set-strings [(str (apply + (map int (flatten (map (partial re-seq #"\d+") (core/get-strings this))))))])))
+      (core/set-text [(str (apply + (map int (flatten (map (partial re-seq #"\d+") (core/get-text this))))))])))

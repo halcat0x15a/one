@@ -33,12 +33,12 @@
   (let [values (string/split-lines (subs value 0 (gselection/getEnd element)))]
     (core/saved-cursor (count (last values)) (dec (count values)))))
 
-(def get-strings (comp vec string/split-lines))
+(def get-text (comp vec string/split-lines))
 
 (defn get-buffer []
   (let [element (buffer-element)
         value (dom/get-value element)]
-    (core/->Buffer (get-strings value) (get-cursor value element))))
+    (core/->Buffer (get-text value) (get-cursor value element))))
 
 (defn text-width [s g]
   (-> g (.measureText s) .-width))
@@ -46,11 +46,10 @@
 (defn render [editor canvas width height]
   (let [g (.getContext canvas "2d")
         {:keys [x y]} (core/get-cursor editor)
-        strings (core/get-strings editor)
-        string (string/join \newline strings)]
+        text (core/get-text editor)]
     (set! (.-font g) (str @style/font-size "px " @style/font-family))
     (.clearRect g 0 0 width height)
-    (loop [tokens (parser/parse syntax/clojure string) s "" y 0]
+    (loop [tokens (parser/parse syntax/clojure (core/get-joined editor)) s "" y 0]
       (if (empty? tokens)
         nil
         (let [{:keys [type text]} (first tokens)
@@ -62,7 +61,7 @@
               (.fillText g text (text-width s g) (* (inc y) @style/font-size))
               (recur nexts (str s text) y))))))
     (set! (.-fillStyle g) @style/text-color)
-    (.fillText g @style/pointer (text-width (subs (strings y) 0 x) g) (* (inc y) @style/font-size))))
+    (.fillText g @style/pointer (text-width (subs (text y) 0 x) g) (* (inc y) @style/font-size))))
 
 (defn update [this]
   (let [buffer (buffer-element)
@@ -71,7 +70,7 @@
         height (* (inc (core/count-lines this)) @style/font-size)]
     (gstyle/setStyle buffer buffer-style)
     (gselection/setCursorPosition buffer (core/cursor-position this))
-    (dom/set-value buffer (core/get-string this))
+    (dom/set-value buffer (core/get-joined this))
     (dom/set-properties canvas {"width" width "height" height})
     (render this canvas width height)
     (reset! core/current-editor this)))

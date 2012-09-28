@@ -1,6 +1,5 @@
 (ns one.core.editor
-  (:require [clojure.string :as string]
-            [one.core :as core]))
+  (:require [one.core :as core]))
 
 (defn buffer [this id]
   (let [buffers (:buffers this)]
@@ -36,7 +35,7 @@
 
 (defn buffers [this]
   (letfn [(set-buffers [this]
-            (core/set-strings this (vec (map name (keys (:buffers this))))))]
+            (core/set-text this (vec (map name (keys (:buffers this))))))]
     (-> this
         (buffer :buffers)
         set-buffers)))

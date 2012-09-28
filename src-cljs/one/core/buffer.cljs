@@ -4,7 +4,7 @@
             [one.core.cursor :as cursor]))
 
 (defn add-newline [editor y]
-  (core/update-strings editor #(vec (concat (take y %) (list "") (drop y %)))))
+  (core/update-text editor #(vec (concat (take y %) (list "") (drop y %)))))
 
 (defn prepend-newline [editor]
   (-> editor
@@ -18,33 +18,33 @@
 
 (defn insert-newline [editor]
   (let [{:keys [x y]} (core/get-cursor editor)
-        [lines lines'] (split-at y (core/get-strings editor))
+        [lines lines'] (split-at y (core/get-text editor))
         line (first lines')]
     (-> editor
-        (core/set-strings (vec (concat lines (list (subs line 0 x) (subs line x)) (rest lines'))))
+        (core/set-text (vec (concat lines (list (subs line 0 x) (subs line x)) (rest lines'))))
         cursor/down
         cursor/start-line)))
 
-(defn insert [editor string]
+(defn insert [editor s]
   (let [cursor (core/get-cursor editor)
         x (:x cursor)]
     (-> editor
-        (core/update-line #(str (subs % 0 x) string (subs % x)))
-        (core/set-cursor (core/set-saved cursor (+ x (count string)))))))
+        (core/update-line #(str (subs % 0 x) s (subs % x)))
+        (core/set-cursor (core/set-saved cursor (+ x (count s)))))))
 
 (defn delete [editor]
-  (let [{:keys [cursor strings]} (core/get-buffer editor)
+  (let [{:keys [cursor text]} (core/get-buffer editor)
         {:keys [x y]} cursor
-        line (strings y)
+        line (text y)
         length (count line)]
     (if (> length x)
       (core/set-line editor (str (subs line 0 x) (subs line (inc x))))
       editor)))
 
 (defn backspace [editor]
-  (let [{:keys [cursor strings]} (core/get-buffer editor)
+  (let [{:keys [cursor text]} (core/get-buffer editor)
         {:keys [x y]} cursor
-        line (strings y)]
+        line (text y)]
     (if (> x 0)
       (-> editor
           (core/set-line (str (subs line 0 (dec x)) (subs line x)))
@@ -52,11 +52,11 @@
       editor)))
 
 (defn delete-line [editor]
-  (let [{:keys [cursor strings]} (core/get-buffer editor)
-        [lines lines'] (split-at (:y cursor) strings)
+  (let [{:keys [cursor text]} (core/get-buffer editor)
+        [lines lines'] (split-at (:y cursor) text)
         lines (concat lines (rest lines'))]
     (-> editor
-        (core/set-strings (if (empty? lines) [""] (vec lines)))
+        (core/set-text (if (empty? lines) [""] (vec lines)))
         cursor/up
         cursor/down
         cursor/start-line)))
@@ -81,6 +81,6 @@
         (core/update-line #(subs % (:x cursor)))
         (core/set-cursor (core/set-saved cursor 0)))))
 
-(defn replace-string [editor string]
+(defn replace-text [editor s]
   (let [x (core/get-cursor-x editor)]
-    (core/update-line editor #(str (subs % 0 x) string (subs % (+ x (count string)))))))
+    (core/update-line editor #(str (subs % 0 x) s (subs % (+ x (count s)))))))

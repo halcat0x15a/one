@@ -11,7 +11,7 @@
 (defn set-saved [cursor x]
   (assoc cursor :x x :saved x))
 
-(defrecord Buffer [strings cursor])
+(defrecord Buffer [text cursor])
 
 (def unit-buffer (Buffer. [""] unit-cursor))
 
@@ -59,43 +59,43 @@
 (defn set-cursor [editor cursor]
   (update-buffer editor #(assoc % :cursor cursor)))
 
-(def get-strings (comp :strings get-buffer))
+(def get-text (comp :text get-buffer))
 
-(def get-string (comp (partial string/join \newline) get-strings))
+(def get-joined (comp (partial string/join \newline) get-text))
 
-(defn update-strings [editor f]
-  (update-buffer editor #(assoc % :strings (f (:strings %)))))
+(defn update-text [editor f]
+  (update-buffer editor #(assoc % :text (f (:text %)))))
 
-(defn set-strings [editor strings]
-  (update-buffer editor #(assoc % :strings strings)))
+(defn set-text [editor text]
+  (update-buffer editor #(assoc % :text text)))
 
-(defn set-string [editor str]
-  (set-strings editor (string/split-lines str)))
+(defn set-joined [editor str]
+  (set-text editor (string/split-lines str)))
 
-(def count-lines (comp count get-strings))
+(def count-lines (comp count get-text))
 
 (defn get-line
   ([editor] (get-line editor (get-cursor-y editor)))
   ([editor y]
-     (get (get-strings editor) y)))
+     (get (get-text editor) y)))
 
 (defn set-line
-  ([editor string] (set-line editor (get-cursor-y editor) string))
-  ([editor y string]
-     (update-strings editor #(assoc % y string))))
+  ([editor line] (set-line editor (get-cursor-y editor) line))
+  ([editor y line]
+     (update-text editor #(assoc % y line))))
 
 (defn update-line
   ([editor f] (update-line editor (get-cursor-y editor) f))
   ([editor y f]
-     (update-strings editor #(assoc % y (f (get % y))))))
+     (update-text editor #(assoc % y (f (get % y))))))
 
 (def count-line
   (comp #(when-let [line %] (count line)) get-line))
 
 (defn cursor-position [editor]
-  (let [{:keys [cursor strings]} (get-buffer editor)
-        strings (take (:y cursor) strings)]
-    (+ (:x cursor) (count strings) (apply + (map count strings)))))
+  (let [{:keys [cursor text]} (get-buffer editor)
+        text (take (:y cursor) text)]
+    (+ (:x cursor) (count text) (apply + (map count text)))))
 
 (defn parse-command [editor s]
   (let [[f & args] (string/split s #"\s+")]

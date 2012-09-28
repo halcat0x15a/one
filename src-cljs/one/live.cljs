@@ -9,12 +9,12 @@
 (defn live [event]
   (dom/log event)
   (doto (net/xhr-connection)
-    (net/transmit "/live" "POST" (js-obj "content" (core/get-string @core/current-editor)))))
+    (net/transmit "/live" "POST" (js-obj "content" (core/get-joined @core/current-editor)))))
 
 (defn listen [editor']
   (doto @pusher
     (.subscribe "live")
-    (-> .-connection (.bind "listen" (fn [x] (core/set-string @core/current-editor (.-content x))))))
+    (-> .-connection (.bind "listen" (fn [x] (core/set-joined @core/current-editor (.-content x))))))
   (-> editor'
       (editor/buffer :listen)))
 

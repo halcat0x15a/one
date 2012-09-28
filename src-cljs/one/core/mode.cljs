@@ -59,7 +59,7 @@
                           (if-let [f (key replace-keymap)]
                             (f editor)
                             (-> editor
-                                (buffer/replace-string (name key))
+                                (buffer/replace-text (name key))
                                 normal-mode)))))
 
 (def normal

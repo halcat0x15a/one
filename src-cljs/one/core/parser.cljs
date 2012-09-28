@@ -1,5 +1,4 @@
-(ns one.core.parser
-  (:require [clojure.string :as string]))
+(ns one.core.parser)
 
 (defrecord Input [tokens cursor success source])
 

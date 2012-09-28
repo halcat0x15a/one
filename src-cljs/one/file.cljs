@@ -11,7 +11,7 @@
   (reset! core/current-editor
           (-> @core/current-editor
               (editor/buffer (.-name file))
-              (core/set-strings (string/split-lines (-> event .-target .-result)))
+              (core/set-text (string/split-lines (-> event .-target .-result)))
               (core/set-cursor core/unit-cursor)
               system/update)))
 
