@@ -11,9 +11,13 @@
 (defn set-saved [cursor x]
   (assoc cursor :x x :saved x))
 
-(defrecord Buffer [text cursor])
+(defrecord Mode [name function])
 
-(def unit-buffer (Buffer. [""] unit-cursor))
+(def unit-mode (Mode. :one identity))
+
+(defrecord Buffer [text cursor mode])
+
+(def unit-buffer (Buffer. [""] unit-cursor unit-mode))
 
 (defrecord View [x y width height])
 
@@ -23,20 +27,19 @@
 
 (def unit-history (History. "" (list) 0))
 
-(defrecord Mode [name function])
-
-(def unit-mode (Mode. :one identity))
-
-(defrecord Editor [buffers current view history functions mode])
+(defrecord Editor [buffers minibuffer current view history functions])
 
 (def default-buffer :scratch)
 
-(def unit-editor (Editor. {:scratch unit-buffer} default-buffer unit-view unit-history {} unit-mode))
+(def unit-editor (Editor. {:scratch unit-buffer} unit-buffer default-buffer unit-view unit-history {}))
 
 (def current-editor (atom unit-editor))
 
 (defn get-buffer [editor]
-  ((:buffers editor) (:current editor)))
+  (let [current (:current editor)]
+    (case current
+      :minibuffer (current editor)
+      (current (:buffers editor)))))
 
 (defn update-buffer [editor f]
   (let [buffers (:buffers editor)

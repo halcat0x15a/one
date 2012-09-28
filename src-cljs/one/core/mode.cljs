@@ -62,7 +62,7 @@
                                 (buffer/replace-text (name key))
                                 normal-mode)))))
 
-(def normal
+(def normal-keymap
   (atom {:h cursor/left
          :j cursor/down
          :k cursor/up
