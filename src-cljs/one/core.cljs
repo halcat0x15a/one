@@ -101,3 +101,6 @@
   (let [[f & args] (string/split s #"\s+")]
     (when-let [f ((:functions editor) (keyword f))]
       (cons f args))))
+
+(defn input [editor key]
+  ((:function (:mode editor)) editor key))

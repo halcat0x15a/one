@@ -5,7 +5,6 @@
             [one.core.editor :as editor]
             [one.core.command :as command]
             [one.core.mode :as mode]
-            [one.core.input :as input]
             [one.core.parser :as parser]
             [one.core.syntax :as syntax])
   (:use clojure.test))
@@ -262,10 +261,10 @@
              :buffers {"world" core/unit-buffer}
              :current "world")))))
 
-(deftest input
+(deftest mode
   (testing "key"
     (testing "for general mode"
-      (is (= (input/input-buffer (assoc core/unit-editor :mode mode/general-mode) :a)
+      (is (= (core/input (assoc core/unit-editor :mode mode/general-mode) :a)
              (buffer/insert (assoc core/unit-editor :mode mode/general-mode) "a"))))))
 
 (deftest syntax

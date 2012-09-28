@@ -103,6 +103,7 @@
     goog.events.KeyCodes/DOWN :down
     goog.events.KeyCodes/UP :up
     goog.events.KeyCodes/RIGHT :right
+    goog.events.KeyCodes/ENTER :enter
     (keyword (.fromCharCode js/String (.-charCode event)))))
 
 (defn buffer-key [event]

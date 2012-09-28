@@ -1,7 +1,8 @@
 (ns one.core.mode
   (:require [one.core :as core]
             [one.core.cursor :as cursor]
-            [one.core.buffer :as buffer]))
+            [one.core.buffer :as buffer]
+            [one.core.command :as command]))
 
 (def general-mode
   (core/->Mode :general (fn [editor key]
@@ -82,3 +83,11 @@
          :X buffer/backspace
          :d delete-mode
          :r replace-mode}))
+
+(def minibuffer-mode
+  (core/->Mode :minibuffer (fn [editor key]
+                             (case key
+                               :up (command/set-prev-command editor)
+                               :down (command/set-prev-command editor)
+                               :enter nil
+                               editor))))
