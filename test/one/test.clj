@@ -3,6 +3,7 @@
             [one.core.text :as text]
             [one.core.cursor :as cursor]
             [one.core.buffer :as buffer]
+            [one.core.view :as view]
             [one.core.editor :as editor]
             [one.core.minibuffer :as minibuffer]
             [one.core.mode :as mode]
@@ -268,6 +269,37 @@
            (assoc (editor/editor)
              :buffers {:world buffer/default-buffer}
              :current :world)))))
+
+(deftest view
+  (testing "view"
+    (testing "up"
+      (is (= (view/up (-> (editor/editor)
+                          (assoc :view (view/->View 0 1 5 1))
+                          (core/set-text ["hello" "world"])))
+             (-> (editor/editor)
+                 (assoc :view (view/->View 0 0 5 1))
+                 (core/set-text ["hello" "world"]))))
+      (testing "above view"
+        (is (= (view/up (-> (editor/editor)
+                          (assoc :view (view/->View 0 0 5 1))
+                          (core/set-text ["hello" "world"])))
+             (-> (editor/editor)
+                 (assoc :view (view/->View 0 0 5 1))
+                 (core/set-text ["hello" "world"]))))))
+    (testing "down"
+      (is (= (view/down (-> (editor/editor)
+                          (assoc :view (view/->View 0 0 5 1))
+                          (core/set-text ["hello" "world"])))
+             (-> (editor/editor)
+                 (assoc :view (view/->View 0 1 5 1))
+                 (core/set-text ["hello" "world"]))))
+      (testing "below view"
+        (is (= (view/down (-> (editor/editor)
+                          (assoc :view (view/->View 0 1 5 1))
+                          (core/set-text ["hello" "world"])))
+             (-> (editor/editor)
+                 (assoc :view (view/->View 0 1 5 1))
+                 (core/set-text ["hello" "world"]))))))))
 
 (deftest mode
   (testing "key"
