@@ -3,7 +3,7 @@
             [one.core.buffer :as buffer]
             [one.core.cursor :as cursor]
             [one.core.editor :as editor]
-            [one.core.command :as command]
+            [one.core.minibuffer :as minibuffer]
             [one.core.mode :as mode]
             [one.core.parser :as parser]
             [one.core.syntax :as syntax])
@@ -158,41 +158,41 @@
          (cursor/end-buffer (core/set-buffer core/unit-editor (core/map->Buffer {:text ["hello" "world"] :cursor (core/saved-cursor 0 1)})))
          (core/set-buffer core/unit-editor (core/map->Buffer {:text ["hello" "world"] :cursor (core/saved-cursor 5 1)})))))
 
-(deftest command
+(deftest minibuffer
   (testing "history"
     (testing "previous command"
-      (is (= (command/prev-command (assoc core/unit-editor
+      (is (= (minibuffer/prev-command (assoc core/unit-editor
                                      :history (core/->History "hello" ["hello" "world"] 0)))
              (assoc core/unit-editor
                :history (core/->History "hello" ["hello" "world"] 1))))
       (testing "with end cursor of history"
-        (is (nil? (command/prev-command (assoc core/unit-editor
+        (is (nil? (minibuffer/prev-command (assoc core/unit-editor
                                      :history (core/->History  "hello" ["hello" "world"] 1)))))))
     (testing "next command"
-      (is (= (command/next-command (assoc core/unit-editor
+      (is (= (minibuffer/next-command (assoc core/unit-editor
                                      :history (core/->History "hello" ["hello" "world"] 1)))
              (assoc core/unit-editor
                :history (core/->History "hello" ["hello" "world"] 0))))
       (testing "with start cursor of history"
-        (is (nil? (command/next-command (assoc core/unit-editor
+        (is (nil? (minibuffer/next-command (assoc core/unit-editor
                                           :history (core/->History "hello" ["hello" "world"] 0)))))))
     (testing "set previous command"
-      (is (= (command/set-prev-command (assoc core/unit-editor
+      (is (= (minibuffer/set-prev-command (assoc core/unit-editor
                                          :history (core/->History "hello" ["hello" "world"] 0)))
              (assoc core/unit-editor
                :history (core/->History "world" ["hello" "world"] 1))))
       (testing "with end cursor of history"
-        (is (= (command/set-prev-command (assoc core/unit-editor
+        (is (= (minibuffer/set-prev-command (assoc core/unit-editor
                                            :history (core/->History "world" ["hello" "world"] 1)))
                (assoc core/unit-editor
                  :history (core/->History "world" ["hello" "world"] 1))))))
     (testing "set next command"
-      (is (= (command/set-next-command (assoc core/unit-editor
+      (is (= (minibuffer/set-next-command (assoc core/unit-editor
                                          :history (core/->History "world" ["hello" "world"] 1)))
              (assoc core/unit-editor
                :history (core/->History "hello" ["hello" "world"] 0))))
       (testing "with start cursor of history"
-        (is (= (command/set-next-command (assoc core/unit-editor
+        (is (= (minibuffer/set-next-command (assoc core/unit-editor
                                            :history (core/->History "hello" ["hello" "world"] 0)))
                (assoc core/unit-editor
                  :history (core/->History "hello" ["hello" "world"] 0))))))))

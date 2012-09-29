@@ -2,7 +2,7 @@
   (:require [one.core :as core]
             [one.core.cursor :as cursor]
             [one.core.buffer :as buffer]
-            [one.core.command :as command]))
+            [one.core.minibuffer :as minibuffer]))
 
 (def general-mode
   (core/->Mode :general (fn [editor key]
@@ -87,7 +87,7 @@
 (def minibuffer-mode
   (core/->Mode :minibuffer (fn [editor key]
                              (case key
-                               :up (command/set-prev-command editor)
-                               :down (command/set-prev-command editor)
-                               :enter nil
+                               :up (minibuffer/set-prev-command editor)
+                               :down (minibuffer/set-prev-command editor)
+                               :enter 
                                editor))))

@@ -1,4 +1,5 @@
-(ns one.core.command)
+(ns one.core.minibuffer
+  (:require [one.core :as core]))
 
 (defn update-history [editor f]
   (assoc editor
@@ -18,7 +19,7 @@
     :history (assoc (:history editor)
                :cursor cursor)))
 
-(defn reset-history [editor]
+(defn prepare-history [editor]
   (-> editor
       (set-current-command "")
       (set-history-cursor 0)))
@@ -48,3 +49,11 @@
   (if-let [editor' (next-command editor)]
     (set-current-command editor' (get-command editor'))
     editor))
+
+(defn parse-command [editor]
+  (let [command (:text (:minibuffer editor))]
+    (if-let [f (core/parse-command editor command)]
+      (-> (apply (first f) editor (rest f))
+          (add-history command)
+          prepare-history)
+      editor)))
