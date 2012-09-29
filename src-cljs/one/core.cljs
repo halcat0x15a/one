@@ -1,45 +1,16 @@
 (ns one.core
   (:require [clojure.string :as string]))
 
-(defrecord Cursor [x y saved])
-
-(def unit-cursor (Cursor. 0 0 0))
-
-(defn saved-cursor [x y]
-  (Cursor. x y x))
-
-(defn set-saved [cursor x]
-  (assoc cursor :x x :saved x))
-
-(defrecord Mode [name function])
-
-(def unit-mode (Mode. :one identity))
-
-(defrecord Buffer [text cursor mode])
-
-(def unit-buffer (Buffer. [""] unit-cursor unit-mode))
-
-(defrecord View [x y width height])
-
-(def unit-view (View. 0 0 0 0))
-
-(defrecord History [current commands cursor])
-
-(def unit-history (History. "" (list) 0))
-
-(defrecord Editor [buffers minibuffer current view history functions])
-
-(def default-buffer :scratch)
-
-(def unit-editor (Editor. {:scratch unit-buffer} unit-buffer default-buffer unit-view unit-history {}))
-
-(def current-editor (atom unit-editor))
-
 (defn get-buffer [editor]
   (let [current (:current editor)]
     (case current
       :minibuffer (current editor)
       (current (:buffers editor)))))
+
+(defn set-buffer [editor buffer]
+  (assoc editor
+    :buffers (assoc (:buffers editor)
+               (:current editor) buffer)))
 
 (defn update-buffer [editor f]
   (let [buffers (:buffers editor)
@@ -47,11 +18,6 @@
     (assoc editor
       :buffers (assoc buffers
                  current (f (buffers current))))))
-
-(defn set-buffer [editor buffer]
-  (assoc editor
-    :buffers (assoc (:buffers editor)
-               (:current editor) buffer)))
 
 (def get-cursor (comp :cursor get-buffer))
 
@@ -62,18 +28,21 @@
 (defn set-cursor [editor cursor]
   (update-buffer editor #(assoc % :cursor cursor)))
 
+(defn update-cursor [editor f]
+  (update-buffer editor #(assoc % :cursor (f (:cursor %)))))
+
 (def get-text (comp :text get-buffer))
 
 (def get-joined (comp (partial string/join \newline) get-text))
-
-(defn update-text [editor f]
-  (update-buffer editor #(assoc % :text (f (:text %)))))
 
 (defn set-text [editor text]
   (update-buffer editor #(assoc % :text text)))
 
 (defn set-joined [editor str]
   (set-text editor (string/split-lines str)))
+
+(defn update-text [editor f]
+  (update-buffer editor #(assoc % :text (f (:text %)))))
 
 (def count-lines (comp count get-text))
 

@@ -1,41 +1,29 @@
 (ns one.core.editor
-  (:require [one.core :as core]))
+  (:require [one.core.buffer :as buffer]
+            [one.core.minibuffer :as minibuffer]
+            [one.core.mode :as mode]
+            [one.core.view :as view]
+            [one.core.tool :as tool]))
 
-(defn buffer [this id]
-  (let [buffers (:buffers this)]
-    (assoc (if (contains? buffers id)
-             this
-             (assoc this
-               :buffers (assoc buffers
-                          id core/unit-buffer)))
-      :current id)))
+(defrecord Editor [buffers minibuffer current view history functions])
 
-(defn create-buffer [this id]
-  (assoc this
-    :buffers (assoc (:buffers this)
-               id core/unit-buffer)
-    :current id))
+(def default-name :scratch)
 
-(defn change-buffer [this id]
-  (if (contains? (:buffers this) id)
-    (assoc this :current id)
-    this))
+(def functions
+  {:vi #(assoc % :mode mode/normal-mode)
+   :get-buffer buffer/get-buffer
+   :create-buffer buffer/create-buffer
+   :change-buffer buffer/change-buffer
+   :delete-buffer buffer/delete-buffer
+   :buffers buffer/buffers
+   :commands tool/commands
+   :history tool/history
+   :apply-buffers tool/apply-buffers
+   :grep tool/grep
+   :count-lines tool/count-lines
+   :sum tool/sum})
 
-(defn delete-buffer [this id]
-  (assoc this
-    :buffers (dissoc (:buffers this) id)))
-
-(defn rename-buffer [this id]
-  (let [buffers (:buffers this)
-        current (:current this)]
-    (assoc this
-      :buffers (assoc (dissoc buffers current)
-                 id (buffers current))
-      :current id)))
-
-(defn buffers [this]
-  (letfn [(set-buffers [this]
-            (core/set-text this (vec (map name (keys (:buffers this))))))]
-    (-> this
-        (buffer :buffers)
-        set-buffers)))
+(defn editor
+  ([] (editor 0 0))
+  ([width height]
+     (Editor. {default-name buffer/default-buffer} buffer/default-minibuffer default-name (view/view width height) minibuffer/default-history {})))

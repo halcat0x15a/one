@@ -1,20 +1,22 @@
 (ns one.core.mode
   (:require [one.core :as core]
+            [one.core.text :as text]
             [one.core.cursor :as cursor]
-            [one.core.buffer :as buffer]
             [one.core.minibuffer :as minibuffer]))
 
+(defrecord Mode [name function])
+
 (def general-mode
-  (core/->Mode :general (fn [editor key]
-                          (buffer/insert editor (name key)))))
+  (Mode. :general (fn [editor key]
+                    (text/insert editor (name key)))))
 
 (declare normal-keymap)
 
 (def normal-mode
-  (core/->Mode :normal (fn [editor key]
-                         (if-let [f (key @normal-keymap)]
-                           (f editor)
-                           editor))))
+  (Mode. :normal (fn [editor key]
+                   (if-let [f (key @normal-keymap)]
+                     (f editor)
+                     editor))))
 
 (def insert-keymap
   (atom {:esc normal-mode
@@ -24,28 +26,28 @@
          :right cursor/right}))
 
 (def insert-mode
-  (core/->Mode :insert (fn [editor key]
-                         (if-let [f (key @insert-keymap)]
-                           (f editor)
-                           (buffer/insert editor (name key))))))
+  (Mode. :insert (fn [editor key]
+                   (if-let [f (key @insert-keymap)]
+                     (f editor)
+                     (text/insert editor (name key))))))
 
 (def delete-keymap
   (atom {:esc normal-mode
-         :left (comp normal-mode buffer/backspace)
-         :right (comp normal-mode buffer/delete)
-         :h (comp normal-mode buffer/backspace)
-         :l (comp normal-mode buffer/delete)
-         :d (comp normal-mode buffer/delete-line)
-         :w (comp normal-mode buffer/delete-forward)
-         :b (comp normal-mode buffer/delete-backward)
-         :| (comp normal-mode buffer/delete-to)
-         :$ (comp normal-mode buffer/delete-from)}))
+         :left (comp normal-mode text/backspace)
+         :right (comp normal-mode text/delete)
+         :h (comp normal-mode text/backspace)
+         :l (comp normal-mode text/delete)
+         :d (comp normal-mode text/delete-line)
+         :w (comp normal-mode text/delete-forward)
+         :b (comp normal-mode text/delete-backward)
+         :| (comp normal-mode text/delete-to)
+         :$ (comp normal-mode text/delete-from)}))
 
 (def delete-mode
-  (core/->Mode :delete (fn [editor key]
-                         (if-let [f (key @delete-keymap)]
-                           (f editor)
-                           (normal-mode editor)))))
+  (Mode. :delete (fn [editor key]
+                   (if-let [f (key @delete-keymap)]
+                     (f editor)
+                     (normal-mode editor)))))
 
 (def replace-keymap
   (atom {:esc normal-mode
@@ -55,12 +57,12 @@
          :right normal-mode}))
 
 (def replace-mode
-  (core/->Mode :replace (fn [editor key]
-                          (if-let [f (key replace-keymap)]
-                            (f editor)
-                            (-> editor
-                                (buffer/replace-text (name key))
-                                normal-mode)))))
+  (Mode. :replace (fn [editor key]
+                    (if-let [f (key replace-keymap)]
+                      (f editor)
+                      (-> editor
+                          (text/replace-text (name key))
+                          normal-mode)))))
 
 (def normal-keymap
   (atom {:h cursor/left
@@ -77,17 +79,17 @@
          :I (comp insert-mode cursor/start-line)
          :a (comp insert-mode cursor/right)
          :A (comp insert-mode cursor/end-line)
-         :o (comp insert-mode buffer/append-newline)
-         :O (comp insert-mode buffer/prepend-newline)
-         :x buffer/delete
-         :X buffer/backspace
+         :o (comp insert-mode text/append-newline)
+         :O (comp insert-mode text/prepend-newline)
+         :x text/delete
+         :X text/backspace
          :d delete-mode
          :r replace-mode}))
 
 (def minibuffer-mode
-  (core/->Mode :minibuffer (fn [editor key]
-                             (case key
-                               :up (minibuffer/set-prev-command editor)
-                               :down (minibuffer/set-prev-command editor)
-                               :enter 
-                               editor))))
+  (Mode. :minibuffer (fn [editor key]
+                       (case key
+                         :up (minibuffer/set-prev-command editor)
+                         :down (minibuffer/set-prev-command editor)
+                         :enter 
+                         editor))))

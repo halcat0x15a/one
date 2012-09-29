@@ -1,6 +1,10 @@
 (ns one.core.minibuffer
   (:require [one.core :as core]))
 
+(defrecord History [current commands cursor])
+
+(def default-history (History. "" (list) 0))
+
 (defn update-history [editor f]
   (assoc editor
     :history (f (:history editor))))
@@ -50,7 +54,7 @@
     (set-current-command editor' (get-command editor'))
     editor))
 
-(defn parse-command [editor]
+(defn eval-command [editor]
   (let [command (:text (:minibuffer editor))]
     (if-let [f (core/parse-command editor command)]
       (-> (apply (first f) editor (rest f))

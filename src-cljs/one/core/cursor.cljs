@@ -2,51 +2,59 @@
   (:require [clojure.string :as string]
             [one.core :as core]))
 
+(defrecord Cursor [x y saved])
+
+(def default-cursor (Cursor. 0 0 0))
+
+(defn saved-cursor [x y]
+  (Cursor. x y x))
+
+(defn set-saved [cursor x]
+  (assoc cursor :x x :saved x))
+
 (defn left [editor]
-  (let [cursor (core/get-cursor editor)
-        {:keys [x y]} cursor]
-    (if (> x 0)
-      (let [x' (dec x)]
-        (core/set-cursor editor (core/set-saved cursor x')))
-      (let [y' (dec y)]
-        (if-let [length (core/count-line editor y')]
-          (core/set-cursor editor (core/saved-cursor length y'))
-          editor)))))
+  (core/update-cursor editor
+                      (fn [cursor]
+                        (let [x (:x cursor)]
+                          (if (> x 0)
+                            (set-saved cursor (dec x))
+                            (let [y' (dec (:y cursor))]
+                              (if-let [length (core/count-line editor y')]
+                                (saved-cursor length y')
+                                cursor)))))))
 
 (defn down [editor]
-  (let [cursor (core/get-cursor editor)
-        {:keys [x y]} cursor]
-    (core/set-cursor
-     editor
-     (if (< y (dec (core/count-lines editor)))
-       (let [y' (inc y)]
-         (assoc cursor
-           :x (min (max x (:saved cursor)) (core/count-line editor y'))
-           :y y'))
-       (core/set-saved cursor (core/count-line editor y))))))
+  (core/update-cursor editor
+                      (fn [cursor]
+                        (let [y (:y cursor)]
+                          (if (< y (dec (core/count-lines editor)))
+                            (let [y' (inc y)]
+                              (assoc cursor
+                                :x (min (max (:x cursor) (:saved cursor)) (core/count-line editor y'))
+                                :y y'))
+                            (set-saved cursor (core/count-line editor y)))))))
 
 (defn up [editor]
-  (let [cursor (core/get-cursor editor)
-        {:keys [x y]} cursor]
-    (core/set-cursor
-     editor
-     (if (> y 0)
-       (let [y' (dec y)]
-         (assoc cursor
-           :x (min (max x (:saved cursor)) (core/count-line editor y'))
-           :y y'))
-       (core/set-saved cursor 0)))))
+  (core/update-cursor editor
+                      (fn [cursor]
+                        (let [y (:y cursor)]
+                          (if (> y 0)
+                            (let [y' (dec y)]
+                              (assoc cursor
+                                :x (min (max (:x cursor) (:saved cursor)) (core/count-line editor y'))
+                                :y y'))
+                            (set-saved cursor 0))))))
 
 (defn right [editor]
-  (let [cursor (core/get-cursor editor)
-        {:keys [x y]} cursor]
-    (if (< x (core/count-line editor (:y cursor)))
-      (let [x' (inc x)]
-        (core/set-cursor editor (core/set-saved cursor x')))
-      (let [y' (inc y)]
-        (if (< y' (core/count-lines editor))
-          (core/set-cursor editor (core/saved-cursor 0 y'))
-          editor)))))
+  (core/update-cursor editor
+                      (fn [cursor]
+                        (let [{:keys [x y]} cursor]
+                          (if (< x (core/count-line editor y))
+                            (set-saved cursor (inc x))
+                            (let [y' (inc y)]
+                              (if (< y' (core/count-lines editor))
+                                (saved-cursor 0 y')
+                                cursor)))))))
 
 (defn move-while [editor pred f]
   (loop [editor editor]
@@ -71,13 +79,10 @@
       (move-while string/blank? right)))
 
 (defn start-line [editor]
-  (core/set-cursor editor (core/set-saved (core/get-cursor editor) 0)))
+  (core/update-cursor editor #(set-saved % 0)))
 
 (defn end-line [editor]
-  (let [cursor (core/get-cursor editor)
-        length (core/count-line editor (:y cursor))]
-    (core/set-cursor editor
-      (assoc cursor :x length :saved length))))
+  (core/update-cursor editor #(set-saved % (core/count-line editor (:y %)))))
 
 (defn start-buffer [editor]
   (-> editor
