@@ -25,6 +25,7 @@
 
 (defn prepare-history [editor]
   (-> editor
+      (core/set-text [""])
       (set-current-command "")
       (set-history-cursor 0)))
 
@@ -55,9 +56,8 @@
     editor))
 
 (defn eval-command [editor]
-  (let [command (:text (:minibuffer editor))]
+  (let [command (core/get-command editor)]
     (if-let [f (core/parse-command editor command)]
-      (-> (apply (first f) editor (rest f))
-          (add-history command)
-          prepare-history)
+      (-> (apply (first f) (prepare-history editor) (rest f))
+          (add-history command))
       editor)))

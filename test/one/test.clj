@@ -196,73 +196,78 @@
         (is (= (minibuffer/set-next-command (assoc (editor/editor)
                                            :history (minibuffer/->History "hello" ["hello" "world"] 0)))
                (assoc (editor/editor)
-                 :history (minibuffer/->History "hello" ["hello" "world"] 0))))))))
-;  (testing "eval command"
-;    (is (= (minibuffer/eval-command (assoc (editor/editor) :minibuffer (buffer/map->Buffer {:text "
+                 :history (minibuffer/->History "hello" ["hello" "world"] 0)))))))
+  (testing "eval command"
+    (is (= (minibuffer/eval-command (assoc (editor/editor)
+                                      :current :minibuffer
+                                      :minibuffer (assoc buffer/default-minibuffer :text ["get-buffer hello"])))
+           (-> (editor/editor)
+               (buffer/get-buffer :hello)
+               (minibuffer/add-history "get-buffer hello"))))))
 
 (deftest buffer
   (testing "create buffer"
     (is (= (buffer/create-buffer (assoc (editor/editor)
-                                   :buffers {"hello" buffer/default-buffer}
-                                   :current "hello")
-                                 "world")
+                                   :buffers {:hello buffer/default-buffer}
+                                   :current :hello)
+                                 :world)
            (assoc (editor/editor)
-             :buffers {"hello" buffer/default-buffer
-                       "world" buffer/default-buffer}
-             :current "world")))
+             :buffers {:hello buffer/default-buffer
+                       :world buffer/default-buffer}
+             :current :world)))
     (testing "with name exists on buffers"
       (is (= (buffer/create-buffer (assoc (editor/editor)
-                                     :buffers {"hello" buffer/default-buffer}
-                                     :current "hello")
-                                   "hello")
+                                     :buffers {:hello buffer/default-buffer}
+                                     :current :hello)
+                                   :hello)
              (assoc (editor/editor)
-               :buffers {"hello" buffer/default-buffer}
-               :current "hello")))))
+               :buffers {:hello buffer/default-buffer}
+               :current :hello)))))
   (testing "change buffer"
     (is (= (buffer/change-buffer (assoc (editor/editor)
-                                   :buffers {"hello" buffer/default-buffer
-                                             "world" buffer/default-buffer}
-                                   :current "hello")
-                                 "world")
+                                   :buffers {:hello buffer/default-buffer
+                                             :world buffer/default-buffer}
+                                   :current :hello)
+                                 :world)
            (assoc (editor/editor)
-             :buffers {"hello" buffer/default-buffer
-                       "world" buffer/default-buffer}
-             :current "world")))
+             :buffers {:hello buffer/default-buffer
+                       :world buffer/default-buffer}
+             :current :world)))
     (testing "with name not exists on buffers"
       (is (= (buffer/change-buffer (assoc (editor/editor)
-                                     :buffers {"hello" buffer/default-buffer}
-                                     :current "hello")
-                                   "world")
+                                     :buffers {:hello buffer/default-buffer}
+                                     :current :hello)
+                                   :world)
              (assoc (editor/editor)
-               :buffers {"hello" buffer/default-buffer}
-               :current "hello")))))
+               :buffers {:hello buffer/default-buffer}
+               :current :hello)))))
   (testing "create or change buffer"
     (are [x y] (= x y)
          (buffer/get-buffer (assoc (editor/editor)
-                          :buffers {"hello" buffer/default-buffer}
-                          :current "hello")
-                        "world")
+                          :buffers {:hello buffer/default-buffer}
+                          :current :hello)
+                        :world)
          (assoc (editor/editor)
-           :buffers {"hello" buffer/default-buffer
-                     "world" buffer/default-buffer}
-           :current "world")
+           :buffers {:hello buffer/default-buffer
+                     :world buffer/default-buffer}
+           :current :world)
          (buffer/get-buffer (assoc (editor/editor)
-                          :buffers {"hello" buffer/default-buffer
-                                    "world" buffer/default-buffer}
-                          :current "hello")
-                        "world")
+                          :buffers {:hello buffer/default-buffer
+                                    :world buffer/default-buffer}
+                          :current :hello)
+                        :world)
          (assoc (editor/editor)
-           :buffers {"hello" buffer/default-buffer
-                     "world" buffer/default-buffer}
-           :current "world")))
+           :buffers {:hello buffer/default-buffer
+                     :world buffer/default-buffer}
+           :current :world)))
   (testing "rename buffer"
     (is (= (buffer/rename-buffer (assoc (editor/editor)
-                                   :buffers {"hello" buffer/default-buffer}
-                                   :current "hello")
-                                 "world")
+                                   :buffers {:hello buffer/default-buffer}
+                                   :current :hello)
+                                 :world)
            (assoc (editor/editor)
-             :buffers {"world" buffer/default-buffer}
-             :current "world")))))
+             :buffers {:world buffer/default-buffer}
+             :current :world)))))
 
 (deftest mode
   (testing "key"

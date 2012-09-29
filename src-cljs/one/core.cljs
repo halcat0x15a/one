@@ -8,16 +8,21 @@
       (current (:buffers editor)))))
 
 (defn set-buffer [editor buffer]
-  (assoc editor
-    :buffers (assoc (:buffers editor)
-               (:current editor) buffer)))
+  (let [current (:current editor)]
+    (case current
+      :minibuffer (assoc editor :minibuffer buffer)
+      (assoc editor
+        :buffers (assoc (:buffers editor)
+                   current buffer)))))
 
 (defn update-buffer [editor f]
-  (let [buffers (:buffers editor)
-        current (:current editor)]
-    (assoc editor
-      :buffers (assoc buffers
-                 current (f (buffers current))))))
+  (let [current (:current editor)]
+    (case current
+      :minibuffer (assoc editor :minibuffer (f (:minibuffer editor)))
+      (assoc editor
+        :buffers (let [buffers (:buffers editor)]
+                   (assoc buffers
+                     current (f (buffers current))))))))
 
 (def get-cursor (comp :cursor get-buffer))
 
@@ -68,6 +73,9 @@
   (let [{:keys [cursor text]} (get-buffer editor)
         text (take (:y cursor) text)]
     (+ (:x cursor) (count text) (apply + (map count text)))))
+
+(defn get-command [editor]
+  (first (:text (:minibuffer editor))))
 
 (defn parse-command [editor s]
   (let [[f & args] (string/split s #"\s+")]

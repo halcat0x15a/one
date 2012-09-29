@@ -10,13 +10,14 @@
 (def default-minibuffer (Buffer. [""] cursor/default-cursor mode/minibuffer-mode))
 
 (defn get-buffer [this id]
-  (let [buffers (:buffers this)]
-    (assoc (if (contains? buffers id)
+  (let [buffers (:buffers this)
+        key (keyword id)]
+    (assoc (if (contains? buffers key)
              this
              (assoc this
                :buffers (assoc buffers
-                          id default-buffer)))
-      :current id)))
+                          key default-buffer)))
+      :current key)))
 
 (defn create-buffer [this id]
   (assoc this
