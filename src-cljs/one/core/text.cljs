@@ -1,40 +1,38 @@
 (ns one.core.text
   (:require [clojure.string :as string]
             [one.core :as core]
-            [one.core.cursor :as cursor]))
+            [one.core.cursor :as cursor]
+            [one.core.lens :as lens]))
 
 (defn add-newline [editor y]
-  (letfn [(insert [text]
-            (vec (concat (take y text) (list "") (drop y text))))]
-    (->> (core/get-text editor)
-         insert
-         (core/set-text editor))))
+  (lens/modify editor lens/text #(vec (concat (take y %) (list "") (drop y %)))))
 
 (defn prepend-newline [editor]
   (-> editor
-      (add-newline (core/get-cursor-y editor))
+      (add-newline ((:get lens/cursor-y) editor))
       cursor/start-line))
 
 (defn append-newline [editor]
   (-> editor
-      (add-newline (inc (core/get-cursor-y editor)))
+      (add-newline (inc ((:get lens/cursor-y) editor)))
       cursor/down))
 
 (defn insert-newline [editor]
-  (let [{:keys [x y]} (core/get-cursor editor)
-        [lines lines'] (split-at y (core/get-text editor))
-        line (first lines')]
-    (-> editor
-        (core/set-text (vec (concat lines (list (subs line 0 x) (subs line x)) (rest lines'))))
-        cursor/down
-        cursor/start-line)))
+  (-> editor
+      (lens/modify lens/text #(let [{:keys [x y]} ((:get lens/cursor) editor)
+                                    [text text'] (split-at y %)
+                                    line (first text')]
+                                (vec (concat text (list (subs line 0 x) (subs line x)) (rest text')))))
+      cursor/down
+      cursor/start-line))
 
 (defn insert [editor s]
-  (let [cursor (core/get-cursor editor)
-        x (:x cursor)]
+  (let [cursor ((:get lens/cursor) editor)
+        {:keys [x y]} cursor
+        set-cursor (:set lens/cursor)]
     (-> editor
-        (core/update-line #(str (subs % 0 x) s (subs % x)))
-        (core/set-cursor (cursor/set-saved cursor (+ x (count s)))))))
+        (lens/modify (lens/line y)  #(str (subs % 0 x) s (subs % x)))
+        (set-cursor (cursor/set-saved cursor (+ x (count s)))))))
 
 (defn delete [editor]
   (let [{:keys [cursor text]} (core/get-buffer editor)
