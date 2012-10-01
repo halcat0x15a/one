@@ -25,6 +25,6 @@
     :sum tool/sum}))
 
 (defn editor
-  ([] (editor 0 0))
+  ([] (editor 80 24))
   ([width height]
      (Editor. {default-name buffer/default-buffer} buffer/default-minibuffer default-name (view/view width height) minibuffer/default-history @functions)))

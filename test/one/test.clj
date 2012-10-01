@@ -106,11 +106,15 @@
       (is (= (cursor/right (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 5 1)})))
              (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 5 1)}))))))
   (testing "move up"
-    (is (= (cursor/up (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 1 1)})))
-           (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 1 0)}))))
+    (is (= (cursor/up (assoc (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 1 1)}))
+                        :view (view/view 5 2)))
+           (assoc (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 1 0)}))
+             :view (view/view 5 2))))
     (testing "with top cursor of buffer"
-      (is (= (cursor/up (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 1 0)})))
-             (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 0 0)})))))
+      (is (= (cursor/up (assoc (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 1 0)}))
+                          :view (view/view 5 2)))
+             (assoc (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 0 0)}))
+               :view (view/view 5 2)))))
     (testing "with lines has diffrent length"
       (is (= (cursor/up (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hell" "world"] :cursor (cursor/saved-cursor 5 1)})))
              (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hell" "world"] :cursor (cursor/->Cursor 4 0 5)}))))))

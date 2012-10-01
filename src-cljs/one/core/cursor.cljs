@@ -1,6 +1,7 @@
 (ns one.core.cursor
   (:require [clojure.string :as string]
-            [one.core :as core]))
+            [one.core :as core]
+            [one.core.view :as view]))
 
 (defrecord Cursor [x y saved])
 
@@ -24,26 +25,30 @@
                                 cursor)))))))
 
 (defn down [editor]
-  (core/update-cursor editor
-                      (fn [cursor]
-                        (let [y (:y cursor)]
-                          (if (< y (dec (core/count-lines editor)))
-                            (let [y' (inc y)]
-                              (assoc cursor
-                                :x (min (max (:x cursor) (:saved cursor)) (core/count-line editor y'))
-                                :y y'))
-                            (set-saved cursor (core/count-line editor y)))))))
+  (let [cursor (core/get-cursor editor)
+        {:keys [x y saved]} cursor
+        length (core/count-lines editor)]
+    (if (< y (dec length))
+      (let [y' (inc y)
+            x' (min (max x saved) (core/count-line editor y'))]
+        (-> editor
+            (core/set-cursor (assoc cursor
+                               :x x'
+                               :y y'))
+            view/down))
+      (core/set-cursor editor (set-saved cursor (core/count-line editor y))))))
+                        
 
 (defn up [editor]
-  (core/update-cursor editor
-                      (fn [cursor]
-                        (let [y (:y cursor)]
-                          (if (> y 0)
-                            (let [y' (dec y)]
-                              (assoc cursor
-                                :x (min (max (:x cursor) (:saved cursor)) (core/count-line editor y'))
-                                :y y'))
-                            (set-saved cursor 0))))))
+  (let [cursor (core/get-cursor editor)
+        {:keys [x y saved]} cursor]
+    (if (> y 0)
+      (let [y' (dec y)
+            x' (min (max x saved) (core/count-line editor y'))]
+        (-> editor
+            (core/set-cursor (assoc cursor :x x' :y y'))
+            view/up))
+      (core/set-cursor editor (set-saved cursor 0)))))
 
 (defn right [editor]
   (core/update-cursor editor
