@@ -4,7 +4,11 @@
             [one.core.cursor :as cursor]))
 
 (defn add-newline [editor y]
-  (core/update-text editor #(vec (concat (take y %) (list "") (drop y %)))))
+  (letfn [(insert [text]
+            (vec (concat (take y text) (list "") (drop y text))))]
+    (->> (core/get-text editor)
+         insert
+         (core/set-text editor))))
 
 (defn prepend-newline [editor]
   (-> editor
