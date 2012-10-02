@@ -1,9 +1,9 @@
 (ns one.core.lens)
 
-(defrecord Lens [get set])
+(deftype Lens [get set])
 
 (defn modify [editor lens f]
-  ((:set lens) editor (f ((:get lens) editor))))
+  ((.set lens) editor (f ((.get lens) editor))))
 
 (def buffers
   (Lens. :buffers
@@ -27,7 +27,7 @@
 
 (defn lens [key lens]
   (letfn [(get-field [editor]
-            (get ((:get lens) editor) key))
+            (get ((.get lens) editor) key))
           (set-field [editor value]
             (modify editor lens #(assoc % key value)))]
     (Lens. get-field set-field)))
