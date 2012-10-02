@@ -1,36 +1,39 @@
 (ns one.core.lens)
 
-(deftype Lens [get set])
+(defprotocol Lens
+  (lens-get [this editor])
+  (lens-set [this value editor]))
 
-(defn modify [editor lens f]
-  ((.set lens) editor (f ((.get lens) editor))))
+(defn modify [lens f editor]
+  (lens-set lens (f (lens-get lens editor)) editor))
 
 (def buffers
-  (Lens. :buffers
-         (fn [editor buffers]
-           (assoc editor :buffers buffers))))
+  (reify Lens
+    (lens-get [this editor] (:buffers editor))
+    (lens-set [this buffers editor]
+      (assoc editor :buffers buffers))))
 
 (def buffer
-  (letfn [(get-buffer [editor]
-            (let [current (:current editor)]
-              (case current
-                :minibuffer (current editor)
-                (current (:buffers editor)))))
-          (set-buffer [editor buffer]
-            (let [current (:current editor)]
-              (case current
-                :minibuffer (assoc editor :minibuffer buffer)
-                (assoc editor
-                  :buffers (assoc (:buffers editor)
-                             current buffer)))))]
-              (Lens. get-buffer set-buffer)))
+  (reify Lens
+    (lens-get [this editor]
+      (let [current (:current editor)]
+        (case current
+          :minibuffer (current editor)
+          (current (:buffers editor)))))
+    (lens-set [this buffer editor]
+      (let [current (:current editor)]
+        (case current
+          :minibuffer (assoc editor :minibuffer buffer)
+          (assoc editor
+            :buffers (assoc (:buffers editor)
+                       current buffer)))))))
 
 (defn lens [key lens]
-  (letfn [(get-field [editor]
-            (get ((.get lens) editor) key))
-          (set-field [editor value]
-            (modify editor lens #(assoc % key value)))]
-    (Lens. get-field set-field)))
+  (reify Lens
+    (lens-get [this editor]
+      (get (lens-get lens editor) key))
+    (lens-set [this value editor]
+      (modify lens #(assoc % key value) editor))))
 
 (def cursor (lens :cursor buffer))
 

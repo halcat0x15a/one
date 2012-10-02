@@ -46,7 +46,7 @@
     (is (= (text/insert-newline (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["foo" "hello world" "bar"] :cursor (cursor/saved-cursor 5 1)})))
              (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["foo" "hello" " world" "bar"] :cursor (cursor/saved-cursor 0 2)})))))
   (testing "insert"
-    (is (= (text/insert (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello"] :cursor (cursor/saved-cursor 5 0)})) "world")
+    (is (= (text/insert "world" (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello"] :cursor (cursor/saved-cursor 5 0)})))
            (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["helloworld"] :cursor (cursor/saved-cursor 10 0)})))))
   (testing "delete"
     (is (= (text/delete (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello world"] :cursor (cursor/saved-cursor 10 0)})))
@@ -309,7 +309,7 @@
   (testing "key"
     (testing "for general mode"
       (is (= (core/input (assoc (editor/editor) :mode mode/general-mode) :a)
-             (text/insert (assoc (editor/editor) :mode mode/general-mode) "a"))))))
+             (text/insert "a" (assoc (editor/editor) :mode mode/general-mode)))))))
 
 (deftest syntax
   (testing "parse clojure"

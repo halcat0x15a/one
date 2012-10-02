@@ -8,7 +8,7 @@
 
 (def general-mode
   (Mode. :general (fn [editor key]
-                    (text/insert editor (name key)))))
+                    (text/insert (name key) editor))))
 
 (declare normal-keymap)
 
