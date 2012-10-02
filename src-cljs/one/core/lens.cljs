@@ -1,9 +1,20 @@
-(ns one.core.lens)
+(ns one.core.lens
+  (:require [one.core.state :as state]))
 
 (defrecord Lens [get set])
 
-(defn modify [editor lens f]
-  ((:set lens) editor (f ((:get lens) editor))))
+(defn get [lens]
+  (fn [editor]
+    (state/->Pair ((:get lens) editor) editor)))
+
+(defn set [lens a]
+  (fn [editor]
+    (state/->Pair nil ((:set lens) editor a))))
+
+(defn modify [lens f]
+  (fn [editor]
+    (let [value (f ((:get lens) editor))]
+      (state/->Pair value ((:set lens) editor value)))))
 
 (def buffers
   (Lens. :buffers

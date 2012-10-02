@@ -2,70 +2,78 @@
   (:require [clojure.string :as string]
             [one.core :as core]
             [one.core.cursor :as cursor]
+            [one.core.state :as state]
             [one.core.lens :as lens]))
 
-(defn add-newline [editor y]
-  (lens/modify editor lens/text #(vec (concat (take y %) (list "") (drop y %)))))
+(defn add-newline [y]
+  (lens/modify lens/text
+               #(vec (concat (take y %) (list "") (drop y %)))))
 
-(defn prepend-newline [editor]
-  (-> editor
-      (add-newline ((:get lens/cursor-y) editor))
-      cursor/start-line))
+(def prepend-newline
+  (state/bind (lens/get lens/cursor-y)
+              (fn [y]
+                (state/bind' (add-newline y)
+                             cursor/start-line))))
 
-(defn append-newline [editor]
-  (-> editor
-      (add-newline (inc ((:get lens/cursor-y) editor)))
-      cursor/down))
+(def append-newline
+  (state/bind (lens/get lens/cursor-y)
+              (fn [y]
+                (state/bind' (add-newline (inc y))
+                             cursor/down))))
 
-(defn insert-newline [editor]
-  (-> editor
-      (lens/modify lens/text #(let [{:keys [x y]} ((:get lens/cursor) editor)
-                                    [text text'] (split-at y %)
-                                    line (first text')]
-                                (vec (concat text (list (subs line 0 x) (subs line x)) (rest text')))))
-      cursor/down
-      cursor/start-line))
+(def insert-newline
+  (state/bind (lens/get lens/cursor)
+              (fn [cursor]
+                (state/bind' (lens/modify lens/text
+                                          #(let [{:keys [x y]} cursor
+                                                 [text text'] (split-at y %)
+                                                 line (first text')]
+                                             (vec (concat text (list (subs line 0 x) (subs line x)) (rest text')))))
+                             cursor/down
+                             cursor/start-line))))
 
-(defn insert [editor s]
-  (let [cursor ((:get lens/cursor) editor)
-        {:keys [x y]} cursor
-        set-cursor (:set lens/cursor)]
-    (-> editor
-        (lens/modify (lens/line y)  #(str (subs % 0 x) s (subs % x)))
-        (set-cursor (cursor/set-saved cursor (+ x (count s)))))))
+(defn insert [s]
+  (state/bind (lens/get lens/cursor)
+              (fn [cursor]
+                (let [{:keys [x y]} cursor]
+                  (state/bind' (lens/modify (lens/line y)  #(str (subs % 0 x) s (subs % x)))
+                               (lnes/set lens/cursor (cursor/set-saved cursor (+ x (count s)))))))))
 
-(defn delete [editor]
-  (let [{:keys [cursor text]} (core/get-buffer editor)
-        {:keys [x y]} cursor
-        line (text y)
-        length (count line)]
-    (if (> length x)
-      (core/set-line editor (str (subs line 0 x) (subs line (inc x))))
-      editor)))
+(def delete
+  (state/bind (lens/get lens/cursor)
+              (fn [cursor]
+                (let [{:keys [x y]} cursor]
+                  (lens/modify (lens/line y) #(if (> (count %) x) (str (subs % 0 x) (subs % (inc x))) %))))))
 
-(defn backspace [editor]
-  (let [{:keys [cursor text]} (core/get-buffer editor)
-        {:keys [x y]} cursor
-        line (text y)]
-    (if (> x 0)
-      (-> editor
-          (core/set-line (str (subs line 0 (dec x)) (subs line x)))
-          cursor/left)
-      editor)))
+(def backspace
+  (state/bind (lens/cursor lens/cursor)
+              (fn [cursor]
+                (let [{:keys [x y]} cursor]
+                  (if (> x 0)
+                    (state/bind' (lens/modify (lens/line y) #(str (subs % 0 (dec x)) (subs % x)))
+                                 cursor/left)
+                    state/get)))))
 
-(defn delete-line [editor]
-  (let [{:keys [cursor text]} (core/get-buffer editor)
-        [lines lines'] (split-at (:y cursor) text)
-        lines (concat lines (rest lines'))]
-    (-> editor
-        (core/set-text (if (empty? lines) [""] (vec lines)))
-        cursor/up
-        cursor/down
-        cursor/start-line)))
+(def delete-line
+  (state/bind (lens/get lens/cursor-y)
+              (fn [y]
+                (state/bind' (lens/modify lens/text #(let [text (concat (take y %) (drop (inc y) %))]
+                                                       (if (empty? text) [""] (vec text))))
+                             cursor/up
+                             cursor/down
+                             cursor/start-line))))
 
-(defn delete-forward [editor]
-  (core/update-line editor #(str (subs % 0 (core/get-cursor-x editor))
-                                 (subs % (core/get-cursor-x (cursor/forward editor))))))
+(def delete-forward
+  (state/bind (lens/get lens/cursor)
+              (fn [cursor]
+                (state/bind state/get
+                            (fn [editor]
+                              (let [{:keys [x y]} cursor
+                                    x' (state/eval (state/bind' cursor/forward
+                                                                (lens/get lens/cursor-x))
+                                                   editor)]
+                                (lens/modify (lens/line y) #(str (subs % 0 x)
+                                                                 (subs % x')))))))))
 
 (defn delete-backward [editor]
   (let [cursor (core/get-cursor (cursor/backward editor))]
