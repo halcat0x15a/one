@@ -43,5 +43,11 @@
 
 (def text (lens :text buffer))
 
+(def count-lines (comp count (partial lens-get text)))
+
 (defn line [y]
   (lens y text))
+
+(defn count-line [y editor]
+  (when-let [line (lens-get (line y) editor)]
+    (count line)))

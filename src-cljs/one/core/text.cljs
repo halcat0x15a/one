@@ -1,6 +1,5 @@
 (ns one.core.text
   (:require [clojure.string :as string]
-            [one.core :as core]
             [one.core.cursor :as cursor]
             [one.core.lens :as lens]))
 
@@ -33,7 +32,7 @@
         {:keys [x y]} cursor]
     (->> editor
          (lens/modify (lens/line y) #(str (subs % 0 x) s (subs % x)))
-         (lens/lens-set lens/cursor (cursor/set-saved cursor (+ x (count s)))))))
+         (lens/lens-set lens/cursor (cursor/set-saved (+ x (count s)) cursor)))))
 
 (defn delete [editor]
   (let [{:keys [x y]} (lens/lens-get lens/cursor editor)]
