@@ -1,6 +1,5 @@
 (ns one.core.tool
-  (:require [one.core :as core]
-            [one.core.buffer :as buffer]
+  (:require [one.core.buffer :as buffer]
             [one.core.parser :as parser]
             [one.core.lens :as lens]))
 

@@ -1,6 +1,5 @@
 (ns one.core.mode
-  (:require [one.core :as core]
-            [one.core.text :as text]
+  (:require [one.core.text :as text]
             [one.core.cursor :as cursor]
             [one.core.minibuffer :as minibuffer]))
 

@@ -1,5 +1,5 @@
 (ns one.core.buffer
-  (:require [one.core :as core]
+  (:require [one.core.lens :as lens]
             [one.core.cursor :as cursor]
             [one.core.mode :as mode]))
 
@@ -44,7 +44,7 @@
 
 (defn buffers [this]
   (letfn [(set-buffers [this]
-            (core/set-text this (vec (map name (keys (:buffers this))))))]
+            (lens/lens-set lens/text (vec (map name (keys (:buffers this)))) this))]
     (->> this
          (create-buffer :buffers)
          set-buffers)))

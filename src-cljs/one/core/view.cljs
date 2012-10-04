@@ -1,5 +1,5 @@
 (ns one.core.view
-  (:require [one.core :as core]))
+  (:require [one.core.lens :as lens]))
 
 (defrecord View [x y width height])
 
@@ -18,6 +18,6 @@
 
 (defn down [editor]
   (update-view editor #(let [y (:y %)]
-                         (if (< (+ y (:height %)) (core/count-lines editor))
+                         (if (< (+ y (:height %)) (lens/count-lines editor))
                            (assoc % :y (inc y))
                            %))))

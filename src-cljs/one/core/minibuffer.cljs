@@ -1,6 +1,5 @@
 (ns one.core.minibuffer
-  (:require [one.core :as core]
-            [one.core.lens :as lens]
+  (:require [one.core.lens :as lens]
             [one.core.parser :as parser]))
 
 (defrecord Minibuffer [command cursor])
