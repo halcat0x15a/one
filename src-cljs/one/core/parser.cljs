@@ -3,7 +3,7 @@
 
 (defrecord Input [tokens cursor success source])
 
-(defrecord Token [type text])
+(deftype Token [type text])
 
 (defn parse [parser source]
   (let [result (parser (Input. (transient []) 0 false source))]

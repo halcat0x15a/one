@@ -209,19 +209,17 @@
 
 (deftest buffer
   (testing "create buffer"
-    (is (= (buffer/create-buffer (assoc (editor/editor)
-                                   :buffers {:hello buffer/default-buffer}
-                                   :current :hello)
-                                 :world)
+    (is (= (buffer/create-buffer :world (assoc (editor/editor)
+                                          :buffers {:hello buffer/default-buffer}
+                                          :current :hello))
            (assoc (editor/editor)
              :buffers {:hello buffer/default-buffer
                        :world buffer/default-buffer}
              :current :world)))
     (testing "with name exists on buffers"
-      (is (= (buffer/create-buffer (assoc (editor/editor)
-                                     :buffers {:hello buffer/default-buffer}
-                                     :current :hello)
-                                   :hello)
+      (is (= (buffer/create-buffer :hello (assoc (editor/editor)
+                                            :buffers {:hello buffer/default-buffer}
+                                            :current :hello))
              (assoc (editor/editor)
                :buffers {:hello buffer/default-buffer}
                :current :hello)))))
@@ -316,16 +314,6 @@
 (deftest syntax
   (testing "parse clojure"
     (are [x y] (= x y)
-         (parser/parse syntax/clojure "(def a 100)")
-         [(parser/->Token nil "(")
-          (parser/->Token nil "def")
-          (parser/->Token nil " ")
-          (parser/->Token nil "a")
-          (parser/->Token nil " ")
-          (parser/->Token :number "100")
-          (parser/->Token nil ")")]
-         (parser/parse syntax/clojure "\"a\" \"b\"")
-         [(parser/->Token :string "\"a\"")
-          (parser/->Token nil " ")
-          (parser/->Token :string "\"b\"")]))
+         (count (parser/parse syntax/clojure "(def a 100)")) 7
+         (count (parser/parse syntax/clojure "\"a\" \"b\"")) 3))
     (is (time (parser/parse syntax/clojure (slurp "test/one/test.clj")))))

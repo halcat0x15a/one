@@ -3,6 +3,8 @@
             [one.core.lens :as lens]
             [one.core.parser :as parser]))
 
+(defrecord Minibuffer [command cursor])
+
 (defrecord History [current commands cursor])
 
 (def default-history (History. "" (list) 0))

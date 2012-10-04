@@ -19,7 +19,7 @@
                           key default-buffer)))
       :current key)))
 
-(defn create-buffer [this id]
+(defn create-buffer [id this]
   (assoc this
     :buffers (assoc (:buffers this)
                id default-buffer)
@@ -45,6 +45,6 @@
 (defn buffers [this]
   (letfn [(set-buffers [this]
             (core/set-text this (vec (map name (keys (:buffers this))))))]
-    (-> this
-        (create-buffer :buffers)
-        set-buffers)))
+    (->> this
+         (create-buffer :buffers)
+         set-buffers)))
