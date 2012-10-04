@@ -26,7 +26,7 @@
 
 (def minibuffer (editor-lens :minibuffer))
 
-(def minibuffer-text (lens-lens :text minibuffer))
+(def command (lens-lens :command minibuffer))
 
 (def history (editor-lens :history))
 

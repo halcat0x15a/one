@@ -27,4 +27,4 @@
 (defn editor
   ([] (editor 80 24))
   ([width height]
-     (Editor. {default-name buffer/default-buffer} buffer/default-minibuffer default-name (view/view width height) minibuffer/default-history @functions)))
+     (Editor. {default-name buffer/default-buffer} minibuffer/default-minibuffer default-name (view/view width height) minibuffer/default-history @functions)))

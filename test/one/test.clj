@@ -202,7 +202,7 @@
   (testing "eval command"
     (is (= (minibuffer/eval-command (assoc (editor/editor)
                                       :current :minibuffer
-                                      :minibuffer (assoc buffer/default-minibuffer :text ["get-buffer hello"])))
+                                      :minibuffer (assoc minibuffer/default-minibuffer :command "get-buffer hello")))
            (->> (editor/editor)
                 (buffer/get-buffer :hello)
                 (minibuffer/add-history "get-buffer hello"))))))

@@ -7,8 +7,6 @@
 
 (def default-buffer (Buffer. [""] cursor/default-cursor mode/general-mode))
 
-(def default-minibuffer (Buffer. [""] cursor/default-cursor mode/minibuffer-mode))
-
 (defn get-buffer [id editor]
   (let [key (keyword id)]
     (letfn [(set-buffer [buffers]

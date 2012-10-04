@@ -1,19 +1,22 @@
 (ns one.core.minibuffer
   (:require [one.core.lens :as lens]
+            [one.core.cursor :as cursor]
             [one.core.parser :as parser]))
 
 (defrecord Minibuffer [command cursor])
+
+(def default-minibuffer (Minibuffer. "" cursor/default-cursor))
 
 (defrecord History [current commands cursor])
 
 (def default-history (History. "" (list) 0))
 
 (defn add-history [command editor]
-  (lens/modify lens/commands #(cons command %) editor))
+  (lens/modify lens/commands (partial cons command) editor))
 
 (defn prepare-history [editor]
   (->> editor
-       (lens/lens-set lens/text [""])
+       (lens/lens-set lens/command "")
        (lens/lens-set lens/current-command "")
        (lens/lens-set lens/history-cursor 0)))
 
@@ -44,7 +47,7 @@
     editor))
 
 (defn eval-command [editor]
-  (let [command (first (lens/lens-get lens/minibuffer-text editor))]
+  (let [command (lens/lens-get lens/command editor)]
     (if-let [f (parser/parse-command command editor)]
       (->> (apply (first f) (conj (vec (rest f)) (prepare-history editor)))
            (add-history command))
