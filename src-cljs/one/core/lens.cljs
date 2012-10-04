@@ -7,11 +7,32 @@
 (defn modify [lens f editor]
   (lens-set lens (f (lens-get lens editor)) editor))
 
-(def buffers
+(defn editor-lens [key]
   (reify Lens
-    (lens-get [this editor] (:buffers editor))
-    (lens-set [this buffers editor]
-      (assoc editor :buffers buffers))))
+    (lens-get [this editor] (get editor key))
+    (lens-set [this value editor]
+      (assoc editor key value))))
+
+(defn lens-lens [key lens]
+  (reify Lens
+    (lens-get [this editor]
+      (get (lens-get lens editor) key))
+    (lens-set [this value editor]
+      (modify lens #(assoc % key value) editor))))
+
+(def buffers (editor-lens :buffers))
+
+(def minibuffer (editor-lens :minibuffer))
+
+(def minibuffer-text (lens-lens :text minibuffer))
+
+(def history (editor-lens :history))
+
+(def commands (lens-lens :commands history))
+
+(def current-command (lens-lens :current history))
+
+(def history-cursor (lens-lens :cursor history))
 
 (def buffer
   (reify Lens
@@ -28,25 +49,18 @@
             :buffers (assoc (:buffers editor)
                        current buffer)))))))
 
-(defn lens [key lens]
-  (reify Lens
-    (lens-get [this editor]
-      (get (lens-get lens editor) key))
-    (lens-set [this value editor]
-      (modify lens #(assoc % key value) editor))))
+(def cursor (lens-lens :cursor buffer))
 
-(def cursor (lens :cursor buffer))
+(def cursor-x (lens-lens :x cursor))
 
-(def cursor-x (lens :x cursor))
+(def cursor-y (lens-lens :y cursor))
 
-(def cursor-y (lens :y cursor))
-
-(def text (lens :text buffer))
+(def text (lens-lens :text buffer))
 
 (def count-lines (comp count (partial lens-get text)))
 
 (defn line [y]
-  (lens y text))
+  (lens-lens y text))
 
 (defn count-line [y editor]
   (when-let [line (lens-get (line y) editor)]

@@ -1,6 +1,7 @@
 (ns one.core.tool
   (:require [one.core :as core]
-            [one.core.buffer :as buffer]))
+            [one.core.buffer :as buffer]
+            [one.core.parser :as parser]))
 
 (defn commands [this]
   (-> this
@@ -13,7 +14,7 @@
       (core/set-text (vec (:commands (:history this))))))
 
 (defn apply-buffers [this command & args]
-  (let [[f & _] (core/parse-command this command)]
+  (let [[f & _] (parser/parse-command command this)]
     (loop [this this buffers (:buffers this) result []]
       (if (empty? buffers)
         (-> this

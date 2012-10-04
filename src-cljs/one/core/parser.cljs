@@ -1,4 +1,5 @@
-(ns one.core.parser)
+(ns one.core.parser
+  (:require [clojure.string :as string]))
 
 (defrecord Input [tokens cursor success source])
 
@@ -57,3 +58,8 @@
       (if (:success result)
         (recur result)
         (success result)))))
+
+(defn parse-command [s editor]
+  (let [[f & args] (string/split s #"\s+")]
+    (when-let [f ((:functions editor) (keyword f))]
+      (cons f args))))

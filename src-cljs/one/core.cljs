@@ -74,13 +74,5 @@
         text (take (:y cursor) text)]
     (+ (:x cursor) (count text) (apply + (map count text)))))
 
-(defn get-command [editor]
-  (first (:text (:minibuffer editor))))
-
-(defn parse-command [editor s]
-  (let [[f & args] (string/split s #"\s+")]
-    (when-let [f ((:functions editor) (keyword f))]
-      (cons f args))))
-
 (defn input [editor key]
   ((:function (:mode editor)) editor key))

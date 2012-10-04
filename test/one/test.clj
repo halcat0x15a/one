@@ -30,10 +30,7 @@
          (core/cursor-position (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 3 0)})))
          3
          (core/cursor-position (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 3 1)})))
-         9))
-  (testing "parse command"
-    (is (= (core/parse-command (assoc (editor/editor) :functions {:f :function}) "f a")
-           (list :function "a")))))
+         9)))
 
 (deftest text
   (testing "prepend newline"
@@ -310,6 +307,11 @@
     (testing "for general mode"
       (is (= (core/input (assoc (editor/editor) :mode mode/general-mode) :a)
              (text/insert "a" (assoc (editor/editor) :mode mode/general-mode)))))))
+
+(deftest parser
+  (testing "parse command"
+    (is (= (parser/parse-command "f a" (assoc (editor/editor) :functions {:f :function}))
+           (list :function "a")))))
 
 (deftest syntax
   (testing "parse clojure"
