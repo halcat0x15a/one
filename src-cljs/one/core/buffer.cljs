@@ -9,38 +9,40 @@
 
 (def default-minibuffer (Buffer. [""] cursor/default-cursor mode/minibuffer-mode))
 
-(defn get-buffer [this id]
-  (let [buffers (:buffers this)
-        key (keyword id)]
-    (assoc (if (contains? buffers key)
-             this
-             (assoc this
-               :buffers (assoc buffers
-                          key default-buffer)))
-      :current key)))
+(defn get-buffer [id editor]
+  (let [key (keyword id)]
+    (letfn [(set-buffer [buffers]
+              (if (contains? buffers key)
+                buffers
+                (assoc buffers
+                  key default-buffer)))]
+      (->> editor
+           (lens/modify lens/buffers set-buffer)
+           (lens/lens-set lens/current-buffer key)))))
 
-(defn create-buffer [id this]
-  (assoc this
-    :buffers (assoc (:buffers this)
-               id default-buffer)
-    :current id))
+(defn create-buffer [id editor]
+  (let [key (keyword id)]
+    (->> editor
+         (lens/modify lens/buffers #(assoc % key default-buffer))
+         (lens/lens-set lens/current-buffer key))))
 
-(defn change-buffer [this id]
-  (if (contains? (:buffers this) id)
-    (assoc this :current id)
-    this))
+(defn change-buffer [id editor]
+  (let [key (keyword id)]
+    (if (contains? (:buffers editor) key)
+      (assoc editor :current key)
+      editor)))
 
-(defn delete-buffer [this id]
+(defn delete-buffer [id this]
   (assoc this
     :buffers (dissoc (:buffers this) id)))
 
-(defn rename-buffer [this id]
-  (let [buffers (:buffers this)
-        current (:current this)]
-    (assoc this
-      :buffers (assoc (dissoc buffers current)
-                 id (buffers current))
-      :current id)))
+(defn rename-buffer [id editor]
+  (let [key (keyword id)
+        current (:current editor)]
+    (->> editor
+         (lens/modify lens/buffers #(assoc (dissoc % current)
+                                      key (current %)))
+         (lens/lens-set lens/current-buffer key))))
 
 (defn buffers [this]
   (letfn [(set-buffers [this]

@@ -8,7 +8,7 @@
 
 (def default-history (History. "" (list) 0))
 
-(defn add-history [editor command]
+(defn add-history [command editor]
   (lens/modify lens/commands #(cons command %) editor))
 
 (defn prepare-history [editor]
@@ -46,6 +46,6 @@
 (defn eval-command [editor]
   (let [command (first (lens/lens-get lens/minibuffer-text editor))]
     (if-let [f (parser/parse-command command editor)]
-      (-> (apply (first f) (prepare-history editor) (rest f))
-          (add-history command))
+      (->> (apply (first f) (conj (vec (rest f)) (prepare-history editor)))
+           (add-history command))
       editor)))

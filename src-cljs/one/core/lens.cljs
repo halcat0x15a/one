@@ -20,6 +20,8 @@
     (lens-set [this value editor]
       (modify lens #(assoc % key value) editor))))
 
+(def current-buffer (editor-lens :current))
+
 (def buffers (editor-lens :buffers))
 
 (def minibuffer (editor-lens :minibuffer))
