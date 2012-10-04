@@ -262,7 +262,18 @@
                                           :current :hello))
            (assoc (editor/editor)
              :buffers {:world buffer/default-buffer}
-             :current :world)))))
+             :current :world))))
+  (testing "get all buffers"
+    (is (= (buffer/buffers (assoc (editor/editor)
+                             :buffers {:hello buffer/default-buffer
+                                       :world buffer/default-buffer}
+                             :current :hello))
+           (assoc (editor/editor)
+             :buffers {:hello buffer/default-buffer
+                       :world buffer/default-buffer
+                       :buffers (assoc buffer/default-buffer
+                                  :text ["hello" "world"])}
+             :current :buffers)))))
 
 (deftest view
   (testing "view"

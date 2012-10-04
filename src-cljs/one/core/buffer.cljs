@@ -30,9 +30,8 @@
       (assoc editor :current key)
       editor)))
 
-(defn delete-buffer [id this]
-  (assoc this
-    :buffers (dissoc (:buffers this) id)))
+(defn delete-buffer [id editor]
+  (lens/modify lens/buffers #(dissoc % (keyword id)) editor))
 
 (defn rename-buffer [id editor]
   (let [key (keyword id)
@@ -42,9 +41,7 @@
                                       key (current %)))
          (lens/lens-set lens/current-buffer key))))
 
-(defn buffers [this]
-  (letfn [(set-buffers [this]
-            (lens/lens-set lens/text (vec (map name (keys (:buffers this)))) this))]
-    (->> this
-         (create-buffer :buffers)
-         set-buffers)))
+(defn buffers [editor]
+  (->> editor
+       (create-buffer :buffers)
+       (lens/lens-set lens/text (vec (map name (keys (:buffers editor)))))))
