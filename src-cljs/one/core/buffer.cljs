@@ -1,11 +1,8 @@
 (ns one.core.buffer
   (:require [one.core.lens :as lens]
             [one.core.cursor :as cursor]
-            [one.core.mode :as mode]))
-
-(defrecord Buffer [text cursor mode])
-
-(def default-buffer (Buffer. [""] cursor/default-cursor mode/general-mode))
+            [one.core.mode :as mode]
+            [one.core.default :as default]))
 
 (defn get-buffer [id editor]
   (let [key (keyword id)]
@@ -13,7 +10,7 @@
               (if (contains? buffers key)
                 buffers
                 (assoc buffers
-                  key default-buffer)))]
+                  key default/buffer)))]
       (->> editor
            (lens/modify lens/buffers set-buffer)
            (lens/lens-set lens/current-buffer key)))))
@@ -21,7 +18,7 @@
 (defn create-buffer [id editor]
   (let [key (keyword id)]
     (->> editor
-         (lens/modify lens/buffers #(assoc % key default-buffer))
+         (lens/modify lens/buffers #(assoc % key default/buffer))
          (lens/lens-set lens/current-buffer key))))
 
 (defn change-buffer [id editor]

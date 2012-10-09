@@ -1,19 +1,18 @@
 (ns one.core.text
   (:require [clojure.string :as string]
-            [one.core.cursor :as cursor]
-            [one.core.lens :as lens]))
-
-(defn add-newline [y editor]
-  (lens/modify lens/text #(vec (concat (take y %) (list "") (drop y %))) editor))
+            [one.core.record :as record]
+            [one.core.lens :as lens]
+            [one.core.util :as util]
+            [one.core.cursor :as cursor]))
 
 (defn prepend-newline [editor]
   (->> editor
-       (add-newline (lens/lens-get lens/cursor-y editor))
+       (lens/modify lens/text (partial util/insert-newline (lens/lens-get lens/cursor-y editor)))
        cursor/start-line))
 
 (defn append-newline [editor]
   (->> editor
-       (add-newline (inc (lens/lens-get lens/cursor-y editor)))
+       (lens/modify lens/text (partial util/insert-newline (inc (lens/lens-get lens/cursor-y editor))))
        cursor/down))
 
 (defn insert-newline [editor]
@@ -86,7 +85,7 @@
   (let [{:keys [x y]} (lens/lens-get lens/cursor editor)]
     (->> editor
          (lens/modify (lens/line y) #(subs % x))
-         (lens/lens-set lens/cursor (cursor/saved-cursor 0 y)))))
+         (lens/lens-set lens/cursor (record/saved-cursor 0 y)))))
 
 (defn replace-text [s editor]
   (let [{:keys [x y]} (lens/lens-get lens/cursor editor)]

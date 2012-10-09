@@ -20,11 +20,13 @@
     (lens-set [this value editor]
       (modify lens #(assoc % key value) editor))))
 
-(def current-buffer (editor-lens :current))
-
 (def buffers (editor-lens :buffers))
 
 (def minibuffer (editor-lens :minibuffer))
+
+(def current-buffer (editor-lens :current))
+
+(def view (editor-lens :view))
 
 (def command (lens-lens :command minibuffer))
 
@@ -59,11 +61,5 @@
 
 (def text (lens-lens :text buffer))
 
-(def count-lines (comp count (partial lens-get text)))
-
 (defn line [y]
   (lens-lens y text))
-
-(defn count-line [y editor]
-  (when-let [line (lens-get (line y) editor)]
-    (count line)))

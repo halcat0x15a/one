@@ -1,15 +1,8 @@
 (ns one.core.minibuffer
-  (:require [one.core.lens :as lens]
+  (:require [one.core.record :as record]
+            [one.core.lens :as lens]
             [one.core.cursor :as cursor]
             [one.core.parser :as parser]))
-
-(defrecord Minibuffer [command cursor])
-
-(def default-minibuffer (Minibuffer. "" cursor/default-cursor))
-
-(defrecord History [current commands cursor])
-
-(def default-history (History. "" (list) 0))
 
 (defn add-history [command editor]
   (lens/modify lens/commands (partial cons command) editor))

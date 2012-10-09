@@ -1,5 +1,6 @@
 (ns one.core.tool
-  (:require [one.core.buffer :as buffer]
+  (:require [one.core.util :as util]
+            [one.core.buffer :as buffer]
             [one.core.parser :as parser]
             [one.core.lens :as lens]))
 
@@ -33,7 +34,7 @@
 (defn count-lines [this]
   (->> this
        (buffer/create-buffer :count-lines)
-       (lens/lens-set lens/text [(str (lens/count-lines this))])))
+       (lens/lens-set lens/text [(str (util/count-lines this))])))
 
 (defn sum [this]
   (->> this

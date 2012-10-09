@@ -1,41 +1,88 @@
 (ns one.test
-  (:require [one.core :as core]
+  (:require [clojure.test.generative.runner :as runner]
+            [clojure.test.generative.generators :as gen]
+            [one.core.record :as record]
+            [one.core.lens :as lens]
+            [one.core.util :as util]
             [one.core.text :as text]
-            [one.core.cursor :as cursor]
-            [one.core.buffer :as buffer]
-            [one.core.view :as view]
             [one.core.editor :as editor]
-            [one.core.minibuffer :as minibuffer]
-            [one.core.mode :as mode]
             [one.core.parser :as parser]
             [one.core.syntax :as syntax])
-  (:use clojure.test))
+  (:use [clojure.test :only [deftest testing is are]]
+        [clojure.test.generative :only [defspec]]
+        [clojure.core.incubator :only [-?>]]
+        [one.core.lens :only [lens-set lens-get]]))
 
-(deftest core
-  (testing "get line"
-    (is (= (core/get-line (core/set-text (editor/editor) ["hello" "world"]) 0)
-           "hello"))
-    (testing "with index out of bounds"
-      (is (nil? (core/get-line (core/set-text (editor/editor) ["hello" "world"]) 2)))))
-  (testing "set line"
-    (is (= (core/set-line (core/set-text (editor/editor) ["hello" "world"]) 1 "miku")
-           (core/set-text (editor/editor) ["hello" "miku"]))))
-  (testing "count line"
-    (is (= (core/count-line (core/set-text (editor/editor) ["hello" "world"]) 0)
-           5))
-    (testing "with index out of bounds"
-      (is (nil? (core/count-line (core/set-text (editor/editor) ["hello" "world"]) 2)))))
-  (testing "calculate cursor position"
+(def e (editor/editor))
+
+(def pos (partial gen/uniform 0))
+
+(def text (partial gen/vec gen/string))
+
+(defrecord Buffer [text x y])
+
+(defn buffer []
+  (let [text (gen/vec gen/string)
+        text' (if (empty? text) [""] text)]
+    (Buffer. text' (pos (inc (apply max (map count text')))) (pos (inc (count text'))))))
+
+(defn saved-cursor [buffer]
+  (record/saved-cursor (.x buffer) (.y buffer)))
+
+(defspec count-lines
+  (fn [text]
+    (util/count-lines (lens-set lens/text text e)))
+  [^{:tag one.test/text} text]
+  (is (= % (count text))))
+
+(defspec count-line
+  (fn [buffer]
+    (let [{:keys [text y]} buffer]
+      (util/count-line y (lens-set lens/text text e))))
+  [^{:tag one.test/buffer} buffer]
+  (let [{:keys [text y]} buffer]
+    (is (= % (-?> text (get y) count)))))
+
+(defspec insert-newline
+  (fn [buffer]
+    (let [{:keys [text y]} buffer]
+      (util/insert-newline y text)))
+  [^{:tag one.test/buffer} buffer]
+  (let [{:keys [text y]} buffer]
+    (is (= % (vec (concat (take y text) (list "") (drop y text)))))))
+
+(defspec cursor-position
+  (fn [buffer]
+    (util/cursor-position (->> e
+                               (lens-set lens/text (.text buffer))
+                               (lens-set lens/cursor (saved-cursor buffer)))))
+  [^{:tag one.test/buffer} buffer]
+  (let [{:keys [text x y]} buffer
+        text' (take y text)]
+    (is (= % (+ x (count text') (apply + (map count text')))))))
+
+(defspec prepend-newline
+  (fn [buffer]
+    (text/prepend-newline (->> e
+                               (lens-set lens/text (.text buffer))
+                               (lens-set lens/cursor (saved-cursor buffer)))))
+  [^one.test/buffer buffer]
+  (let [{:keys [text y]} buffer]
+    (are [a b] (= a b)
+         (lens-get lens/text %) (util/insert-newline y text)
+         (lens-get lens/cursor-x %) 0)))
+
+(deftest syntax
+  (testing "parse clojure"
     (are [x y] (= x y)
-         (core/cursor-position (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 3 0)})))
-         3
-         (core/cursor-position (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 3 1)})))
-         9)))
+         (count (parser/parse syntax/clojure "(def a 100)")) 7
+         (count (parser/parse syntax/clojure "\"a\" \"b\"")) 3)))
+
+(runner/-main "test/one")
+
+(comment
 
 (deftest text
-  (testing "prepend newline"
-    (is (= (text/prepend-newline (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 1 1)})))
-           (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "" "world"] :cursor (cursor/saved-cursor 0 1)})))))
   (testing "append newline"
     (is (= (text/append-newline (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 1 1)})))
            (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world" ""] :cursor (cursor/->Cursor 0 2 1)})))))
@@ -317,9 +364,4 @@
     (is (= (parser/parse-command "f a" (assoc (editor/editor) :functions {:f :function}))
            (list :function "a")))))
 
-(deftest syntax
-  (testing "parse clojure"
-    (are [x y] (= x y)
-         (count (parser/parse syntax/clojure "(def a 100)")) 7
-         (count (parser/parse syntax/clojure "\"a\" \"b\"")) 3))
-    (is (time (parser/parse syntax/clojure (slurp "test/one/test.clj")))))
+)

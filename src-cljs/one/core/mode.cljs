@@ -1,18 +1,13 @@
 (ns one.core.mode
-  (:require [one.core.text :as text]
+  (:require [one.core.record :as record]
+            [one.core.text :as text]
             [one.core.cursor :as cursor]
             [one.core.minibuffer :as minibuffer]))
-
-(defrecord Mode [name function])
-
-(def general-mode
-  (Mode. :general (fn [editor key]
-                    (text/insert (name key) editor))))
 
 (declare normal-keymap)
 
 (def normal-mode
-  (Mode. :normal (fn [editor key]
+  (record/->Mode :normal (fn [editor key]
                    (if-let [f (key @normal-keymap)]
                      (f editor)
                      editor))))
@@ -25,7 +20,7 @@
          :right cursor/right}))
 
 (def insert-mode
-  (Mode. :insert (fn [editor key]
+  (record/->Mode :insert (fn [editor key]
                    (if-let [f (key @insert-keymap)]
                      (f editor)
                      (text/insert editor (name key))))))
@@ -43,7 +38,7 @@
          :$ (comp normal-mode text/delete-from)}))
 
 (def delete-mode
-  (Mode. :delete (fn [editor key]
+  (record/->Mode :delete (fn [editor key]
                    (if-let [f (key @delete-keymap)]
                      (f editor)
                      (normal-mode editor)))))
@@ -56,7 +51,7 @@
          :right normal-mode}))
 
 (def replace-mode
-  (Mode. :replace (fn [editor key]
+  (record/->Mode :replace (fn [editor key]
                     (if-let [f (key replace-keymap)]
                       (f editor)
                       (-> editor
@@ -86,7 +81,7 @@
          :r replace-mode}))
 
 (def minibuffer-mode
-  (Mode. :minibuffer (fn [editor key]
+  (record/->Mode :minibuffer (fn [editor key]
                        (case key
                          :up (minibuffer/set-prev-command editor)
                          :down (minibuffer/set-prev-command editor)

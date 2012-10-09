@@ -1,23 +1,19 @@
 (ns one.core.view
-  (:require [one.core.lens :as lens]))
-
-(defrecord View [x y width height])
-
-(defn view [width height]
-  (View. 0 0 width height))
-
-(defn update-view [editor f]
-  (assoc editor
-    :view (f (:view editor))))
+  (:require [one.core.lens :as lens]
+            [one.core.util :as util]))
 
 (defn up [editor]
-  (update-view editor #(let [y (:y %)]
-                         (if (> y 0)
-                           (assoc % :y (dec y))
-                           %))))
+  (letfn [(up' [view]
+            (let [y (:y view)]
+              (if (> y 0)
+                (assoc view :y (dec y))
+                view)))]
+    (lens/modify lens/view up' editor)))
 
 (defn down [editor]
-  (update-view editor #(let [y (:y %)]
-                         (if (< (+ y (:height %)) (lens/count-lines editor))
-                           (assoc % :y (inc y))
-                           %))))
+  (letfn [(down' [view]
+            (let [y (:y view)]
+              (if (< (+ y (:height view)) (util/count-lines editor))
+                (assoc view :y (inc y))
+                view)))]
+    (lens/modify lens/view down' editor)))

@@ -1,3 +1,1 @@
-rm test/one/core.clj
-
 rm -r test/one/core
