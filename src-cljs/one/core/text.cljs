@@ -16,13 +16,9 @@
        cursor/down))
 
 (defn insert-newline [editor]
-  (letfn [(insert [text]
-            (let [{:keys [x y]} (lens/lens-get lens/cursor editor)
-                  [text' text''] (split-at y text)
-                  line (first text'')]
-              (vec (concat text' (list (subs line 0 x) (subs line x)) (rest text'')))))]
+  (let [{:keys [x y]} (lens/lens-get lens/cursor editor)]
     (->> editor
-         (lens/modify lens/text insert)
+         (lens/modify lens/text (partial util/insert-newline x y))
          cursor/down
          cursor/start-line)))
 

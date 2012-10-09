@@ -1,19 +1,11 @@
 (ns one.test
-  (:require [clojure.test.generative.runner :as runner]
-            [clojure.test.generative.generators :as gen]
+  (:require [clojure.test.generative.generators :as gen]
             [one.core.record :as record]
             [one.core.lens :as lens]
-            [one.core.util :as util]
-            [one.core.text :as text]
-            [one.core.editor :as editor]
-            [one.core.parser :as parser]
-            [one.core.syntax :as syntax])
-  (:use [clojure.test :only [deftest testing is are]]
-        [clojure.test.generative :only [defspec]]
-        [clojure.core.incubator :only [-?>]]
-        [one.core.lens :only [lens-set lens-get]]))
+            [one.core.editor :as editor])
+  (:use [one.core.lens :only [lens-set]]))
 
-(def e (editor/editor))
+(def editor (editor/editor))
 
 (def pos (partial gen/uniform 0))
 
@@ -22,68 +14,22 @@
 (defrecord Buffer [text x y])
 
 (defn buffer []
-  (let [text (gen/vec gen/string)
-        text' (if (empty? text) [""] text)]
-    (Buffer. text' (pos (inc (apply max (map count text')))) (pos (inc (count text'))))))
+  (let [text (text)
+        text' (if (empty? text) [""] text)
+        y (pos (count text'))]
+    (Buffer. text' (pos (inc (count (text' y)))) y)))
 
 (defn saved-cursor [buffer]
   (record/saved-cursor (.x buffer) (.y buffer)))
 
-(defspec count-lines
-  (fn [text]
-    (util/count-lines (lens-set lens/text text e)))
-  [^{:tag one.test/text} text]
-  (is (= % (count text))))
-
-(defspec count-line
-  (fn [buffer]
-    (let [{:keys [text y]} buffer]
-      (util/count-line y (lens-set lens/text text e))))
-  [^{:tag one.test/buffer} buffer]
-  (let [{:keys [text y]} buffer]
-    (is (= % (-?> text (get y) count)))))
-
-(defspec insert-newline
-  (fn [buffer]
-    (let [{:keys [text y]} buffer]
-      (util/insert-newline y text)))
-  [^{:tag one.test/buffer} buffer]
-  (let [{:keys [text y]} buffer]
-    (is (= % (vec (concat (take y text) (list "") (drop y text)))))))
-
-(defspec cursor-position
-  (fn [buffer]
-    (util/cursor-position (->> e
-                               (lens-set lens/text (.text buffer))
-                               (lens-set lens/cursor (saved-cursor buffer)))))
-  [^{:tag one.test/buffer} buffer]
-  (let [{:keys [text x y]} buffer
-        text' (take y text)]
-    (is (= % (+ x (count text') (apply + (map count text')))))))
-
-(defspec prepend-newline
-  (fn [buffer]
-    (text/prepend-newline (->> e
-                               (lens-set lens/text (.text buffer))
-                               (lens-set lens/cursor (saved-cursor buffer)))))
-  [^one.test/buffer buffer]
-  (let [{:keys [text y]} buffer]
-    (are [a b] (= a b)
-         (lens-get lens/text %) (util/insert-newline y text)
-         (lens-get lens/cursor-x %) 0)))
-
-(deftest syntax
-  (testing "parse clojure"
-    (are [x y] (= x y)
-         (count (parser/parse syntax/clojure "(def a 100)")) 7
-         (count (parser/parse syntax/clojure "\"a\" \"b\"")) 3)))
+(defn set-buffer [buffer]
+  (->> editor
+       (lens-set lens/text (.text buffer))
+       (lens-set lens/cursor (saved-cursor buffer))))
 
 (comment
 
 (deftest text
-  (testing "append newline"
-    (is (= (text/append-newline (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 1 1)})))
-           (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world" ""] :cursor (cursor/->Cursor 0 2 1)})))))
   (testing "insert newline"
     (is (= (text/insert-newline (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["foo" "hello world" "bar"] :cursor (cursor/saved-cursor 5 1)})))
              (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["foo" "hello" " world" "bar"] :cursor (cursor/saved-cursor 0 2)})))))

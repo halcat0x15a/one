@@ -1,5 +1,5 @@
 bin/before
 
-lein run -m clojure.test.generative.runner/main test/one
+lein2 run -m clojure.test.generative.runner test/one
 
 bin/after

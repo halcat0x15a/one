@@ -7,9 +7,14 @@
   (when-let [line (lens/lens-get (lens/line y) editor)]
     (count line)))
 
-(defn insert-newline [y text]
-  (let [[text' text''] (split-at y text)]
-    (vec (concat text' (list "") text''))))
+(defn insert-newline
+  ([x y text]
+     (let [[text' text''] (split-at y text)
+           line (first text'')]
+       (vec (concat text' (list (subs line 0 x) (subs line x)) (rest text'')))))
+  ([y text]
+     (let [[text' text''] (split-at y text)]
+       (vec (concat text' (list "") text'')))))
 
 (defn cursor-position [editor]
   (let [{:keys [cursor text]} (lens/lens-get lens/buffer editor)
