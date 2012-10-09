@@ -1,3 +1,4 @@
 language: clojure
+script: lein run -m clojure.test.generative.runner test/one
 before_script: bin/before
 after_script: bin/after

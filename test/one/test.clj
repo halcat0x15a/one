@@ -78,8 +78,6 @@
          (count (parser/parse syntax/clojure "(def a 100)")) 7
          (count (parser/parse syntax/clojure "\"a\" \"b\"")) 3)))
 
-(runner/-main "test/one")
-
 (comment
 
 (deftest text
