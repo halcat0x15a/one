@@ -30,12 +30,6 @@
 (comment
 
 (deftest text
-  (testing "insert newline"
-    (is (= (text/insert-newline (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["foo" "hello world" "bar"] :cursor (cursor/saved-cursor 5 1)})))
-             (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["foo" "hello" " world" "bar"] :cursor (cursor/saved-cursor 0 2)})))))
-  (testing "insert"
-    (is (= (text/insert "world" (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello"] :cursor (cursor/saved-cursor 5 0)})))
-           (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["helloworld"] :cursor (cursor/saved-cursor 10 0)})))))
   (testing "delete"
     (is (= (text/delete (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello world"] :cursor (cursor/saved-cursor 10 0)})))
            (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello worl"] :cursor (cursor/saved-cursor 10 0)}))))
