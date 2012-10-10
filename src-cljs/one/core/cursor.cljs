@@ -5,6 +5,12 @@
             [one.core.lens :as lens]
             [one.core.util :as util]))
 
+(defn modify-cursor-with [f editor]
+  (let [cursor (lens/lens-get lens/cursor editor)
+        {:keys [x y]} cursor
+        line (lens/lens-get (lens/line y) editor)]
+    (lens/lens-set lens/cursor (assoc cursor :x (f line x)) editor)))
+
 (def left
   (partial lens/modify lens/cursor-x #(if (pos? %) (dec %) %)))
 
@@ -18,41 +24,20 @@
 (def up
   (partial lens/modify lens/cursor-y #(if (pos? %) (dec %) %)))
 
-(defn right [editor]
-  (letfn [(right' [cursor]
-            (let [{:keys [x y]} cursor]
-              (if (< x (util/count-line y editor))
-                (assoc cursor :x (inc x))
-                cursor)))]
-    (lens/modify lens/cursor right' editor)))
-
-(defn move-while [editor pred f]
-  (loop [editor editor]
-    (let [{:keys [x y]} (lens/lens-get lens/cursor editor)
-          editor' (f editor)]
-      (if-let [character (str (get (lens/lens-get (lens/line y) editor) x))]
-        (if (and (not= editor' editor) (pred character))
-          (recur editor')
-          editor)
-        editor))))
-
-(defn forward [editor]
-  (-> editor
-      (move-while string/blank? right)
-      (move-while (comp not string/blank?) right)))
-
-(defn backward [editor]
-  (-> editor
-      left
-      (move-while string/blank? left)
-      (move-while (comp not string/blank?) left)
-      (move-while string/blank? right)))
+(def right
+  (partial modify-cursor-with
+           (fn [line x]
+             (if (< x (count line))
+               (inc x)
+               x))))
 
 (def start-line
   (partial lens/lens-set lens/cursor-x 0))
 
-(defn end-line [editor]
-  (lens/modify lens/cursor #(assoc % :x (util/count-line (:y %) editor)) editor))
+(def end-line
+  (partial modify-cursor-with
+           (fn [line _]
+             (count line))))
 
 (def start-buffer
   (partial lens/modify lens/cursor #(assoc % :x 0 :y 0)))
@@ -64,3 +49,9 @@
                 :x (util/count-line y' editor)
                 :y y')))]
     (lens/modify lens/cursor end-buffer' editor)))
+
+(def forward
+  (partial modify-cursor-with (partial util/move-while-word inc)))
+
+(def backward
+  (partial modify-cursor-with (comp inc (partial util/move-while-word dec))))

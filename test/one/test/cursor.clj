@@ -63,3 +63,17 @@
     (are [a b] (= a b)
          (lens-get lens/cursor-x %) (count (text y'))
          (lens-get lens/cursor-y %) y')))
+
+(defspec forward
+  (comp cursor/forward test/set-buffer)
+  [^test/buffer buffer]
+  (let [{:keys [text x y]} buffer]
+    (is (= (lens-get lens/cursor-x %)
+           (util/move-while-word inc (text y) x)))))
+
+(defspec backward
+  (comp cursor/backward test/set-buffer)
+  [^test/buffer buffer]
+  (let [{:keys [text x y]} buffer]
+    (is (= (lens-get lens/cursor-x %)
+           (inc (util/move-while-word dec (text y) x))))))

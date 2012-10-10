@@ -20,3 +20,19 @@
   (let [{:keys [cursor text]} (lens/lens-get lens/buffer editor)
         text (take (:y cursor) text)]
     (+ (:x cursor) (count text) (apply + (map count text)))))
+
+(def w #"\w")
+
+(def word (partial re-matches w))
+
+(defn move-while [pred f s n]
+  (loop [x n]
+    (if-let [c (get s x)]
+      (if (pred (str c))
+        (recur (f x))
+        x)
+      x)))
+
+(defn move-while-word [f line x]
+  (->> (move-while (complement word) f line x)
+       (move-while word f line)))
