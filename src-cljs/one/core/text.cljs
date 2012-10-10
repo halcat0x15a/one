@@ -32,14 +32,14 @@
 (defn delete [editor]
   (let [{:keys [x y]} (lens/lens-get lens/cursor editor)]
     (letfn [(delete' [line]
-              (if (> (count line) x)
+              (if (< x (count line))
                 (str (subs line 0 x) (subs line (inc x)))
                 line))]
       (lens/modify (lens/line y) delete' editor))))
 
 (defn backspace [editor]
   (let [{:keys [x y]} (lens/lens-get lens/cursor editor)]
-    (if (> x 0)
+    (if (pos? x)
       (->> editor
            (lens/modify (lens/line y) #(str (subs % 0 (dec x)) (subs % x)))
            cursor/left)

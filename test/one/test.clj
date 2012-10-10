@@ -30,18 +30,6 @@
 (comment
 
 (deftest text
-  (testing "delete"
-    (is (= (text/delete (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello world"] :cursor (cursor/saved-cursor 10 0)})))
-           (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello worl"] :cursor (cursor/saved-cursor 10 0)}))))
-    (testing "with end cursor of line"
-      (is (= (text/delete (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello world"] :cursor (cursor/saved-cursor 11 0)})))
-             (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello world"] :cursor (cursor/saved-cursor 11 0)}))))))
-  (testing "backspace"
-    (is (= (text/backspace (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello world"] :cursor (cursor/saved-cursor 1 0)})))
-           (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["ello world"] :cursor (cursor/saved-cursor 0 0)}))))
-    (testing "with start cursor of line"
-      (is (= (text/backspace (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello world"] :cursor (cursor/saved-cursor 0 0)})))
-             (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello world"] :cursor (cursor/saved-cursor 0 0)}))))))
   (testing "delete line"
     (are [x y] (= x y)
          (text/delete-line (core/set-buffer (editor/editor) (buffer/map->Buffer {:text ["hello" "world"] :cursor (cursor/saved-cursor 5 0)})))
