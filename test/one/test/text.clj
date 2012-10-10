@@ -11,10 +11,10 @@
 (defspec prepend-newline
   (comp text/prepend-newline test/set-buffer)
   [^test/buffer buffer]
-  (let [{:keys [text x y]} buffer]
+  (let [{:keys [text y]} buffer]
     (are [a b] (= a b)
          (lens-get lens/text %) (util/insert-newline y text)
-         (lens-get lens/cursor %) (record/->Cursor 0 y 0))))
+         (lens-get lens/cursor-x %) 0)))
 
 (defspec append-newline
   (comp text/append-newline test/set-buffer)
@@ -23,7 +23,8 @@
         y' (inc y)]
     (are [a b] (= a b)
          (lens-get lens/text %) (util/insert-newline y' text)
-         (lens-get lens/cursor %) (record/->Cursor 0 (if (< y (count text)) y' y) x))))
+         (lens-get lens/cursor-x %) 0
+         (lens-get lens/cursor-y %) y')))
 
 (defspec insert-newline
   (comp text/insert-newline test/set-buffer)

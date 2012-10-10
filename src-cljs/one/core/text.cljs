@@ -13,6 +13,7 @@
 (defn append-newline [editor]
   (->> editor
        (lens/modify lens/text (partial util/insert-newline (inc (lens/lens-get lens/cursor-y editor))))
+       cursor/start-line
        cursor/down))
 
 (defn insert-newline [editor]
@@ -27,7 +28,7 @@
         {:keys [x y]} cursor]
     (->> editor
          (lens/modify (lens/line y) #(str (subs % 0 x) s (subs % x)))
-         (lens/lens-set lens/cursor (cursor/set-saved (+ x (count s)) cursor)))))
+         (lens/lens-set lens/cursor (assoc cursor :x (+ x (count s)))))))
 
 (defn delete [editor]
   (let [{:keys [x y]} (lens/lens-get lens/cursor editor)]

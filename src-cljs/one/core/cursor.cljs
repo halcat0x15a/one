@@ -5,52 +5,25 @@
             [one.core.lens :as lens]
             [one.core.util :as util]))
 
-(defn set-saved [x cursor]
-  (assoc cursor :x x :saved x))
-
-(defn left [editor]
-  (letfn [(left' [cursor]
-            (let [x (:x cursor)]
-              (if (> x 0)
-                (set-saved (dec x) cursor)
-                (let [y' (dec (:y cursor))]
-                  (if-let [length (util/count-line y' editor)]
-                    (record/saved-cursor length y')
-                    cursor)))))]
-    (lens/modify lens/cursor left' editor)))
+(def left
+  (partial lens/modify lens/cursor-x #(if (pos? %) (dec %) %)))
 
 (defn down [editor]
-  (let [cursor (lens/lens-get lens/cursor editor)
-        {:keys [x y saved]} cursor
-        length (util/count-lines editor)]
-    (if (< y (dec length))
-      (let [y' (inc y)
-            x' (min (max x saved) (util/count-line y' editor))]
-        (->> editor
-             (lens/lens-set lens/cursor (assoc cursor :x x' :y y'))
-             view/down))
-      (lens/lens-set lens/cursor (record/saved-cursor (util/count-line y editor) y) editor))))
+  (letfn [(down' [y]
+            (if (< y (dec (util/count-lines editor)))
+              (inc y)
+              y))]
+    (lens/modify lens/cursor-y down' editor)))
 
-(defn up [editor]
-  (let [cursor (lens/lens-get lens/cursor editor)
-        {:keys [x y saved]} cursor]
-    (if (> y 0)
-      (let [y' (dec y)
-            x' (min (max x saved) (util/count-line y' editor))]
-        (->> editor
-            (lens/lens-set lens/cursor (assoc cursor :x x' :y y'))
-            view/up))
-      (lens/lens-set lens/cursor (record/saved-cursor 0 y) editor))))
+(def up
+  (partial lens/modify lens/cursor-y #(if (pos? %) (dec %) %)))
 
 (defn right [editor]
   (letfn [(right' [cursor]
             (let [{:keys [x y]} cursor]
               (if (< x (util/count-line y editor))
-                (set-saved (inc x) cursor)
-                (let [y' (inc y)]
-                  (if (< y' (util/count-lines editor))
-                    (record/saved-cursor 0 y')
-                    cursor)))))]
+                (assoc cursor :x (inc x))
+                cursor)))]
     (lens/modify lens/cursor right' editor)))
 
 (defn move-while [editor pred f]
@@ -75,18 +48,19 @@
       (move-while (comp not string/blank?) left)
       (move-while string/blank? right)))
 
-(defn start-line [editor]
-  (lens/modify lens/cursor (partial set-saved 0) editor))
+(def start-line
+  (partial lens/lens-set lens/cursor-x 0))
 
 (defn end-line [editor]
-  (lens/modify lens/cursor #(set-saved (util/count-line (:y %) editor) %) editor))
+  (lens/modify lens/cursor #(assoc % :x (util/count-line (:y %) editor)) editor))
 
-(defn start-buffer [editor]
-  (-> editor
-      (move-while (constantly true) up)
-      start-line))
+(def start-buffer
+  (partial lens/modify lens/cursor #(assoc % :x 0 :y 0)))
 
 (defn end-buffer [editor]
-  (-> editor
-      (move-while (constantly true) down)
-      end-line))
+  (letfn [(end-buffer' [cursor]
+            (let [y' (dec (util/count-lines editor))]
+              (assoc cursor
+                :x (util/count-line y' editor)
+                :y y')))]
+    (lens/modify lens/cursor end-buffer' editor)))
