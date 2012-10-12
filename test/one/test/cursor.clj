@@ -69,11 +69,11 @@
   [^test/buffer buffer]
   (let [{:keys [text x y]} buffer]
     (is (= (lens-get lens/cursor-x %)
-           (util/move-while-word inc (text y) x)))))
+           (util/find-forward (text y) x)))))
 
 (defspec backward
   (comp cursor/backward test/set-buffer)
   [^test/buffer buffer]
   (let [{:keys [text x y]} buffer]
     (is (= (lens-get lens/cursor-x %)
-           (inc (util/move-while-word dec (text y) x))))))
+           (util/find-backward (text y) x)))))

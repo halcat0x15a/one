@@ -1,6 +1,7 @@
 (ns one.core.syntax
   (:require [one.core.parser :as parser])
-  (:refer-clojure :exclude [name keyword newline]))
+  (:refer-clojure :exclude [name keyword newline])
+  (:use [one.core.parser :only [sym opt exp rep]]))
 
 (def re-newline #"^\n")
 
@@ -37,3 +38,5 @@
    this))
 
 (def clojure (parser/rep expression))
+
+(def word (rep (exp (opt parser/not-word) parser/word (opt parser/not-word))))

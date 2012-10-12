@@ -3,7 +3,7 @@
 
 (defrecord Input [tokens cursor success source])
 
-(deftype Token [type text])
+(defrecord Token [type text cursor])
 
 (defn parse [parser source]
   (let [result (parser (Input. (transient []) 0 false source))]
@@ -14,11 +14,12 @@
     (let [source (:source input)
           token (re-find regex source)]
       (letfn [(consume [token]
-                (let [token-size (count token)]
-                  (conj! (:tokens input) (Token. type token))
+                (let [token-size (count token)
+                      cursor (:cursor input)]
+                  (conj! (:tokens input) (Token. type token cursor))
                   (assoc input
                     :success true
-                    :cursor (+ (:cursor input) token-size)
+                    :cursor (+ cursor token-size)
                     :source (subs source token-size))))]
         (cond (string? token) (consume token)
               (coll? token) (consume (first token))
@@ -63,3 +64,7 @@
   (let [[f & args] (string/split s #"\s+")]
     (when-let [f ((:functions editor) (keyword f))]
       (cons f args))))
+
+(def word (sym :word #"^\w+"))
+
+(def not-word (sym nil #"^\W+"))

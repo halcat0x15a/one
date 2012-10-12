@@ -61,15 +61,15 @@
   (let [{:keys [x y]} (lens/lens-get lens/cursor editor)]
     (letfn [(delete-forward' [line]
               (str (subs line 0 x)
-                   (subs line (->> editor cursor/forward (lens/lens-get lens/cursor-x)))))]
+                   (subs line (util/find-forward line x))))]
       (lens/modify (lens/line y) delete-forward' editor))))
 
 (defn delete-backward [editor]
   (let [{:keys [x y]} (lens/lens-get lens/cursor editor)
         cursor (->> editor cursor/backward (lens/lens-get lens/cursor))]
     (letfn [(delete-backward' [line]
-              (str (subs line 0 (:x cursor))
-                   (subs line x)))]
+                (str (subs line 0 (:x cursor))
+                     (subs line x)))]
       (->> editor
            (lens/modify (lens/line y) delete-backward')
            (lens/lens-set lens/cursor cursor)))))

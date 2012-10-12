@@ -1,5 +1,7 @@
 (ns one.core.util
-  (:require [one.core.lens :as lens]))
+  (:require [one.core.lens :as lens]
+            [one.core.syntax :as syntax]
+            [one.core.parser :as parser]))
 
 (def count-lines (comp count (partial lens/lens-get lens/text)))
 
@@ -21,18 +23,19 @@
         text (take (:y cursor) text)]
     (+ (:x cursor) (count text) (apply + (map count text)))))
 
-(def w #"\w")
+(def word #"\w+")
 
-(def word (partial re-matches w))
+(def find-word (partial re-seq word))
 
-(defn move-while [pred f s n]
-  (loop [x n]
-    (if-let [c (get s x)]
-      (if (pred (str c))
-        (recur (f x))
-        x)
-      x)))
+(defn find-forward [line x]
+  (let [tokens (filter :type (parser/parse syntax/word (subs line x)))]
+    (if (empty? tokens)
+      (count line)
+      (let [token (first tokens)]
+        (+ (.cursor token) (count (.text token)))))))
 
-(defn move-while-word [f line x]
-  (->> (move-while (complement word) f line x)
-       (move-while word f line)))
+(defn find-backward [line x]
+  (let [tokens (filter :type (parser/parse syntax/word (subs line 0 x)))]
+    (if (empty? tokens)
+      0
+      (.cursor (last tokens)))))

@@ -51,7 +51,7 @@
     (lens/modify lens/cursor end-buffer' editor)))
 
 (def forward
-  (partial modify-cursor-with (partial util/move-while-word inc)))
+  (partial modify-cursor-with util/find-forward))
 
 (def backward
-  (partial modify-cursor-with (comp inc (partial util/move-while-word dec))))
+  (partial modify-cursor-with util/find-backward))

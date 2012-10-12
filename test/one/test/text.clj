@@ -66,3 +66,19 @@
                                       (str (subs line 0 x') (subs line x))
                                       line)
          (lens-get lens/cursor-x %) (if (pos? x) x' x))))
+
+(defspec delete-forward
+  (comp text/delete-forward test/set-buffer)
+  [^test/buffer buffer]
+  (let [{:keys [text x y]} buffer
+        line (text y)]
+    (is (= (lens-get (lens/line y) %)
+           (str (subs line 0 x) (subs line (util/find-forward line x)))))))
+
+(defspec delete-backward
+  (comp text/delete-backward test/set-buffer)
+  [^test/buffer buffer]
+  (let [{:keys [text x y]} buffer
+        line (text y)]
+    (are [a b] (= a b)
+         (lens-get (lens/line y) %) (str (subs line 0 (util/find-backward line x)) (subs line x)))))

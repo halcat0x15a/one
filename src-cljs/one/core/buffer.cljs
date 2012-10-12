@@ -4,17 +4,6 @@
             [one.core.mode :as mode]
             [one.core.default :as default]))
 
-(defn get-buffer [id editor]
-  (let [key (keyword id)]
-    (letfn [(set-buffer [buffers]
-              (if (contains? buffers key)
-                buffers
-                (assoc buffers
-                  key default/buffer)))]
-      (->> editor
-           (lens/modify lens/buffers set-buffer)
-           (lens/lens-set lens/current-buffer key)))))
-
 (defn create-buffer [id editor]
   (let [key (keyword id)]
     (->> editor
@@ -26,6 +15,17 @@
     (if (contains? (:buffers editor) key)
       (assoc editor :current key)
       editor)))
+
+(defn get-buffer [id editor]
+  (let [key (keyword id)]
+    (letfn [(set-buffer [buffers]
+              (if (contains? buffers key)
+                buffers
+                (assoc buffers
+                  key default/buffer)))]
+      (->> editor
+           (lens/modify lens/buffers set-buffer)
+           (lens/lens-set lens/current-buffer key)))))
 
 (defn delete-buffer [id editor]
   (lens/modify lens/buffers #(dissoc % (keyword id)) editor))
