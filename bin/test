@@ -1,5 +1,1 @@
-bin/before
-
 lein2 run -m clojure.test.generative.runner test/one
-
-bin/after
