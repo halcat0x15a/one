@@ -2,7 +2,7 @@
   (:require [one.core.data :as data]
             [one.core.state :as state])
   (:use;*CLJSBUILD-REMOVE*;-macros
-   [one.core.macros :only [defdata for-m]]))
+   [one.core.macros :only [defdata for-m do-m]]))
 
 (def left
   (state/modify data/x
@@ -12,13 +12,12 @@
                     x))))
 
 (def down
-  (for-m [text (state/get data/text)
-          cursor (state/modify data/y
-                               (fn [y]
-                                 (if (< y (dec (count text)))
-                                   (inc y)
-                                   y)))]
-         cursor))
+  (do-m [text (state/get data/text)]
+        (state/modify data/y
+                      (fn [y]
+                        (if (< y (dec (count text)))
+                          (inc y)
+                          y)))))
 
 (def up
   (state/modify data/y
@@ -28,21 +27,19 @@
                     y))))
 
 (def right
-  (for-m [line (state/get data/line)
-          x (state/modify data/x
-                          (fn [x]
-                            (if (< x (count line))
-                              (inc x)
-                              x)))]
-         x))
+  (do-m [line (state/get data/line)]
+         (state/modify data/x
+                       (fn [x]
+                         (if (< x (count line))
+                           (inc x)
+                           x)))))
 
 (def start-line
   (state/set data/x 0))
 
 (def end-line
-  (for-m [line (state/get data/line)
-          x (state/set data/x (count line))]
-         x))
+  (do-m [line (state/get data/line)]
+        (state/set data/x (count line))))
 
 (comment
 (def start-buffer

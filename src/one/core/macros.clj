@@ -1,6 +1,13 @@
 (ns one.core.macros
   (:use [clojure.core.match :only [match]]))
 
+(defmacro do-m [bindings expression]
+  (match [bindings]
+    [[name value]]
+      `(one.core.monad/bind ~value (fn [~name] ~expression))
+    [[name value & bindings']]
+      `(one.core.monad/bind ~value (fn [~name] (for-m ~bindings' ~expression)))))
+
 (defmacro for-m [bindings expression]
   (match [bindings]
     [[name value]]
