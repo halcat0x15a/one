@@ -5,12 +5,6 @@
   (:use [clojure.test :only [is]]
         [clojure.test.generative :only [defspec]]))
 
-(defmacro defspec-lens [name lens type]
-  `(defspec ~name
-     #(lens/set ~lens % test/editor)
-     [{:tag ~type} value#]
-     (is (= (lens/get ~lens %) value#))))
-
 (defspec current
   #(lens/set data/current % test/editor)
   [^keyword key]
@@ -20,3 +14,8 @@
   #(lens/set data/buffer % test/editor)
   [^test/buffer buffer]
   (is (= (lens/get data/buffer %) buffer)))
+
+(defspec cursor
+  #(lens/set data/cursor % test/editor)
+  [^test/cursor cursor]
+  (is (= (lens/get data/cursor %) cursor)))

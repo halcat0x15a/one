@@ -1,7 +1,10 @@
 (ns one.test
   (:require [clojure.test.generative.generators :as gen]
             [one.core.data :as data]
-            [one.core.lens :as lens]))
+            [one.core.lens :as lens]
+            [one.core.state :as state])
+  (:use [clojure.test :only [is]]
+        [clojure.test.generative :only [defspec]]))
 
 (def editor
   (data/->Editor {:scratch (data/->Buffer [""] (data/->Cursor 0 0))}
@@ -17,10 +20,23 @@
         y (pos (count text'))]
     (data/->Buffer text' (data/->Cursor (pos (inc (count (text' y)))) y))))
 
+(defspec buffer-spec
+  identity
+  [^one.test/buffer buffer]
+  (is (< (-> buffer :cursor :y) (-> buffer :text count))))
+
+(def cursor (partial :cursor buffer))
+
 (defn set-buffer [buffer]
   (->> editor
        (lens/set data/text (:text buffer))
        (lens/set data/cursor (:cursor buffer))))
+
+(defn run [s lens]
+  (fn [value]
+    (->> editor
+         (lens/set lens value)
+         (state/run s))))
 
 (comment
 

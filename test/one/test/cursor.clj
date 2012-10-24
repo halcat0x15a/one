@@ -8,7 +8,7 @@
         [clojure.test.generative :only [defspec]]))
 
 (defspec left
-  (comp (partial state/run cursor/left) test/set-buffer)
+  (test/run cursor/left data/buffer)
   [^test/buffer buffer]
   (let [x (-> buffer :cursor :x)]
     (are [x'] (= x' (if (pos? x) (dec x) x))
@@ -16,7 +16,7 @@
          (.value %))))
 
 (defspec down
-  (comp (partial state/run cursor/down) test/set-buffer)
+  (test/run cursor/down data/buffer)
   [^test/buffer buffer]
   (let [{:keys [text cursor]} buffer
         y (:y cursor)]
@@ -25,7 +25,7 @@
          (.value %))))
 
 (defspec up
-  (comp (partial state/run cursor/up) test/set-buffer)
+  (test/run cursor/up data/buffer)
   [^test/buffer buffer]
   (let [y (-> buffer :cursor :y)]
     (are [y'] (= y' (if (pos? y) (dec y) y))
@@ -33,7 +33,7 @@
          (.value %))))
 
 (defspec right
-  (comp (partial state/run cursor/right) test/set-buffer)
+  (test/run cursor/right data/buffer)
   [^test/buffer buffer]
   (let [{:keys [text cursor]} buffer
         {:keys [x y]} cursor]
@@ -42,37 +42,38 @@
          (.value %))))
 
 (defspec start-line
-  (comp (partial state/run cursor/start-line) test/set-buffer)
+  (test/run cursor/start-line data/buffer)
   [^test/buffer buffer]
   (are [x'] (zero? x')
        (lens/get data/x (.state %))
        (.value %)))
 
 (defspec end-line
-  (comp (partial state/run cursor/end-line) test/set-buffer)
+  (test/run cursor/end-line data/buffer)
   [^test/buffer buffer]
   (let [{:keys [text cursor]} buffer
         {:keys [x y]} cursor]
     (are [x'] (= x' (count (text y)))
          (lens/get data/x (.state %))
          (.value %))))
-(comment
-(defspec start-buffer
-  (comp cursor/start-buffer test/set-buffer)
-  [^test/buffer buffer]
-  (are [x] (zero? x)
-       (lens-get lens/cursor-x %)
-       (lens-get lens/cursor-y %)))
 
-(defspec end-line
-  (comp cursor/end-buffer test/set-buffer)
+(defspec start-buffer
+  (test/run cursor/start-buffer data/buffer)
+  [^test/buffer buffer]
+  (are [cursor] (= cursor (data/->Cursor 0 0))
+       (lens/get data/cursor (.state %))
+       (.value %)))
+
+(defspec end-buffer
+  (test/run cursor/end-buffer data/buffer)
   [^test/buffer buffer]
   (let [{:keys [text]} buffer
-        y' (dec (count text))]
-    (are [a b] (= a b)
-         (lens-get lens/cursor-x %) (count (text y'))
-         (lens-get lens/cursor-y %) y')))
+        y (dec (count text))]
+    (are [cursor] (= cursor (data/->Cursor (count (text y)) y))
+         (lens/get data/cursor (.state %))
+         (.value %))))
 
+(comment
 (defspec forward
   (comp cursor/forward test/set-buffer)
   [^test/buffer buffer]

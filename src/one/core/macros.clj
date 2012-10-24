@@ -1,19 +1,21 @@
 (ns one.core.macros
   (:use [clojure.core.match :only [match]]))
 
-(defmacro do-m [bindings expression]
+(defmacro monad-syntax [function bindings expression]
   (match [bindings]
-    [[name value]]
-      `(one.core.monad/bind ~value (fn [~name] ~expression))
-    [[name value & bindings']]
-      `(one.core.monad/bind ~value (fn [~name] (for-m ~bindings' ~expression)))))
+         [[name value]]
+         `(~function ~value
+                     (fn [~name] ~expression))
+         [[name value & bindings']]
+         `(one.core.monad/bind ~value
+                               (fn [~name] (monad-syntax ~function ~bindings' ~expression)))))
+
+
+(defmacro do-m [bindings expression]
+  `(monad-syntax one.core.monad/bind ~bindings ~expression))
 
 (defmacro for-m [bindings expression]
-  (match [bindings]
-    [[name value]]
-      `(one.core.monad/fmap ~value (fn [~name] ~expression))
-    [[name value & bindings']]
-      `(one.core.monad/bind ~value (fn [~name] (for-m ~bindings' ~expression)))))
+  `(monad-syntax one.core.monad/fmap ~bindings ~expression))
 
 (defmacro defdata
   ([name fields]

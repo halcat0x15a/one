@@ -41,18 +41,18 @@
   (do-m [line (state/get data/line)]
         (state/set data/x (count line))))
 
-(comment
 (def start-buffer
-  (partial lens/modify lens/cursor #(assoc % :x 0 :y 0)))
+  (for-m [x (state/set data/x 0)
+          y (state/set data/y 0)]
+         (data/->Cursor x y)))
 
-(defn end-buffer [editor]
-  (letfn [(end-buffer' [cursor]
-            (let [y' (dec (util/count-lines editor))]
-              (assoc cursor
-                :x (util/count-line y' editor)
-                :y y')))]
-    (lens/modify lens/cursor end-buffer' editor)))
+(def end-buffer
+  (for-m [text (state/get data/text)
+          y' (state/set data/y (-> text count dec))
+          x' (state/set data/x (count (text y')))]
+         (data/->Cursor x' y')))
 
+(comment
 (def forward
   (partial modify-cursor-with util/find-forward))
 
