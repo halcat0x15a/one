@@ -1,3 +1,4 @@
+(comment
 (ns one.core.minibuffer
   (:require [one.core.record :as record]
             [one.core.lens :as lens]
@@ -45,3 +46,4 @@
       (->> (apply (first f) (conj (vec (rest f)) (prepare-history editor)))
            (add-history command))
       editor)))
+)

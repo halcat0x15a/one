@@ -1,10 +1,27 @@
 (ns one.core.macros
-  (:use [clojure.core.match :only [match]]
-        [one.core.monad :only [fmap bind]]))
+  (:use [clojure.core.match :only [match]]))
 
-(defmacro do-m [bindings expression]
+(defmacro for-m [bindings expression]
   (match [bindings]
     [[name value]]
-      `(fmap (fn [~name] ~expression) ~value)
+      `(one.core.monad/fmap ~value (fn [~name] ~expression))
     [[name value & bindings']]
-      `(bind (fn [~name] (do-m ~bindings' ~expression)) ~value)))
+      `(one.core.monad/bind ~value (fn [~name] (for-m ~bindings' ~expression)))))
+
+(defmacro defdata
+  ([name fields]
+     `(do
+        (defrecord ~name ~fields)
+        ~@(map (fn [field#]
+                 `(def ~field#
+                    (one.core.lens/associative ~(keyword (symbol field#)))))
+               fields)))
+  ([name fields parent]
+     `(do
+        (defrecord ~name ~fields)
+        ~@(map (fn [field#]
+                 `(def ~field#
+                    (one.core.lens/compose
+                     (one.core.lens/associative ~(keyword (symbol field#)))
+                     ~parent)))
+               fields))))

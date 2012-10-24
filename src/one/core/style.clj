@@ -1,3 +1,4 @@
+(comment
 (ns one.core.style)
 
 (def font-size (atom 16))
@@ -16,3 +17,4 @@
   {:keyword-literal "aqua"
    :string-literal "fuchsia"
    :number-literal "lime"})
+)

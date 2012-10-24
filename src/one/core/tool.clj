@@ -1,3 +1,4 @@
+(comment
 (ns one.core.tool
   (:require [one.core.util :as util]
             [one.core.buffer :as buffer]
@@ -40,3 +41,4 @@
   (->> this
        (buffer/create-buffer :sum)
        (lens/modify lens/text #(vector (str (apply + (map int (flatten (map (partial re-seq #"\d+") %)))))))))
+)

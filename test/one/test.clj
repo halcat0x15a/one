@@ -1,31 +1,26 @@
 (ns one.test
   (:require [clojure.test.generative.generators :as gen]
-            [one.core.record :as record]
-            [one.core.lens :as lens]
-            [one.core.editor :as editor])
-  (:use [one.core.lens :only [lens-set]]))
+            [one.core.data :as data]
+            [one.core.lens :as lens]))
 
-(def editor (editor/editor))
+(def editor
+  (data/->Editor {:scratch (data/->Buffer [""] (data/->Cursor 0 0))}
+                 :scratch))
 
 (def pos (partial gen/uniform 0))
 
 (def text (partial gen/vec gen/string))
 
-(defrecord Buffer [text x y])
-
 (defn buffer []
   (let [text (text)
         text' (if (empty? text) [""] text)
         y (pos (count text'))]
-    (Buffer. text' (pos (inc (count (text' y)))) y)))
-
-(defn saved-cursor [buffer]
-  (record/saved-cursor (.x buffer) (.y buffer)))
+    (data/->Buffer text' (data/->Cursor (pos (inc (count (text' y)))) y))))
 
 (defn set-buffer [buffer]
   (->> editor
-       (lens-set lens/text (.text buffer))
-       (lens-set lens/cursor (saved-cursor buffer))))
+       (lens/set data/text (:text buffer))
+       (lens/set data/cursor (:cursor buffer))))
 
 (comment
 

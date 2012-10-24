@@ -1,9 +1,10 @@
 (ns one.core.buffer
-  (:require [one.core.lens :as lens]
-            [one.core.cursor :as cursor]
-            [one.core.mode :as mode]
-            [one.core.default :as default]))
+  (:require [one.core.data :as data]
+            [one.core.state :as state])
+  (:use;*CLJSBUILD-REMOVE*;-macros
+   [one.core.macros :only [defdata for-m]]))
 
+(comment
 (defn create-buffer [id editor]
   (let [key (keyword id)]
     (->> editor
@@ -42,3 +43,4 @@
   (->> editor
        (create-buffer :buffers)
        (lens/lens-set lens/text (vec (map name (keys (:buffers editor)))))))
+)

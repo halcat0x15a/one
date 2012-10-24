@@ -1,23 +1,41 @@
-(ns one.core.lens)
+(ns one.core.lens
+  (:refer-clojure :exclude [get set]))
 
 (defprotocol Lens
-  (lens-get [this editor])
-  (lens-set [this value editor]))
+  (get [this obj])
+  (set [this value obj]))
 
-(defn modify [lens f editor]
-  (lens-set lens (f (lens-get lens editor)) editor))
+(defn modify [lens f obj]
+  (set lens (f (get lens obj)) obj))
 
+(defn compose [lens lens']
+  (reify Lens
+    (get [this obj]
+      (->> obj
+           (get lens')
+           (get lens)))
+    (set [this value obj]
+      (modify lens' (partial set lens value) obj))))
+
+(defn associative [key]
+  (reify Lens
+    (get [this obj]
+      (key obj))
+    (set [this value obj]
+      (assoc obj key value))))
+
+(comment
 (defn editor-lens [key]
   (reify Lens
-    (lens-get [this editor] (get editor key))
-    (lens-set [this value editor]
+    (get [this editor] (get editor key))
+    (set [this value editor]
       (assoc editor key value))))
 
-(defn lens-lens [key lens]
+(defn lens [key lens]
   (reify Lens
-    (lens-get [this editor]
-      (get (lens-get lens editor) key))
-    (lens-set [this value editor]
+    (get [this editor]
+      (clojure.core/get (get lens editor) key))
+    (set [this value editor]
       (modify lens #(assoc % key value) editor))))
 
 (def buffers (editor-lens :buffers))
@@ -63,3 +81,4 @@
 
 (defn line [y]
   (lens-lens y text))
+)

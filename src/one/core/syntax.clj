@@ -1,3 +1,4 @@
+(comment
 (ns one.core.syntax
   (:require [one.core.parser :as parser])
   (:refer-clojure :exclude [name keyword newline])
@@ -40,3 +41,4 @@
 (def clojure (parser/rep expression))
 
 (def word (rep (exp (opt parser/not-word) parser/word (opt parser/not-word))))
+)

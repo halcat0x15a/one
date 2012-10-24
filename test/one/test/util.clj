@@ -1,3 +1,4 @@
+(comment
 (ns one.test.util
   (:require [one.test :as test]
             [one.core.lens :as lens]
@@ -34,3 +35,4 @@
   (let [{:keys [text x y]} buffer
         text' (take y text)]
     (is (= % (+ x (count text') (apply + (map count text')))))))
+)

@@ -1,3 +1,4 @@
+(comment
 (ns one.core.editor
   (:require [one.core.record :as record]
             [one.core.buffer :as buffer]
@@ -28,3 +29,4 @@
   ([] (editor 80 24))
   ([width height]
      (record/->Editor {default-name default/buffer} default/minibuffer default-name (default/view width height) default/history @functions)))
+)

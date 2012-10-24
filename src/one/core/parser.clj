@@ -1,3 +1,4 @@
+(comment
 (ns one.core.parser
   (:require [clojure.string :as string]))
 
@@ -68,3 +69,4 @@
 (def word (sym :word #"^\w+"))
 
 (def not-word (sym nil #"^\W+"))
+)

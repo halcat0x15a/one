@@ -1,44 +1,50 @@
 (ns one.core.cursor
-  (:require [clojure.string :as string]
-            [one.core.record :as record]
-            [one.core.view :as view]
-            [one.core.lens :as lens]
-            [one.core.util :as util]))
-
-(defn modify-cursor-with [f editor]
-  (let [cursor (lens/lens-get lens/cursor editor)
-        {:keys [x y]} cursor
-        line (lens/lens-get (lens/line y) editor)]
-    (lens/lens-set lens/cursor (assoc cursor :x (f line x)) editor)))
+  (:require [one.core.data :as data]
+            [one.core.state :as state])
+  (:use;*CLJSBUILD-REMOVE*;-macros
+   [one.core.macros :only [defdata for-m]]))
 
 (def left
-  (partial lens/modify lens/cursor-x #(if (pos? %) (dec %) %)))
+  (state/modify data/x
+                (fn [x]
+                  (if (pos? x)
+                    (dec x)
+                    x))))
 
-(defn down [editor]
-  (letfn [(down' [y]
-            (if (< y (dec (util/count-lines editor)))
-              (inc y)
-              y))]
-    (lens/modify lens/cursor-y down' editor)))
+(def down
+  (for-m [text (state/get data/text)
+          cursor (state/modify data/y
+                               (fn [y]
+                                 (if (< y (dec (count text)))
+                                   (inc y)
+                                   y)))]
+         cursor))
 
 (def up
-  (partial lens/modify lens/cursor-y #(if (pos? %) (dec %) %)))
+  (state/modify data/y
+                (fn [y]
+                  (if (pos? y)
+                    (dec y)
+                    y))))
 
 (def right
-  (partial modify-cursor-with
-           (fn [line x]
-             (if (< x (count line))
-               (inc x)
-               x))))
+  (for-m [line (state/get data/line)
+          x (state/modify data/x
+                          (fn [x]
+                            (if (< x (count line))
+                              (inc x)
+                              x)))]
+         x))
 
 (def start-line
-  (partial lens/lens-set lens/cursor-x 0))
+  (state/set data/x 0))
 
 (def end-line
-  (partial modify-cursor-with
-           (fn [line _]
-             (count line))))
+  (for-m [line (state/get data/line)
+          x (state/set data/x (count line))]
+         x))
 
+(comment
 (def start-buffer
   (partial lens/modify lens/cursor #(assoc % :x 0 :y 0)))
 
@@ -55,3 +61,4 @@
 
 (def backward
   (partial modify-cursor-with util/find-backward))
+)

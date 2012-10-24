@@ -1,3 +1,4 @@
+(comment
 (ns one.core.text
   (:require [clojure.string :as string]
             [one.core.record :as record]
@@ -87,3 +88,4 @@
 (defn replace-text [s editor]
   (let [{:keys [x y]} (lens/lens-get lens/cursor editor)]
     (lens/modify (lens/line y) #(str (subs % 0 x) s (subs % (+ x (count s)))) editor)))
+)

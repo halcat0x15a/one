@@ -5,7 +5,7 @@
                  [org.clojure/core.match "0.2.0-alpha11"]
                  [org.clojure/test.generative "0.1.9"]]
   :plugins [[lein-cljsbuild "0.2.7"]]
-  :hooks [leiningen.cljsbuild]
+;  :hooks [leiningen.cljsbuild]
   :cljsbuild {:crossovers [one.core]
               :crossover-jar true
               :builds {:main

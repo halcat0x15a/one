@@ -1,3 +1,4 @@
+(comment
 (ns one.core.mode
   (:require [one.core.record :as record]
             [one.core.text :as text]
@@ -87,3 +88,4 @@
                          :down (minibuffer/set-prev-command editor)
                          :enter 
                          editor))))
+)

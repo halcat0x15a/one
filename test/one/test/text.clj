@@ -1,3 +1,4 @@
+(comment
 (ns one.test.text
   (:require [one.test :as test]
             [one.core.record :as record]
@@ -82,3 +83,4 @@
         line (text y)]
     (are [a b] (= a b)
          (lens-get (lens/line y) %) (str (subs line 0 (util/find-backward line x)) (subs line x)))))
+)

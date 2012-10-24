@@ -1,3 +1,4 @@
+(comment
 (ns one.core.default
   (:require [one.core.record :as record]
             [one.core.text :as text]))
@@ -19,3 +20,4 @@
 (def minibuffer (record/->Minibuffer "" cursor))
 
 (def history (record/->History "" (list) 0))
+)

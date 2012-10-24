@@ -1,3 +1,4 @@
+(comment
 (ns one.core.util
   (:require [one.core.lens :as lens]
             [one.core.syntax :as syntax]
@@ -39,3 +40,4 @@
     (if (empty? tokens)
       0
       (.cursor (last tokens)))))
+)

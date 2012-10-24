@@ -1,3 +1,4 @@
+(comment
 (ns one.core.view
   (:require [one.core.lens :as lens]
             [one.core.util :as util]))
@@ -17,3 +18,4 @@
                 (assoc view :y (inc y))
                 view)))]
     (lens/modify lens/view down' editor)))
+)
