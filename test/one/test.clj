@@ -3,7 +3,7 @@
             [one.core.data :as data]
             [one.core.lens :as lens]
             [one.core.state :as state])
-  (:use [clojure.test :only [is]]
+  (:use [clojure.test :only [is are]]
         [clojure.test.generative :only [defspec]]))
 
 (def editor
@@ -37,6 +37,11 @@
     (->> editor
          (lens/set lens value)
          (state/run s))))
+
+(defn state-is [lens' value' s]
+  (are [value] (= value value')
+       (lens/get lens' (.state s))
+       (.value s)))
 
 (comment
 

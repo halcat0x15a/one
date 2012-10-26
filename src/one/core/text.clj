@@ -1,15 +1,13 @@
-(comment
 (ns one.core.text
-  (:require [clojure.string :as string]
-            [one.core.record :as record]
-            [one.core.lens :as lens]
-            [one.core.util :as util]
-            [one.core.cursor :as cursor]))
+  (:require [clojure.string :as string]))
+(comment
 
-(defn prepend-newline [editor]
-  (->> editor
-       (lens/modify lens/text (partial util/insert-newline (lens/lens-get lens/cursor-y editor)))
-       cursor/start-line))
+(def prepend-newline
+  (for-m [text (state/get data/text)
+          y (state/get data/y)
+          #_ cursor/start-line
+          [a b] (split-at y text)
+          (state/modify data/text (concat a '(\newline) b)))))
 
 (defn append-newline [editor]
   (->> editor
