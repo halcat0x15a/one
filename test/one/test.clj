@@ -6,7 +6,7 @@
   (:use [clojure.test :only [is are]]
         [clojure.test.generative :only [defspec]]))
 
-(def editor
+(def zero-editor
   (data/->Editor {:scratch (data/->Buffer [""] (data/->Cursor 0 0))}
                  :scratch))
 
@@ -27,19 +27,19 @@
 
 (def cursor (partial :cursor buffer))
 
-(defn editorx []
+(defn editor []
   (let [current (gen/keyword)]
     (data/->Editor {current (buffer)}
                    current)))
 
 (defn set-buffer [buffer]
-  (->> editor
+  (->> zero-editor
        (lens/set data/text (:text buffer))
        (lens/set data/cursor (:cursor buffer))))
 
 (defn run [s lens]
   (fn [value]
-    (->> editor
+    (->> zero-editor
          (lens/set lens value)
          (state/run s))))
 

@@ -6,16 +6,16 @@
         [clojure.test.generative :only [defspec]]))
 
 (defspec current
-  #(lens/set data/current % test/editor)
-  [^keyword key]
+  (fn [editor key] (lens/set data/current key editor))
+  [^test/editor editor ^keyword key]
   (is (= (lens/get data/current %) key)))
 
 (defspec buffer
-  #(lens/set data/buffer % test/editor)
-  [^test/buffer buffer]
+  (fn [editor buffer] (lens/set data/buffer buffer editor))
+  [^test/editor editor ^test/buffer buffer]
   (is (= (lens/get data/buffer %) buffer)))
 
 (defspec cursor
-  #(lens/set data/cursor % test/editor)
-  [^test/cursor cursor]
+  (fn [editor cursor] (lens/set data/cursor cursor editor))
+  [^test/editor editor ^test/cursor cursor]
   (is (= (lens/get data/cursor %) cursor)))

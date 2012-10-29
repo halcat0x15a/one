@@ -6,11 +6,11 @@
         [clojure.test.generative :only [defspec]]))
 
 (defspec state
-  (fn [key] (state/exec (state/set data/current key) test/editor))
-  [^keyword key]
+  (fn [editor key] (state/exec (state/set data/current key) editor))
+  [^test/editor editor ^keyword key]
   (is (= (state/eval (state/get data/current) %) key)))
 
 (defspec modify
-  (fn [key] (state/exec (state/set data/current key) test/editor))
-  [^keyword key]
+  (fn [editor key] (state/exec (state/set data/current key) editor))
+  [^test/editor editor ^keyword key]
   (is (= (state/eval (state/get data/current) %) key)))
