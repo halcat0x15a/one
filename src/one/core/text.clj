@@ -1,19 +1,29 @@
 (ns one.core.text
-  (:require [clojure.string :as string]))
+  (:require [clojure.string :as string])
+  (:use [one.core.macros :only [do-m]]))
+
+(defn insert [s editor]
+  (do-m [cursor (state/get data/cursor)
+         _ (state/set data/cursor (assoc cursor :x (+ (:x cursor) (count s))))]
+        (state/modify data/line
+                      (fn [line]
+                        (str (subs line 0 (:x cursor)) s (subs line (:x cursor)))))))
+
 (comment
-
 (def prepend-newline
-  (for-m [text (state/get data/text)
-          y (state/get data/y)
-          #_ cursor/start-line
-          [a b] (split-at y text)
-          (state/modify data/text (concat a '(\newline) b)))))
+  (do-m [text (state/get data/text)
+         y (state/get data/y)
+         #_ cursor/start-line
+         [a b] (split-at y text)]
+        (state/modify data/text (vec (concat a '(\newline) b)))))
 
-(defn append-newline [editor]
-  (->> editor
-       (lens/modify lens/text (partial util/insert-newline (inc (lens/lens-get lens/cursor-y editor))))
-       cursor/start-line
-       cursor/down))
+(def append-newline
+  (do-m [text (state/get data/text)
+         y (state/get data/y)
+         [a b] (split-at (inc y text))
+         #_ cursor/start-line
+         #_ cursor/down]
+        (lens/modify lens/text (vec (concat a '(\newline) b)))))
 
 (defn insert-newline [editor]
   (let [{:keys [x y]} (lens/lens-get lens/cursor editor)]
@@ -21,13 +31,6 @@
          (lens/modify lens/text (partial util/insert-newline x y))
          cursor/down
          cursor/start-line)))
-
-(defn insert [s editor]
-  (let [cursor (lens/lens-get lens/cursor editor)
-        {:keys [x y]} cursor]
-    (->> editor
-         (lens/modify (lens/line y) #(str (subs % 0 x) s (subs % x)))
-         (lens/lens-set lens/cursor (assoc cursor :x (+ x (count s)))))))
 
 (defn delete [editor]
   (let [{:keys [x y]} (lens/lens-get lens/cursor editor)]

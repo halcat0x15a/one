@@ -5,10 +5,14 @@
   (match [bindings]
          [[name value]]
          `(~function ~value
-                     (fn [~name] ~expression))
+                     (fn [arg#]
+                       (let [~name arg#]
+                         ~expression)))
          [[name value & bindings']]
          `(one.core.monad/bind ~value
-                               (fn [~name] (monad-syntax ~function ~bindings' ~expression)))))
+                               (fn [arg#]
+                                 (let [~name arg#]
+                                   (monad-syntax ~function ~bindings' ~expression))))))
 
 
 (defmacro do-m [bindings expression]
