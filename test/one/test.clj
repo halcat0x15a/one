@@ -27,6 +27,11 @@
 
 (def cursor (partial :cursor buffer))
 
+(defn editorx []
+  (let [current (gen/keyword)]
+    (data/->Editor {current (buffer)}
+                   current)))
+
 (defn set-buffer [buffer]
   (->> editor
        (lens/set data/text (:text buffer))

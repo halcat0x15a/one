@@ -4,7 +4,7 @@
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [org.clojure/core.match "0.2.0-alpha11"]
                  [org.clojure/test.generative "0.1.9"]]
-  :plugins [[lein-cljsbuild "0.2.8"]]
+  :plugins [[lein-cljsbuild "0.2.9"]]
 ;  :hooks [leiningen.cljsbuild]
   :cljsbuild {:crossovers [one.core]
               :crossover-jar true
