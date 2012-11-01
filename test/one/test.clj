@@ -2,13 +2,23 @@
   (:require [clojure.test.generative.generators :as gen]
             [one.core.data :as data]
             [one.core.lens :as lens]
-            [one.core.state :as state])
+            [one.core.state :as state]
+            [one.core.lisp :as lisp])
   (:use [clojure.test :only [is are]]
         [clojure.test.generative :only [defspec]]))
 
 (def zero-editor
   (data/->Editor {:scratch (data/->Buffer [""] (data/->Cursor 0 0))}
                  :scratch))
+
+(defn literal []
+  ((gen/rand-nth
+    [gen/long gen/boolean gen/string])))
+
+(defspec literal-spec
+  identity
+  [^one.test/literal x]
+  (is (lisp/literal? x)))
 
 (def pos (partial gen/uniform 0))
 

@@ -1,8 +1,25 @@
 (ns one.core.buffer
-  (:require [one.core.data :as data]
+  (:require [clojure.zip :as zip]
+            [one.core.data :as data]
             [one.core.state :as state])
   (:use;*CLJSBUILD-REMOVE*;-macros
    [one.core.macros :only [defdata for-m]]))
+
+(defn horizontal [f]
+  (state/modify data/buffer
+                (fn [buffer]
+                  (if-let [buffer' (f buffer)]
+                    buffer'
+                    buffer))))
+
+(def left (horizontal zip/left))
+
+(def right (horizontal zip/right))
+
+(def up
+  (for-m [buffer (state/get data/buffer)
+          (if-let [buffer' (zip/left (zip/up buffer))]
+            (monad/replicate (constantly left) (count (lefts buffer))
 
 (comment
 (defn create-buffer [id editor]

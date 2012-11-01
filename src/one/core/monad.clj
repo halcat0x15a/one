@@ -1,8 +1,14 @@
-(ns one.core.monad)
+(ns one.core.monad
+  (:refer-clojure :exclude [replicate]))
 
 (defprotocol Monadic
   (fmap [m f])
   (bind [m f]))
 
-(defn bind' [m v]
-  (bind m (constantly v)))
+(defn bind' [m m']
+  (bind m (constantly m')))
+
+(defn replicate [f n m]
+  (if (zero? n)
+    m
+    (recur f (dec n) (bind m f))))
