@@ -1,17 +1,54 @@
 (ns one.core.lisp
-  (:refer-clojure :exclude [eval]))
+  (:refer-clojure :exclude [eval])
+  (:require [one.core.monad :as monad])
+  (:use
+   [one.core.macros :only [do-m]]))
 
-(declare lisp)
+(defprotocol Result
+  (value [this]))
 
-(deftype Nothing [])
+(deftype Success [env v]
+  Result
+  (value [this] v)
+  monad/Monadic
+  (fmap [this f]
+    (Success. env (f v)))
+  (bind [this f]
+    (f v)))
+
+(deftype Nothing []
+  Result
+  (value [this]
+    (throw (Exception. "Unknown")))
+  monad/Monadic
+  (fmap [this f] this)
+  (bind [this f] this))
+
+(deftype Failure [message]
+  Result
+  (value [this] message)
+  monad/Monadic
+  (fmap [this f] this)
+  (bind [this f] this))
+
+(def success? (partial instance? Success))
+
+(defn null [env]
+  (Success. env nil))
 
 (def nothing (Nothing.))
 
 (defn few-args [s]
-  (throw (Exception. (str "Too few arguments to " s))))
+  (Failure. (str "Too few arguments to " s)))
 
 (defn many-args [s]
-  (throw (Exception. (str "Too many arguments to " s))))
+  (Failure. (str "Too many arguments to " s)))
+
+(defn unresolve-symbol [s]
+  (Failure. (str "Unable to resolve symbol: " s " in this context")))
+
+(defn wrong-args [n s]
+  (Failure. (str "Wrong number of args (" n ") passed to")))
 
 (defprotocol Eval
   (eval [this env exp]))
@@ -23,22 +60,22 @@
       (number? exp)
       (string? exp)))
 
+(deftype Evaluator [pred f]
+  Eval
+  (eval [this env exp]
+    (if (pred exp)
+      (f env exp)
+      nothing)))
+
 (def literal
-  (reify Eval
-    (eval [this env exp]
-      (if (literal? exp)
-        exp
-        nothing))))
+  (Evaluator. literal? ->Success))
 
 (def variable
-  (reify Eval
-    (eval [this env exp]
-      (if (symbol? exp)
-        (if-let [result (get env exp)]
-          result
-          (throw
-           (Exception. (str "Unable to resolve symbol: " exp " in this context"))))
-        nothing))))
+  (Evaluator. symbol?
+    (fn [env exp]
+      (if (contains? env exp)
+        (Success. env (env exp))
+        (unresolve-symbol exp)))))
 
 (defn tagged? [tag exp]
   (and (seq? exp)
@@ -55,54 +92,83 @@
 (def quotation
   (Special. 'quote
     (fn [env exp]
-      (first exp))))
+      (Success. env (first exp)))))
 
 (def definition
   (Special. 'def
     (fn [env exp]
-      (if-let [name (first exp)]
-        (assoc! env name (second exp))
-        (few-args 'def)))))
+      (let [arity (count exp)]
+        (cond (zero? arity) (few-args 'def)
+              (> arity 2) (many-args 'def)
+              :else (let [value (second exp)]
+                      (Success. (assoc env (first exp) value) value)))))))
+
+(defprotocol Procedure
+  (run [this f args]))
+
+(deftype Compound [env params body]
+  Procedure
+  (run [this f args]
+    (let [arity (count args)]
+      (if (= arity (count params))
+        (f (merge env (interleave params args)) body)
+        (wrong-args arity)))))
+
+(deftype Primitive [f])
 
 (def function
   (Special. 'fn
-    (fn [env exp])))
+    (fn [env exp]
+      (let [arity (count exp)]
+        (cond (< arity 1) (few-args 'fn)
+              (> arity 2) (many-args 'fn)
+              (zero? arity) (null env)
+              :else (Success. env (Compound. env (first exp) (second exp))))))))
 
 (defn divergence [f]
   (Special. 'if
     (fn [env exp]
-      (case (count exp)
-        0 (few-args 'if)
-        1 (few-args 'if)
-        2 (when (->> exp first (f env))
-            (f env (nth exp 1)))
-        3 (if (->> exp first (f env))
-            (f env (nth exp 1))
-            (f env (nth exp 2)))
-        (many-args 'if)))))
+      (let [arity (count exp)]
+        (cond (< arity 2) (few-args 'if)
+              (> arity 3) (many-args 'if)
+              :else (monad/bind (->> exp first (f env))
+                                (fn [b]
+                                  (if b
+                                    (->> exp second (f env))
+                                    (if (= arity 3)
+                                      (f env (nth exp 2))
+                                      (null env))))))))))
 
 (defn serial [f]
   (Special. 'do
     (fn [env exp]
-      (let [exps (rest exp)]
-        (case (count exps)
-          0 nil
-          1 (f env (first exps))
-          (do
-            (f env (first exps))
-            (recur env (list 'do (rest exps)))))))))
+      (case (count exp)
+        0 (null env)
+        1 (f env (first exp))
+        (let [result (f env (first exp))]
+          (if (success? result)
+            (recur (.env result) (rest exp))
+            result))))))
+
+(defn application [f]
+  (Evaluator. (fn [exp]
+                (and (seq? exp)
+                     (-> exp empty? not)))
+              (fn [env exp]
+                (do-m [p (f env (first exp))
+                       args (monad/sequence (map (partial f env) (rest exp)))]
+                      (run p f args)))))
 
 (defn compose [e & es]
-  (if (empty? es)
-    e
-    (apply compose
-           (reify Eval
-             (eval [this env exp]
-               (let [result (eval e env exp)]
-                 (if (= result nothing)
-                   (-> es first (eval env exp))
-                   result))))
-           (rest es))))
+  (reduce (fn [e e']
+            (reify Eval
+              (eval [this env exp]
+                (let [result (eval e env exp)]
+                  (if (= result nothing)
+                    (eval e' env exp)
+                    result)))))
+          e
+          es))
 
 (def lisp
   (let [eval (fn [env exp] (eval lisp env exp))]
@@ -110,6 +176,10 @@
              variable
              quotation
              definition
-             (divergence eval))))
+             (divergence eval)
+             (serial eval)
+             function
+             (application eval))))
 
-(def eval' (partial eval lisp  (transient {})))
+(def eval'
+  (comp value (partial eval lisp {})))
