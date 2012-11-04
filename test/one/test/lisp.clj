@@ -19,7 +19,10 @@
   [^test/literal x]
   (is (= % x)))
 
-(defspec serial-definition-variable
-  (fn [sym x] (lisp/eval' (list 'do (list 'def sym x) sym)))
-  [^symbol sym ^test/literal x]
+(defspec function-serial-definition-variable
+  (fn [sym sym' x]
+    (lisp/eval' (list 'do
+                      (list 'def sym (list 'fn [sym'] sym'))
+                      (list sym x))))
+  [^test/symbol sym ^test/symbol sym' ^test/literal x]
   (is (= % x)))

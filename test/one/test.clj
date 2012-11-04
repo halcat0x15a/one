@@ -20,6 +20,12 @@
   [^one.test/literal x]
   (is (lisp/literal? x)))
 
+(defn symbol []
+  (let [s (gen/symbol)]
+    (if (some (partial = s) lisp/specials)
+      (recur)
+      s)))
+
 (def pos (partial gen/uniform 0))
 
 (def text (partial gen/vec gen/string))
