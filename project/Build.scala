@@ -6,7 +6,7 @@ object OneBuild extends Build {
 
   val scalazVersion = "7.0.0-M3"
   val unfilteredVersion = "0.6.+"
-  val dispatchVersion = "0.8.+"
+  val dispatchVersion = "0.8.9"
 
   val javafx = file("/usr/lib/jvm/javafx-sdk/rt/lib")
   val jfxrt = javafx / "jfxrt.jar"
