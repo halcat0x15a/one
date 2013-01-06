@@ -1,0 +1,1 @@
+lein2 run -m clojure.test.generative.runner test
