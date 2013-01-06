@@ -16,10 +16,10 @@ import unfiltered.scalate.Scalate
 
 import unfiltered.netty.request._
 
-import dispatch._
+import dispatch.classic._
 
-import dispatch.json.Js
-import dispatch.json.JsHttp._
+import dispatch.classic.json.Js
+import dispatch.classic.json.JsHttp._
 
 import com.typesafe.config._
 
