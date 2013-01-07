@@ -12,7 +12,7 @@
         lefts (lefts zipper)
         rights (rights zipper)
         lefts' (lefts zipper)]
-    (when-let [value' (first lefts')]
+    (if-let [value' (first lefts')]
       (assoc zipper
         value value'
         lefts (rest lefts')
@@ -23,7 +23,7 @@
         lefts (lefts zipper)
         rights (rights zipper)
         rights' (rights zipper)]
-    (when-let [value' (first rights')]
+    (if-let [value' (first rights')]
       (assoc zipper
         value value'
         lefts (conj (lefts zipper) (value zipper))
@@ -34,7 +34,7 @@
         lefts (lefts zipper)
         rights (rights zipper)
         lefts' (lefts zipper)]
-    (when-let [value' (first lefts')]
+    (if-let [value' (first lefts')]
       (assoc zipper
         value value'
         lefts []
@@ -45,7 +45,7 @@
         lefts (lefts zipper)
         rights (rights zipper)
         rights' (rights zipper)]
-    (when-let [value' (last rights')]
+    (if-let [value' (last rights')]
       (assoc zipper
         value value'
         lefts (concat (lefts zipper) (cons (value zipper) (drop-last rights')))
@@ -69,7 +69,7 @@
   (let [value (value zipper)
         rights (rights zipper)
         rights' (rights zipper)]
-    (when-let [value' (first rights')]
+    (if-let [value' (first rights')]
       (assoc zipper
         value value'
         rights (rest rights')))))
@@ -78,10 +78,32 @@
   (let [value (value zipper)
         lefts (lefts zipper)
         lefts' (lefts zipper)]
-    (when-let [value' (last lefts')]
+    (if-let [value' (last lefts')]
       (assoc zipper
         value value'
         lefts (drop-last lefts')))))
+
+(defn delete-rights [zipper]
+  (let [value (value zipper)
+        lefts (lefts zipper)
+        rights (rights zipper)
+        lefts' (lefts zipper)]
+    (if-let [value' (last lefts')]
+      (assoc zipper
+        value value'
+        lefts (drop-last lefts')
+        rights []))))
+
+(defn delete-lefts [zipper]
+  (let [value (value zipper)
+        lefts (lefts zipper)
+        rights (rights zipper)
+        rights' (rights zipper)]
+    (if-let [value' (first rights')]
+      (assoc zipper
+        value value'
+        lefts []
+        rights (rest rights')))))
 
 (defn map [zipper f]
   (let [value (value zipper)

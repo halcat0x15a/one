@@ -1,6 +1,7 @@
 (ns felis.editor.row
   (:refer-clojure :exclude [replace])
-  (:require [felis.zipper :as zipper]
+  (:require [felis.core :as core]
+            [felis.zipper :as zipper]
             [felis.row :as row]))
 
 (def left
@@ -29,3 +30,12 @@
 
 (def backspace
   (partial row/update #(row/delete % zipper/backspace)))
+
+(def delete-rights
+  (partial row/update #(row/delete % zipper/delete-rights)))
+
+(def delete-lefts
+  (partial row/update #(row/delete % zipper/delete-lefts)))
+
+(def initialize
+  (partial row/update core/initialize))

@@ -27,3 +27,9 @@
     (->> editor (append edit) (backspace edit)))
   [^{:tag (test/editor test/default)} editor ^test/edit edit]
   (is (= % editor)))
+
+(defspec delete-lefts-rights-initialize
+  (fn [editor edit]
+    (->> editor (delete-lefts edit) (delete-rights edit)))
+  [^{:tag (test/editor test/default)} editor ^test/edit edit]
+  (is (= % (initialize edit editor))))

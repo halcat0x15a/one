@@ -1,5 +1,6 @@
 (ns felis.editor.buffer
-  (:require [felis.zipper :as zipper]
+  (:require [felis.core :as core]
+            [felis.zipper :as zipper]
             [felis.buffer :as buffer]
             [felis.editor.row :as row]))
 
@@ -9,15 +10,11 @@
 (def bottom
   (partial buffer/update zipper/right))
 
-(defn start [editor]
-  (->> editor
-       (buffer/update zipper/start)
-       row/start))
+(def start
+  (partial buffer/update zipper/start))
 
-(defn end [editor]
-  (->> editor
-       (buffer/update zipper/end)
-       row/end))
+(def end
+  (partial buffer/update zipper/end))
 
 (def insert
   (partial buffer/update #(zipper/insert % felis.row/empty)))
@@ -26,7 +23,16 @@
   (partial buffer/update #(zipper/append % felis.row/empty)))
 
 (def delete
-  (partial buffer/update zipper/delete))
+  (partial buffer/delete zipper/delete))
 
 (def backspace
-  (partial buffer/update zipper/backspace))
+  (partial buffer/delete zipper/backspace))
+
+(def delete-bottoms
+  (partial buffer/delete zipper/delete-rights))
+
+(def delete-tops
+  (partial buffer/delete zipper/delete-lefts))
+
+(def initialize
+  (partial buffer/update core/initialize))

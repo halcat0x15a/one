@@ -12,7 +12,10 @@
   (insert [this editor])
   (append [this editor])
   (delete [this editor])
-  (backspace [this editor]))
+  (backspace [this editor])
+  (delete-lefts [this editor])
+  (delete-rights [this editor])
+  (initialize [this editor]))
 
 (deftype Row []
   Edit
@@ -33,7 +36,13 @@
   (delete [this editor]
     (row/delete editor))
   (backspace [this editor]
-    (row/backspace editor)))
+    (row/backspace editor))
+  (delete-lefts [this editor]
+    (row/delete-lefts editor))
+  (delete-rights [this editor]
+    (row/delete-rights editor))
+  (initialize [this editor]
+    (row/initialize editor)))
 
 (deftype Buffer []
   Edit
@@ -54,7 +63,13 @@
   (delete [this editor]
     (buffer/delete editor))
   (backspace [this editor]
-    (buffer/backspace editor)))
+    (buffer/backspace editor))
+  (delete-lefts [this editor]
+    (buffer/delete-tops editor))
+  (delete-rights [this editor]
+    (buffer/delete-bottoms editor))
+  (initialize [this editor]
+    (buffer/initialize editor)))
 
 (defprotocol Editable
   (edit [this]))

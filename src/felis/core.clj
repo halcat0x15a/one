@@ -1,11 +1,22 @@
-(ns felis.core)
+(ns felis.core
+  (:refer-clojure :exclude [char]))
 
 (defprotocol Editor
-  (perform [this key])
-  (keymap [this]))
+  (perform [this key]))
+
+(defprotocol Initialize
+  (initialize [this]))
 
 (defprotocol Text
   (text [this]))
+
+(defprotocol Keymap
+  (escape [this])
+  (left [this])
+  (right [this])
+  (up [this])
+  (down [this])
+  (char [this]))
 
 (defn split-lines [string]
   (letfn [(split-lines [src acc xs]

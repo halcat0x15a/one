@@ -4,13 +4,13 @@
             [felis.core :as core]
             [felis.zipper :as zipper]))
 
+(declare ->Line)
+
 (defprotocol Row
   (move [this f])
   (insert [this f char])
   (delete [this f])
   (replace [this char]))
-
-(declare ->Line)
 
 (deftype Empty []
   Row
@@ -19,6 +19,8 @@
     (->Line char [] []))
   (delete [this f] this)
   (replace [this char] this)
+  core/Initialize
+  (initialize [this] this)
   core/Text
   (text [this] ""))
 
@@ -37,6 +39,8 @@
   (value [this] :char)
   (lefts [this] :lefts)
   (rights [this] :rights)
+  core/Initialize
+  (initialize [this] empty)
   core/Text
   (text [this]
     (str (string/join lefts) char (string/join rights))))
@@ -45,6 +49,6 @@
   (update-in editor [:buffer :row] f))
 
 (defn string-> [string]
-  (if (= string "")
+  (if (empty? string)
     empty
     (Line. (first string) [] (rest string))))
