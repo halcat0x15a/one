@@ -1,41 +1,30 @@
 (ns felis.test
   (:refer-clojure :exclude [chars])
   (:require [clojure.data.generators :as gen]
-            [felis.editable :as editable]
             [felis.row :as row]
             [felis.buffer :as buffer]
             [felis.editor :as editor]))
 
-(defprotocol Generator
-  (line [this])
-  (buffer [this]))
-
 (def chars
   (partial gen/vec gen/printable-ascii-char))
 
-(defn row [generator]
-  (gen/rand-nth [row/empty (line generator)]))
+(defn rows [row]
+  (gen/vec row))
 
-(def rows (comp gen/vec row))
+(defn row []
+  (row/->Row (chars) (chars)))
 
-(defn zipper [generator]
-  (gen/rand-nth [(line generator) (buffer generator)]))
+(defn buffer []
+  (buffer/->Buffer (gen/keyword) (row) (rows row) (rows row)))
 
-(defn editor [generator]
-  (editor/->Normal (buffer generator)))
+(defn editable []
+  (gen/rand-nth [(row)
+                 (buffer)]))
 
-(defn editable [generator]
-  (gen/rand-nth [(row generator) (buffer generator)]))
+(defn editor []
+  (editor/->Normal (buffer)))
 
-(def edit
-  (partial gen/rand-nth [(editable/->Row) (editable/->Buffer)]))
-
-(def default
-  (reify Generator
-    (line [this] (row/->Line (gen/printable-ascii-char) (chars) (chars)))
-    (buffer [this] (buffer/->Buffer (gen/keyword) (row this) (rows this) (rows this)))))
-
-(def initial
-  (reify Generator
-    (line [this] (row/->Line (gen/printable-ascii-char) [] (chars)))
-    (buffer [this] (buffer/->Buffer buffer/default (row this) [] (rows this)))))
+(defn serializable []
+  (letfn [(row [] (row/->Row [] (chars)))]
+    (gen/rand-nth [(row)
+                   (buffer/->Buffer buffer/default (row) [] (rows row))])))

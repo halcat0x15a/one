@@ -22,7 +22,7 @@
 (defrecord Insert [buffer]
   core/Editor
   (perform [this char]
-    (row/insert this char)))
+    (row/append this char)))
 
 (defrecord ReplaceOnce [buffer]
   core/Editor
@@ -36,8 +36,8 @@
 
 (def delete
   {\d buffer/delete
-   \0 row/delete-lefts
-   \9 row/delete-rights
+;   \0 row/delete-lefts
+;   \9 row/delete-rights
    \h row/backspace
    \j buffer/delete
    \k buffer/backspace
@@ -68,8 +68,8 @@
    \a (comp map->Insert row/right)
    \I (comp map->Insert row/start)
    \A (comp map->Insert row/end)
-   \o (comp map->Insert buffer/append)
-   \O (comp map->Insert buffer/insert)
+   \o (comp map->Insert buffer/append-newline)
+   \O (comp map->Insert buffer/insert-newline)
    \r map->ReplaceOnce
    \R map->Replace
    \x row/delete

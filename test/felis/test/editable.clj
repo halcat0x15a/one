@@ -1,18 +1,27 @@
 (ns felis.test.editable
-  (:require [clojure.data.generators :as gen]
-            [clojure.test.generative :refer :all]
+  (:refer-clojure :exclude [next])
+  (:require [clojure.test.generative :refer :all]
             [felis.test :as test]
-            [felis.editable :refer :all]
-            [felis.core :as core]))
+            [felis.editable :refer :all]))
 
-(defspec string->editable->string
-  (fn [string edit]
-    (->> string (string-> edit) core/text))
-  [^string string ^test/edit edit]
-  (is (= % string)))
+(defspec next-prev
+  #(-> % start next prev)
+  [^test/editable editable]
+  (is (= % (start editable))))
 
-(defspec editable->string->editable
-  (fn [editable]
-    (->> editable core/text (string-> (edit editable))))
-  [^{:tag (test/editable test/initial)} editable]
+(defspec prev-next
+  #(-> % end prev next)
+  [^test/editable editable]
+  (is (= % (end editable))))
+
+(defspec insert-delete
+  (fn [editable anything]
+    (-> editable (insert anything) delete))
+  [^test/editable editable ^anything anything]
+  (is (= % editable)))
+
+(defspec append-backspace
+  (fn [editable anything]
+    (-> editable (append anything) backspace))
+  [^test/editable editable ^anything anything]
   (is (= % editable)))

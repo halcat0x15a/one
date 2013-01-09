@@ -4,12 +4,6 @@
 (defprotocol Editor
   (perform [this key]))
 
-(defprotocol Initialize
-  (initialize [this]))
-
-(defprotocol Text
-  (text [this]))
-
 (defprotocol Keymap
   (escape [this])
   (left [this])
