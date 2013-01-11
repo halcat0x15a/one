@@ -1,63 +1,57 @@
 (ns felis.row
   (:refer-clojure :exclude [empty])
-  (:require [clojure.string :as string]
-            [felis.core :as core]
+  (:require [felis.string :as string]
             [felis.editable :as editable]
-            [felis.functor :as functor]
-            [felis.serialization :as serialization]))
+            [felis.serialization :as serialization]
+            [felis.functor :as functor]))
 
 (declare reader)
+
+(defn- move [row field field']
+  (if-let [value (editable/first row field)]
+    (assoc row
+      field (editable/rest row field)
+      field' (editable/conj row field' value))
+    row))
+
+(defn- insert [row field value]
+  (assoc row
+     field (editable/conj row field value)))
+
+(defn- delete [row field]
+  (assoc row
+     field (editable/rest row field)))
 
 (defrecord Row [lefts rights]
   editable/Editable
   (next [this]
-    (if-let [value (first rights)]
-      (assoc this
-        :lefts (conj (vec lefts) value)
-        :rights (rest rights))
-      this))
+    (move this :rights :lefts))
   (prev [this]
-    (if-let [value (last lefts)]
-      (assoc this
-        :lefts (drop-last lefts)
-        :rights (cons value rights))
-      this))
-  (start [this]
-    (assoc this
-      :lefts []
-      :rights (concat lefts rights)))
-  (end [this]
-    (assoc this
-      :lefts (concat lefts rights)
-      :rights []))
+    (move this :lefts :rights))
   (insert [this value]
-    (assoc this
-      :rights (cons value rights)))
+    (insert this :rights value))
   (append [this value]
-    (assoc this
-      :lefts (conj lefts value)))
+    (insert this :lefts value))
   (delete [this]
-    (assoc this
-      :rights (rest rights)))
+    (delete this :rights))
   (backspace [this]
-    (assoc this
-      :lefts (drop-last lefts)))
+    (delete this :lefts))
   functor/Functor
   (map [this f]
     (assoc this
-      :lefts (map f lefts)
-      :rights (map f rights)))
+      :lefts (clojure.string/join (map f lefts))
+      :rights (clojure.string/join (map f rights))))
   serialization/Serializable
   (write [this]
-    (string/join (concat lefts rights)))
+    (str lefts rights))
   (reader [this] reader))
 
-(def empty (Row. [] []))
+(def empty (Row. "" ""))
 
 (def reader
   (reify serialization/Reader
-    (read [this string]
-      (Row. [] (vec string)))))
+    (read [this s]
+      (Row. "" s))))
 
 (defn update [f editor]
-  (update-in editor [:buffer :tops 0 :rights 0] f))
+  (update-in editor [:buffer :row] f))

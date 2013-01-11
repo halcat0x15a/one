@@ -10,14 +10,14 @@
     (-> editor f map->Normal)
     editor))
 
-(defn run [editor keymap key]
+(defn run [keymap editor key]
   (condp = key
     (core/escape keymap) (map->Normal editor)
     (core/left keymap) (row/left editor)
     (core/right keymap) (row/right editor)
     (core/up keymap) (buffer/top editor)
     (core/down keymap) (buffer/bottom editor)
-    (core/perform editor (core/char key))))
+    (core/perform editor (core/char keymap key))))
 
 (defrecord Insert [buffer]
   core/Editor
@@ -81,3 +81,5 @@
   core/Editor
   (perform [this char]
     (keymap this normal char)))
+
+(def default (Normal. felis.buffer/scratch))

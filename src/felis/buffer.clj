@@ -1,66 +1,52 @@
 (ns felis.buffer
-  (:refer-clojure :exclude [empty])
-  (:require [clojure.string :as string]
-            [felis.core :as core]
+  (:refer-clojure :exclude [name empty])
+  (:require [felis.core :as core]
+            [felis.string :as string]
             [felis.editable :as editable]
-            [felis.functor :as functor]
             [felis.serialization :as serialization]
+            [felis.functor :as functor]
             [felis.row :as row]))
 
-(def default :*scratch*)
-
 (declare reader)
+
+(defn- move [buffer field field']
+  (if-let [row (editable/first buffer field)]
+    (assoc buffer
+      :row row
+      field (editable/rest buffer field)
+      field' (editable/conj buffer field' (:row buffer)))
+    buffer))
+
+(defmulti empty identity)
+(defmethod empty :tops [field] [])
+(defmethod empty :bottoms [field] '())
+
+(defn- insert [buffer field value]
+  (assoc buffer
+    :row value
+    field (editable/conj buffer field (:row buffer))))
+
+(defn- delete [buffer field]
+  (if-let [row (editable/first buffer field)]
+    (assoc buffer
+      :row row
+      field (editable/rest buffer field))
+    buffer))
 
 (defrecord Buffer [name row tops bottoms]
   editable/Editable
   (next [this]
-    (if-let [row' (first bottoms)]
-      (assoc this
-        :row row'
-        :tops (conj tops row)
-        :bottoms (rest bottoms))
-      this))
+    (move this :bottoms :tops))
   (prev [this]
-    (if-let [row' (peek tops)]
-      (assoc this
-        :row row'
-        :tops (pop tops)
-        :bottoms (cons row bottoms))
-      this))
-  (start [this]
-    (if-let [row' (first tops)]
-      (assoc this
-        :row row'
-        :tops []
-        :bottoms (concat (rest tops) (list row) bottoms))
-      this))
-  (end [this]
-    (if-let [row' (peek bottoms)]
-      (assoc this
-        :row row'
-        :tops (vec (concat tops (list row) (pop bottoms)))
-        :bottoms [])
-      this))
+    (move this :tops :bottoms))
   (insert [this value]
-    (assoc this
-      :row value
-      :bottoms (cons row bottoms)))
+    (insert this :bottoms value))
   (append [this value]
-    (assoc this
-      :row value
-      :tops (conj tops row)))
+    (insert this :tops value))
   (delete [this]
-    (if-let [row (first bottoms)]
-      (assoc this
-        :row row
-        :bottoms (rest bottoms))
-      this))
+    (delete this :bottoms))
   (backspace [this]
-    (if-let [row (peek tops)]
-      (assoc this
-        :row row
-        :tops (pop tops))
-      this))
+    (delete this :tops))
   functor/Functor
   (map [this f]
     (assoc this
@@ -72,19 +58,19 @@
     (->> (concat tops [row] bottoms)
          (map serialization/write)
          (interpose \newline)
-         string/join))
+         (apply str)))
   (reader [this] reader))
+
+(def default :*scratch*)
+
+(def scratch (Buffer. default row/empty [] '()))
 
 (def reader
   (reify serialization/Reader
-    (read [this string]
-      (let [rows
-            (->> string
-                 core/split-lines
-                 (map (partial serialization/read row/reader)))]
+    (read [this s]
+      (let [read (partial map (partial serialization/read row/reader))
+            rows (-> s string/split-lines read)]
         (Buffer. default (first rows) [] (rest rows))))))
 
-(def empty (Buffer. default row/empty [] []))
-
 (defn update [f editor]
-  (update-in editor [:buffer 0] f))
+  (update-in editor [:buffer] f))
