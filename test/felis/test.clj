@@ -35,9 +35,9 @@
 
 (def keymap
   (reify core/Keymap
-    (escape [this] :escape)
-    (left [this] :left)
-    (right [this] :right)
-    (up [this] :up)
-    (down [this] :down)
+    (escape? [this key] (= key :escape))
+    (left? [this key] (= key :left))
+    (right? [this key] (= key :right))
+    (up? [this key] (= key :up))
+    (down? [this key] (= key :down))
     (char [this key] key)))

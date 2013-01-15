@@ -5,19 +5,18 @@
 
 (declare map->Normal)
 
-(defn keymap [editor keymap key]
-  (if-let [f (keymap key)]
-    (-> editor f map->Normal)
-    editor))
+(defn run [editor keymap event]
+  (cond (core/escape? keymap event) (map->Normal editor)
+        (core/left? keymap event) (row/left editor)
+        (core/right? keymap event) (row/right editor)
+        (core/up? keymap event) (buffer/top editor)
+        (core/down? keymap event) (buffer/bottom editor)
+        :else (core/perform editor (core/char keymap event))))
 
-(defn run [keymap editor key]
-  (condp = key
-    (core/escape keymap) (map->Normal editor)
-    (core/left keymap) (row/left editor)
-    (core/right keymap) (row/right editor)
-    (core/up keymap) (buffer/top editor)
-    (core/down keymap) (buffer/bottom editor)
-    (core/perform editor (core/char keymap key))))
+(defn exec [editor keymap key]
+  (if-let [f (keymap key)]
+    (f editor)
+    editor))
 
 (defrecord Insert [buffer]
   core/Editor
@@ -46,7 +45,7 @@
 (defrecord Delete [buffer]
   core/Editor
   (perform [this char]
-    (keymap this delete char)))
+    (-> this (exec delete char) map->Normal)))
 
 (def go
   {\0 buffer/start
@@ -55,7 +54,7 @@
 (defrecord Go [buffer]
   core/Editor
   (perform [this char]
-    (keymap this go char)))
+    (-> this (exec go char) map->Normal)))
 
 (def normal
   {\h row/left
@@ -80,6 +79,6 @@
 (defrecord Normal [buffer]
   core/Editor
   (perform [this char]
-    (keymap this normal char)))
+    (exec this normal char)))
 
 (def default (Normal. felis.buffer/scratch))

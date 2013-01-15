@@ -21,6 +21,13 @@
 
 (def end (partial until next))
 
+(defn position [editable]
+  (loop [editable editable n 0]
+    (let [editable' (prev editable)]
+      (if (identical? editable' editable)
+        n
+        (recur editable' (inc n))))))
+
 (defn field [row field & other] field)
 
 (defmulti first field)

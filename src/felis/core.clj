@@ -5,9 +5,9 @@
   (perform [this key]))
 
 (defprotocol Keymap
-  (escape [this])
-  (left [this])
-  (right [this])
-  (up [this])
-  (down [this])
-  (char [this key]))
+  (escape? [this event])
+  (left? [this event])
+  (right? [this event])
+  (up? [this event])
+  (down? [this event])
+  (char [this event]))
