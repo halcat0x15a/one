@@ -1,14 +1,8 @@
 (ns felis.test.editable
-  (:refer-clojure :exclude [next first rest conj empty])
+  (:refer-clojure :exclude [sequence next first rest conj empty])
   (:require [clojure.test.generative :refer :all]
             [felis.test :as test]
             [felis.editable :refer :all]))
-
-(defspec rest!=nil
-  (fn [editable]
-    (rest editable (test/field editable)))
-  [^test/editable editable]
-  (is (not (nil? %))))
 
 (defspec insert->delete
   (fn [editable anything]
@@ -22,27 +16,27 @@
   [^test/editable editable ^char anything]
   (is (= % editable)))
 
-(defspec start-position=zero
-  #(-> % start position)
+(defspec start-cursor=zero
+  #(-> % start cursor)
   [^test/editable editable]
   (is (zero? %)))
 
-(defspec end-position>=some-position
-  #(-> % end position)
+(defspec end-cursor>=some-cursor
+  #(-> % end cursor)
   [^test/editable editable]
-  (is (>= % (position editable))))
+  (is (>= % (cursor editable))))
 
-(defspec next-position>=some-position
-  #(-> % next position)
+(defspec next-cursor>=some-cursor
+  #(-> % next cursor)
   [^test/editable editable]
-  (is (>= % (position editable))))
+  (is (>= % (cursor editable))))
 
-(defspec prev-position<=some-position
-  #(-> % prev position)
+(defspec prev-cursor<=some-cursor
+  #(-> % prev cursor)
   [^test/editable editable]
-  (is (<= % (position editable))))
+  (is (<= % (cursor editable))))
 
 (defspec still-when-delete
-  #(-> % delete position)
+  #(-> % delete cursor)
   [^test/editable editable]
-  (is (= % (position editable))))
+  (is (= % (cursor editable))))

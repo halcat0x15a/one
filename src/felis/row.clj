@@ -1,57 +1,39 @@
 (ns felis.row
-  (:refer-clojure :exclude [empty])
-  (:require [felis.string :as string]
+  (:refer-clojure :exclude [remove empty])
+  (:require [felis.collection :as collection]
+            [felis.collection.string :as string]
             [felis.editable :as editable]
-            [felis.serialization :as serialization]
-            [felis.functor :as functor]))
+            [felis.serialization :as serialization]))
 
 (declare reader)
 
-(defn- move [row field field']
-  (if-let [value (editable/first row field)]
-    (assoc row
-      field (editable/rest row field)
-      field' (editable/conj row field' value))
-    row))
-
-(defn- insert [row field value]
-  (assoc row
-     field (editable/conj row field value)))
-
-(defn- delete [row field]
-  (assoc row
-     field (editable/rest row field)))
-
 (defrecord Row [lefts rights]
   editable/Editable
-  (next [this]
-    (move this :rights :lefts))
-  (prev [this]
-    (move this :lefts :rights))
-  (insert [this value]
-    (insert this :rights value))
-  (append [this value]
-    (insert this :lefts value))
-  (delete [this]
-    (delete this :rights))
-  (backspace [this]
-    (delete this :lefts))
-  functor/Functor
-  (map [this f]
-    (assoc this
-      :lefts (clojure.string/join (map f lefts))
-      :rights (clojure.string/join (map f rights))))
+  (move [row field field']
+    (if-let [value (-> row field collection/peek)]
+      (assoc row
+        field (-> row field collection/pop)
+        field' (-> row field' (collection/conj value)))
+      row))
+  (ins [row field char]
+    (assoc row
+      field (-> row field (collection/conj char))))
+  (del [row field]
+    (assoc row
+      field (-> row field collection/pop)))
+  (sequence [row]
+    (str (:sequence lefts) (:sequence rights)))
   serialization/Serializable
-  (write [this]
-    (str lefts rights))
-  (reader [this] reader))
+  (write [row]
+    (editable/sequence row))
+  (reader [row] reader))
 
-(def empty (Row. "" ""))
+(def empty (Row. (string/->Left "") (string/->Right "")))
 
 (def reader
   (reify serialization/Reader
-    (read [this s]
-      (Row. "" s))))
+    (read [this string]
+      (Row. (string/->Left "") (string/->Right string)))))
 
 (defn update [f editor]
   (update-in editor [:buffer :row] f))

@@ -1,6 +1,7 @@
 (ns felis.string
   (:refer-clojure :exclude [first rest last butlast])
-  (:require [clojure.core :as core]))
+  (:require [clojure.core :as core]
+            [clojure.string :as string]))
 
 (defn first [s]
   (if (-> s count pos?)
@@ -30,3 +31,5 @@
           (recur src' "" (conj! xs acc))
           (recur src' (str acc c) xs)))
       (persistent! (conj! xs acc)))))
+
+(def join string/join)

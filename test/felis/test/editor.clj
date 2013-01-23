@@ -1,6 +1,7 @@
 (ns felis.test.editor
   (:require [clojure.test :refer :all]
             [felis.test :as test]
+            [felis.collection.string :as string]
             [felis.editor :as editor]))
 
 (defprotocol Input
@@ -27,4 +28,4 @@
 (deftest helloworld
   (testing "type 'hello world'"
     (is (= (emulate \i "helloworld" :escape)
-           (assoc-in editor/default [:buffer :row :lefts] "helloworld")))))
+           (assoc-in editor/default [:buffer :row :lefts] (string/->Left "helloworld"))))))
