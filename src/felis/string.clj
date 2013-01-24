@@ -3,19 +3,10 @@
   (:require [clojure.core :as core]
             [clojure.string :as string]))
 
-(defn first [s]
-  (if (-> s count pos?)
-    (subs s 0 1)))
-
 (defn rest [s]
   (if (-> s count pos?)
     (subs s 1)
     s))
-
-(defn last [s]
-  (let [length (count s)]
-    (if (pos? length)
-      (subs s (dec length) length))))
 
 (defn butlast [s]
   (let [length (count s)]

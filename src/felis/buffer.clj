@@ -1,22 +1,28 @@
 (ns felis.buffer
-  (:refer-clojure :exclude [name empty])
+  (:refer-clojure :exclude [empty sequence])
   (:require [felis.string :as string]
             [felis.collection :as collection]
             [felis.collection.sequence :as sequence]
-            [felis.editable :as editable]
+            [felis.edit :as edit]
             [felis.serialization :as serialization]
             [felis.row :as row]))
 
 (declare reader)
 
+(defn sequence [buffer]
+  (concat (-> buffer :lefts :sequence)
+          (-> buffer :row list)
+          (-> buffer :rights :sequence)))
+
 (defrecord Buffer [name row lefts rights]
-  editable/Editable
-  (move [buffer field field']
+  edit/Edit
+  (move [buffer field]
     (if-let [row' (-> buffer field collection/peek)]
-      (assoc buffer
-        :row row'
-        field (-> buffer field collection/pop)
-        field' (-> buffer field' (collection/conj row)))
+      (let [field' (edit/opposite field)]
+        (assoc buffer
+          :row row'
+          field (-> buffer field collection/pop)
+          field' (-> buffer field' (collection/conj row))))
       buffer))
   (ins [buffer field row']
     (assoc buffer
@@ -28,14 +34,10 @@
         :row row'
         field (-> buffer field collection/pop))
       buffer))
-  (sequence [buffer]
-    (concat (-> buffer :lefts :sequence)
-            (-> buffer :row list)
-            (-> buffer :rights :sequence)))
   serialization/Serializable
   (write [buffer]
     (->> buffer
-         editable/sequence
+         sequence
          (map serialization/write)
          (interpose \newline)
          (apply str)))

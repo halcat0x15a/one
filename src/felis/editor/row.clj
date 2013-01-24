@@ -1,41 +1,41 @@
 (ns felis.editor.row
   (:refer-clojure :exclude [replace])
   (:require [felis.core :as core]
-            [felis.editable :as editable]
+            [felis.edit :as edit]
             [felis.row :as row]))
 
 (def left
-  (partial row/update editable/prev))
+  (partial row/update edit/prev))
 
 (def right
-  (partial row/update editable/next))
+  (partial row/update edit/next))
 
 (def start
-  (partial row/update editable/start))
+  (partial row/update edit/start))
 
 (def end
-  (partial row/update editable/end))
+  (partial row/update edit/end))
 
 (defn insert [editor char]
-  (row/update #(editable/insert % char) editor))
+  (row/update #(edit/insert % char) editor))
 
 (defn append [editor char]
-  (row/update #(editable/append % char) editor))
+  (row/update #(edit/append % char) editor))
 
 (defn replace [editor char]
   (-> editor
-      editable/delete
-      (editable/insert char)))
+      edit/delete
+      (edit/insert char)))
 
 (def delete
-  (partial row/update editable/delete))
+  (partial row/update edit/delete))
 
 (def backspace
-  (partial row/update editable/backspace))
+  (partial row/update edit/backspace))
 (comment
 (def delete-rights
-  (partial row/update editable/delete-rights))
+  (partial row/update edit/delete-rights))
 
 (def delete-lefts
-  (partial row/update editable/delete-lefts))
+  (partial row/update edit/delete-lefts))
 )

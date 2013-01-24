@@ -1,8 +1,11 @@
 (ns felis.test.editor
   (:require [clojure.test :refer :all]
-            [felis.test :as test]
-            [felis.collection.string :as string]
             [felis.editor :as editor]))
+
+(def keycode
+  (reify editor/KeyCode
+    (special [this] {})
+    (char [this event] event)))
 
 (defprotocol Input
   (input [this editor]))
@@ -17,15 +20,10 @@
       editor))
   java.lang.Character
   (input [this editor]
-    (editor/run editor test/keymap this))
+    (editor/run editor keycode this))
   clojure.lang.Keyword
   (input [this editor]
-    (editor/run editor test/keymap this)))
+    (editor/run editor keycode this)))
 
-(defn emulate [x & xs]
-  (reduce (fn [editor x] (input x editor)) editor/default (cons x xs)))
-
-(deftest helloworld
-  (testing "type 'hello world'"
-    (is (= (emulate \i "helloworld" :escape)
-           (assoc-in editor/default [:buffer :row :lefts] (string/->Left "helloworld"))))))
+(defn emulate [editor x & xs]
+  (reduce (fn [editor x] (input x editor)) editor (cons x xs)))

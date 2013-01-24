@@ -1,12 +1,11 @@
 (ns felis.test
   (:refer-clojure :exclude [sequence])
   (:require [clojure.data.generators :as gen]
-            [felis.core :as core]
             [felis.collection.sequence :as sequence]
             [felis.collection.string :as string]
             [felis.row :as row]
             [felis.buffer :as buffer]
-            [felis.editor :as editor]))
+            [felis.editor.vim :as vim]))
 
 (defn left []
   (string/->Left (gen/string)))
@@ -23,39 +22,21 @@
 (defn row []
   (row/->Row (left) (right)))
 
-(defn sequence []
+(defn collection []
   (gen/rand-nth [(left) (right) (top row) (bottom row)]))
 
 (defn buffer []
   (buffer/->Buffer (gen/keyword) (row) (top row) (bottom row)))
 
-(defn editable []
+(defn edit []
   (gen/rand-nth [(row) (buffer)]))
 
 (defn editor []
-  (editor/->Normal (buffer)))
+  (gen/rand-nth [(vim/->Normal (buffer))]))
 
 (defn serializable []
-  (letfn [(row [] (row/->Row (string/->Left "") (right)))]
-    (gen/rand-nth
-     [(row) (buffer/->Buffer buffer/default (row) (sequence/->Sequence []) (bottom row))])))
-
-(defprotocol Field
-  (field [this]))
-
-(extend-protocol Field
-  felis.row.Row
-  (field [this]
-    (gen/rand-nth [:lefts :rights]))
-  felis.buffer.Buffer
-  (field [this]
-    (gen/rand-nth [:tops :bottoms])))
-
-(def keymap
-  (reify core/Keymap
-    (escape? [this key] (= key :escape))
-    (left? [this key] (= key :left))
-    (right? [this key] (= key :right))
-    (up? [this key] (= key :up))
-    (down? [this key] (= key :down))
-    (char [this key] key)))
+  (letfn [(row [] (assoc row/empty
+                    :rights (right)))]
+    (gen/rand-nth [(row) (assoc buffer/scratch
+                           :row (row)
+                           :rights (bottom row))])))

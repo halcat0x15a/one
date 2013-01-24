@@ -1,5 +1,4 @@
 (ns felis.collection.sequence
-  (:refer-clojure :exclude [empty])
   (:require [felis.collection :as collection]))
 
 (defrecord Sequence [sequence]

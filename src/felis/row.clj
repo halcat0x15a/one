@@ -1,19 +1,24 @@
 (ns felis.row
-  (:refer-clojure :exclude [remove empty])
+  (:refer-clojure :exclude [empty sequence])
   (:require [felis.collection :as collection]
             [felis.collection.string :as string]
-            [felis.editable :as editable]
+            [felis.edit :as edit]
             [felis.serialization :as serialization]))
 
 (declare reader)
 
+(defn sequence [row]
+  (str (-> row :lefts :sequence)
+       (-> row :rights :sequence)))
+
 (defrecord Row [lefts rights]
-  editable/Editable
-  (move [row field field']
+  edit/Edit
+  (move [row field]
     (if-let [value (-> row field collection/peek)]
-      (assoc row
-        field (-> row field collection/pop)
-        field' (-> row field' (collection/conj value)))
+      (let [field' (edit/opposite field)]
+        (assoc row
+          field (-> row field collection/pop)
+          field' (-> row field' (collection/conj value))))
       row))
   (ins [row field char]
     (assoc row
@@ -21,11 +26,9 @@
   (del [row field]
     (assoc row
       field (-> row field collection/pop)))
-  (sequence [row]
-    (str (:sequence lefts) (:sequence rights)))
   serialization/Serializable
   (write [row]
-    (editable/sequence row))
+    (sequence row))
   (reader [row] reader))
 
 (def empty (Row. (string/->Left "") (string/->Right "")))

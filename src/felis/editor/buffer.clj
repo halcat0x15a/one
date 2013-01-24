@@ -1,36 +1,36 @@
 (ns felis.editor.buffer
   (:require [felis.core :as core]
-            [felis.editable :as editable]
+            [felis.edit :as edit]
             [felis.buffer :as buffer]
             [felis.editor.row :as row]))
 
 (def top
-  (partial buffer/update editable/prev))
+  (partial buffer/update edit/prev))
 
 (def bottom
-  (partial buffer/update editable/next))
+  (partial buffer/update edit/next))
 
 (def start
-  (partial buffer/update editable/start))
+  (partial buffer/update edit/start))
 
 (def end
-  (partial buffer/update editable/end))
+  (partial buffer/update edit/end))
 
 (def insert-newline
-  (partial buffer/update #(editable/insert % felis.row/empty)))
+  (partial buffer/update #(edit/insert % felis.row/empty)))
 
 (def append-newline
-  (partial buffer/update #(editable/append % felis.row/empty)))
+  (partial buffer/update #(edit/append % felis.row/empty)))
 
 (def delete
-  (partial buffer/update editable/delete))
+  (partial buffer/update edit/delete))
 
 (def backspace
-  (partial buffer/update editable/backspace))
+  (partial buffer/update edit/backspace))
 (comment
 (def delete-bottoms
-  (partial buffer/update editable/delete-rights))
+  (partial buffer/update edit/delete-rights))
 
 (def delete-tops
-  (partial buffer/update editable/delete-lefts))
+  (partial buffer/update edit/delete-lefts))
 )

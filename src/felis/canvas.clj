@@ -1,6 +1,7 @@
 (ns felis.canvas
   (:require [felis.buffer :as buffer]
-            [felis.editable :as editable]))
+            [felis.row :as row]
+            [felis.buffer :as buffer]))
 
 (defprotocol Canvas
   (text [this string x y]))
@@ -11,5 +12,5 @@
   ([canvas editor]
      (draw canvas editor @font-size))
   ([canvas editor size]
-     (doseq [[y row] (->> editor :buffer editable/sequence-indexed)]
-       (text canvas (editable/sequence row) 0 (* y size)))))
+     (doseq [[y row] (->> editor :buffer buffer/sequence (map-indexed vector))]
+       (text canvas (row/sequence row) 0 (+ (* y size) size)))))

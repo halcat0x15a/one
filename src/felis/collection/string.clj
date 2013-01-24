@@ -5,21 +5,21 @@
 (defrecord Left [sequence]
   collection/Sequence
   (peek [left]
-    (string/last sequence))
+    (last sequence))
   (pop [left]
     (assoc left
       :sequence (string/butlast sequence)))
-  (conj [left character]
+  (conj [left char]
     (assoc left
-      :sequence (str sequence character))))
+      :sequence (str sequence char))))
 
 (defrecord Right [sequence]
   collection/Sequence
   (peek [right]
-    (string/first sequence))
+    (first sequence))
   (pop [right]
     (assoc right
       :sequence (string/rest sequence)))
-  (conj [right value]
+  (conj [right char]
     (assoc right
-      :sequence (str value sequence))))
+      :sequence (str char sequence))))
