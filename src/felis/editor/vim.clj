@@ -3,9 +3,7 @@
             [felis.editor.row :as row]
             [felis.editor.buffer :as buffer]))
 
-(declare map->Normal)
-
-(def global {:escape map->Normal})
+(declare map->Normal global)
 
 (def insert
   {:left row/left
@@ -84,3 +82,5 @@
   (input [editor char] editor))
 
 (def vim (Normal. felis.buffer/scratch))
+
+(def global {:escape map->Normal})

@@ -1,5 +1,5 @@
 (ns felis.collection
-  (:refer-clojure :exclude [peek pop conj]))
+  (:refer-clojure :exclude [peek pop conj concat]))
 
 (defprotocol Sequence
   (peek [sequence])

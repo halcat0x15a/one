@@ -36,12 +36,21 @@
       buffer))
   serialization/Serializable
   (write [buffer]
-    (->> buffer
-         sequence
+    (->> (concat (:sequence lefts)
+                 (list row)
+                 (:sequence rights))
          (map serialization/write)
          (interpose \newline)
-         (apply str)))
-  (reader [buffer] reader))
+         string/join))
+  (reader [buffer] reader)
+  serialization/HTML
+  (html [this]
+    (->> (concat (:sequence lefts)
+                 (-> row focus list)
+                 (:sequence rights))
+         (map serialization/html)
+         (interpose "<br>")
+         string/join)))
 
 (def default :*scratch*)
 

@@ -7,3 +7,6 @@
 
 (defprotocol Reader
   (read [this string]))
+
+(defprotocol HTML
+  (html [this]))

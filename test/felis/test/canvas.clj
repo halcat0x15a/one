@@ -7,10 +7,12 @@
 
 (def canvas
   (reify Canvas
-    (text [this string x y]
+    (color [canvas color])
+    (text [canvas string x y]
       (println string))))
-
+(comment
 (defspec string-drawn=buffer-serialized
   #(->> % (draw canvas) with-out-str string/butlast)
   [^test/editor editor]
   (is (= % (-> editor :buffer serialization/write))))
+)

@@ -1,6 +1,7 @@
 (ns felis.row
   (:refer-clojure :exclude [empty sequence])
-  (:require [felis.collection :as collection]
+  (:require [felis.macros :as macros]
+            [felis.collection :as collection]
             [felis.collection.string :as string]
             [felis.edit :as edit]
             [felis.serialization :as serialization]))
@@ -28,8 +29,19 @@
       field (-> row field collection/pop)))
   serialization/Serializable
   (write [row]
-    (sequence row))
-  (reader [row] reader))
+    (str (:sequence lefts) (:sequence rights)))
+  (reader [row] reader)
+  serialization/HTML
+  (html [row]
+    (-> row serialization/write string/nbsp))
+
+(defn focus [{:keys [lefts rights]}]
+  (reify serialization/HTML
+    (html [this]
+      (str (:sequence lefts)
+           #tag[:span {:class :focus}
+                (get rights 0 "")]
+           (-> rights :sequence string/rest)))))
 
 (def empty (Row. (string/->Left "") (string/->Right "")))
 
