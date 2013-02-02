@@ -2,8 +2,8 @@
   (:refer-clojure :exclude [char]))
 
 (defprotocol Editor
-  (keymap [this])
-  (input [this char]))
+  (keymap [editor])
+  (input [editor char]))
 
 (defprotocol KeyCode
   (code [this event]))

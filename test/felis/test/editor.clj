@@ -4,8 +4,7 @@
 
 (def keycode
   (reify editor/KeyCode
-    (special [this] {})
-    (char [this event] event)))
+    (code [this event] event)))
 
 (defprotocol Input
   (input [this editor]))

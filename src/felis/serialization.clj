@@ -2,11 +2,6 @@
   (:refer-clojure :exclude [read]))
 
 (defprotocol Serializable
-  (write [this])
-  (reader [this]))
+  (write [this]))
 
-(defprotocol Reader
-  (read [this string]))
-
-(defprotocol HTML
-  (html [this]))
+(defmulti read (fn [reader string] reader))

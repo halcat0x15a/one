@@ -1,70 +1,56 @@
 (ns felis.buffer
-  (:refer-clojure :exclude [empty sequence])
-  (:require [felis.string :as string]
+  (:require [clojure.string :as string]
+            [felis.string :as felis-string]
             [felis.collection :as collection]
-            [felis.collection.sequence :as sequence]
             [felis.edit :as edit]
+            [felis.text :as text]
             [felis.serialization :as serialization]
-            [felis.row :as row]))
+            [felis.node :as node]
+            [felis.empty :as empty]))
 
-(declare reader)
+(defn make-string [{:keys [focus lefts rights]} show string]
+  (->> (concat (:sequence lefts)
+               (list focus)
+               (:sequence rights))
+       (map show)
+       (interpose string)
+       string/join))
 
-(defn sequence [buffer]
-  (concat (-> buffer :lefts :sequence)
-          (-> buffer :row list)
-          (-> buffer :rights :sequence)))
-
-(defrecord Buffer [name row lefts rights]
+(defrecord Buffer [name focus lefts rights]
   edit/Edit
   (move [buffer field]
-    (if-let [row' (-> buffer field collection/peek)]
-      (let [field' (edit/opposite field)]
-        (assoc buffer
-          :row row'
-          field (-> buffer field collection/pop)
-          field' (-> buffer field' (collection/conj row))))
+    (if-let [focus' (-> buffer field collection/peek)]
+      (-> buffer
+          (assoc :focus (text/map->Inner focus'))
+          (update-in [field] collection/pop)
+          (update-in [(edit/opposite field)] #(collection/conj % (text/map->Outer focus))))
       buffer))
-  (ins [buffer field row']
-    (assoc buffer
-      :row row'
-      field (-> buffer field (collection/conj row))))
-  (del [buffer field]
-    (if-let [row' (-> buffer field collection/peek)]
-      (assoc buffer
-        :row row'
-        field (-> buffer field collection/pop))
+  (insert [buffer field focus']
+    (-> buffer
+        (assoc :focus (text/map->Inner focus'))
+        (update-in [field] #(collection/conj % (text/map->Outer focus)))))
+  (delete [buffer field]
+    (if-let [focus' (-> buffer field collection/peek)]
+      (-> buffer
+          (assoc :focus (text/map->Inner focus'))
+          (update-in [field] collection/pop))
       buffer))
+  node/Node
+  (render [buffer] (make-string buffer node/render "<br>"))
   serialization/Serializable
-  (write [buffer]
-    (->> (concat (:sequence lefts)
-                 (list row)
-                 (:sequence rights))
-         (map serialization/write)
-         (interpose \newline)
-         string/join))
-  (reader [buffer] reader)
-  serialization/HTML
-  (html [this]
-    (->> (concat (:sequence lefts)
-                 (-> row focus list)
-                 (:sequence rights))
-         (map serialization/html)
-         (interpose "<br>")
-         string/join)))
+  (write [buffer] (make-string buffer serialization/write \newline)))
 
-(def default :*scratch*)
+(defmethod node/path Buffer [_] [:root :buffer])
 
-(def scratch
-  (Buffer. default row/empty (sequence/->Sequence []) (sequence/->Sequence '())))
+(defmethod empty/empty Buffer [_]
+  (Buffer. :*scratch*
+           (empty/empty felis.text.Inner)
+           (empty/empty felis.collection.Top)
+           (empty/empty felis.collection.Bottom)))
 
-(def reader
-  (reify serialization/Reader
-    (read [reader string]
-      (let [read (partial map (partial serialization/read row/reader))
-            rows (-> string string/split-lines read)]
-        (assoc scratch
-          :row (first rows)
-          :rights (sequence/->Sequence (rest rows)))))))
-
-(defn update [f editor]
-  (update-in editor [:buffer] f))
+(defmethod serialization/read Buffer [_ string]
+  (let [read (partial map (partial serialization/read felis.text.Outer))
+        lines (-> string felis-string/split-lines read)]
+    (assoc (empty/empty Buffer)
+      :focus (-> lines first text/map->Inner)
+      :rights (-> lines rest collection/->Right))))

@@ -3,12 +3,16 @@
   (:require [clojure.string :as string]))
 
 (defn tag [values]
-  `(let [[tag# attrs# & contents#] ~values]
-     (str \< (name tag#)
-          (reduce-kv (fn [attrs# key# value#]
-                       (str attrs# \space (name key#) \= \" (name value#) \"))
-                     "" attrs#)
-          \> (string/join contents#) \< \/ (name tag#) \>)))
+  (let [[tag attrs & contents] values
+        open (str \<
+                  (name tag)
+                  (reduce-kv (fn [attrs key value]
+                               (str attrs \space (name key) \= \" (name value) \"))
+                             ""
+                             attrs)
+                  \>)
+        close (str \< \/ (name tag) \>)]
+    `(str ~open (str ~@contents) ~close)))
 
 (defn css [style]
   `(reduce-kv (fn [style# selector# block#]

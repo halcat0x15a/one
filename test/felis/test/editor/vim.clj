@@ -1,6 +1,5 @@
 (ns felis.test.editor
   (:require [clojure.test :refer :all]
-            [felis.core :as core]
             [felis.test :as test]
             [felis.collection.string :as string]
             [felis.editor :as editor]

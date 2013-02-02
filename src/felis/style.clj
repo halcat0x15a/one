@@ -1,4 +1,5 @@
-(ns felis.style)
+(ns felis.style
+  (:require [felis.macros :as macros]))
 
 (def editor
   #css{:.editor

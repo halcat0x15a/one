@@ -1,29 +1,27 @@
 (ns felis.string
-  (:refer-clojure :exclude [rest last butlast])
+  (:refer-clojure :exclude [rest butlast])
   (:require [clojure.core :as core]
             [clojure.string :as string]))
 
-(defn rest [s]
-  (if (-> s count pos?)
-    (subs s 1)
-    s))
+(defn rest [string]
+  (if (-> string count pos?)
+    (subs string 1)
+    string))
 
-(defn butlast [s]
-  (let [length (count s)]
+(defn butlast [string]
+  (let [length (count string)]
     (if (pos? length)
-      (subs s 0 (dec length))
-      s)))
+      (subs string 0 (dec length))
+      string)))
 
 (defn split-lines [string]
   (loop [src string acc "" xs (transient [])]
-    (if-let [c (first src)]
+    (if-let [char (first src)]
       (let [src' (core/rest src)]
-        (if (identical? c \newline)
+        (if (identical? char \newline)
           (recur src' "" (conj! xs acc))
-          (recur src' (str acc c) xs)))
+          (recur src' (str acc char) xs)))
       (persistent! (conj! xs acc)))))
 
-(def join string/join)
-
-(defn nbsp [source]
-  (string/replace source #" " "&nbsp;"))
+(defn nbsp [string]
+  (string/replace string #" " "&nbsp;"))

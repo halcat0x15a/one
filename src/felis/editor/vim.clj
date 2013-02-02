@@ -1,44 +1,46 @@
 (ns felis.editor.vim
   (:require [felis.editor :as editor]
-            [felis.editor.row :as row]
+            [felis.group :as group]
+            [felis.empty :as empty]
+            [felis.editor.text :as text]
             [felis.editor.buffer :as buffer]))
 
 (declare map->Normal global)
 
 (def insert
-  {:left row/left
-   :right row/right
+  {:left text/left
+   :right text/right
    :up buffer/top
    :down buffer/bottom
-   :backspace row/backspace
+   :backspace text/backspace
    :enter buffer/append-newline})
 
-(defrecord Insert [buffer]
+(defrecord Insert [root]
   editor/Editor
   (keymap [editor] (merge global insert))
   (input [editor char]
-    (row/append editor char)))
+    (text/append editor char)))
 
-(defrecord ReplaceOnce [buffer]
+(defrecord ReplaceOnce [root]
   editor/Editor
   (keymap [editor] global)
   (input [this char]
-    (-> this (row/replace char) map->Normal)))
+    (-> this (text/replace char) map->Normal)))
 
-(defrecord Replace [buffer]
+(defrecord Replace [root]
   editor/Editor
   (keymap [editor] global)
   (input [editor char]
-    (-> editor (row/replace char) row/right)))
+    (-> editor (text/replace char) text/right)))
 
 (def delete
   {\d buffer/delete
-   \h row/backspace
+   \h text/backspace
    \j buffer/delete
    \k buffer/backspace
-   \l row/delete})
+   \l text/delete})
 
-(defrecord Delete [buffer]
+(defrecord Delete [root]
   editor/Editor
   (keymap [editor] (merge global delete))
   (input [this char] (map->Normal this)))
@@ -47,40 +49,41 @@
   {\0 buffer/start
    \9 buffer/end})
 
-(defrecord Go [buffer]
+(defrecord Go [root]
   editor/Editor
   (keymap [editor] (merge global go))
   (input [editor char] (map->Normal editor)))
 
 (def normal
-  {:left row/left
-   :right row/right
+  {:left text/left
+   :right text/right
    :up buffer/top
    :down buffer/bottom
-   \h row/left
+   \h text/left
    \j buffer/bottom
    \k buffer/top
-   \l row/right
-   \0 row/start
-   \9 row/end
+   \l text/right
+   \0 text/start
+   \9 text/end
    \i map->Insert
-   \a (comp map->Insert row/right)
-   \I (comp map->Insert row/start)
-   \A (comp map->Insert row/end)
+   \a (comp map->Insert text/right)
+   \I (comp map->Insert text/start)
+   \A (comp map->Insert text/end)
    \o (comp map->Insert buffer/append-newline)
    \O (comp map->Insert buffer/insert-newline)
    \r map->ReplaceOnce
    \R map->Replace
-   \x row/delete
-   \X row/backspace
+   \x text/delete
+   \X text/backspace
    \d map->Delete
    \g map->Go})
 
-(defrecord Normal [buffer]
+(defrecord Normal [root]
   editor/Editor
   (keymap [editor] (merge global normal))
   (input [editor char] editor))
 
-(def vim (Normal. felis.buffer/scratch))
+(defmethod empty/empty Normal [_]
+  (Normal. (empty/empty felis.group.Group)))
 
 (def global {:escape map->Normal})

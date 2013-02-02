@@ -5,14 +5,14 @@
             [felis.test :as test]
             [felis.serialization :refer :all]))
 
-(defspec string->serializable->string
+(defspec write-read
   (fn [string serializable]
-    (->> string (read (reader serializable)) write))
+    (->> string (read (type serializable)) write))
   [^string string ^test/serializable serializable]
   (is (= % string)))
 
-(defspec serializable->string->serializable
+(defspec read-write
   (fn [serializable]
-    (->> serializable write (read (reader serializable))))
+    (->> serializable write (read (type serializable))))
   [^test/serializable serializable]
   (is (= % serializable)))
