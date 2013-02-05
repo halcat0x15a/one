@@ -3,22 +3,22 @@
   (:require [felis.edit :as edit]))
 
 (defn next [edit]
-  (edit/move edit :rights))
+  (edit/move edit edit/rights))
 
 (defn prev [edit]
-  (edit/move edit :lefts))
+  (edit/move edit edit/lefts))
 
 (defn insert [value edit]
-  (edit/insert edit :rights value))
+  (edit/insert edit edit/rights value))
 
 (defn append [value edit]
-  (edit/insert edit :lefts value))
+  (edit/insert edit edit/lefts value))
 
 (defn delete [edit]
-  (edit/delete edit :rights))
+  (edit/delete edit edit/rights))
 
 (defn backspace [edit]
-  (edit/delete edit :lefts))
+  (edit/delete edit edit/lefts))
 
 (defn- until [f edit]
   (let [edit' (f edit)]

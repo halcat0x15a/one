@@ -1,6 +1,7 @@
 (ns felis.text
   (:refer-clojure :exclude [peek pop conj read empty])
-  (:require [felis.string :as string]
+  (:require [clojure.core :as core]
+            [felis.string :as string]
             [felis.collection :as collection]
             [felis.edit :as edit]
             [felis.node :as node]
@@ -47,6 +48,10 @@
   (write [text] (write text)))
 
 (def path [:root :buffer :focus])
+
+(def lefts (core/conj path edit/lefts))
+
+(def rights (core/conj path edit/rights))
 
 (def empty (Text. "" ""))
 

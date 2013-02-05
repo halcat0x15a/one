@@ -5,15 +5,15 @@
             [felis.editor.buffer :as buffer]))
 
 (def keymap
-  {\d buffer/delete
-   key/left text/backspace
+  {key/left text/backspace
    key/up buffer/delete
    key/down buffer/backspace
    key/right text/delete
    \h text/backspace
    \j buffer/delete
    \k buffer/backspace
-   \l text/delete})
+   \l text/delete
+   \d buffer/delete})
 
 (defrecord Delete [root]
   editor/Editor

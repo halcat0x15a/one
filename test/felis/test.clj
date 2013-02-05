@@ -6,7 +6,7 @@
             [felis.buffer :as buffer]
             [felis.group :as group]
             [felis.empty :as empty]
-            [felis.editor.vim :as vim]))
+            [felis.editor.normal :as normal]))
 
 (defn list [f]
   (into '() (gen/list f)))
@@ -15,7 +15,7 @@
   (text/->Text (gen/string) (gen/string)))
 
 (defn minibuffer []
-  (minibuffer/->Minibuffer (text)))
+  (minibuffer/->Minibuffer (text) {}))
 
 (defn top []
   (gen/vec text))
@@ -39,7 +39,7 @@
   (rand-nth [(group) (buffer) (minibuffer) (text)]))
 
 (defn editor []
-  (gen/rand-nth [(vim/->Normal (group))]))
+  (gen/rand-nth [(normal/->Normal (group))]))
 
 (defn field []
   (gen/rand-nth [:lefts :rights]))
