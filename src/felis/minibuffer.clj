@@ -13,7 +13,7 @@
 
 (defn render [text]
   (tag :div {:class "minibuffer"}
-       (serialization/write text)))
+       (text/inside text)))
 
 (defrecord Minibuffer [text commands]
   node/Node

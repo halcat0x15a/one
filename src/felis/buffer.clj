@@ -33,19 +33,11 @@
         (update-in [field] collection/pop))
     buffer))
 
-(defn inside [{:keys [lefts rights]}]
-  (str lefts
-       (tag :span {:class :focus}
-            (get rights 0 ""))
-       (string/rest rights)))
-
-(def outside (comp string/nbsp serialization/write))
-
 (defn render [{:keys [lefts focus rights]}]
   (tag :div {:class "buffer"}
-       (->> (concat (map outside lefts)
-                    (-> focus inside list)
-                    (map outside rights))
+       (->> (concat (map text/outside lefts)
+                    (-> focus text/inside list)
+                    (map text/outside rights))
             (string/make-string "<br>"))))
 
 (defn write [{:keys [lefts focus rights]}]

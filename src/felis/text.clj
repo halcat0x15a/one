@@ -1,5 +1,6 @@
 (ns felis.text
   (:refer-clojure :exclude [peek pop conj read empty])
+;*CLJSBUILD-REMOVE*;(:use-macros [felis.macros :only (tag)])
   (:require [clojure.core :as core]
             [felis.string :as string]
             [felis.collection :as collection]
@@ -7,6 +8,10 @@
             [felis.node :as node]
             [felis.serialization :as serialization]
             [felis.empty :as empty]))
+
+;*CLJSBUILD-REMOVE*;(comment
+(use '[felis.macros :only (tag)])
+;*CLJSBUILD-REMOVE*;)
 
 (defmulti peek (fn [feild string] feild))
 (defmethod peek :rights [_ string] (first string))
@@ -62,3 +67,13 @@
 (defmethod empty/empty Text [_] empty)
 
 (defmethod serialization/read Text [_ string] (read string))
+
+(defn inside [{:keys [lefts rights]}]
+  (let [lefts (string/nbsp lefts)
+        rights (string/nbsp rights)]
+    (str lefts
+         (tag :span {:class :focus}
+              (get rights 0 ""))
+         (string/rest rights))))
+
+(def outside (comp string/nbsp serialization/write))
