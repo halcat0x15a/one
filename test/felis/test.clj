@@ -1,51 +1,42 @@
 (ns felis.test
-  (:refer-clojure :exclude [empty])
+  (:refer-clojure :exclude [list empty])
   (:require [clojure.data.generators :as gen]
-            [felis.collection :as collection]
             [felis.text :as text]
+            [felis.minibuffer :as minibuffer]
             [felis.buffer :as buffer]
             [felis.group :as group]
             [felis.empty :as empty]
             [felis.editor.vim :as vim]))
 
-(defn left []
-  (collection/->Left (gen/string)))
-
-(defn right []
-  (collection/->Right (gen/string)))
+(defn list [f]
+  (into '() (gen/list f)))
 
 (defn text []
-  (text/->Text (left) (right)))
+  (text/->Text (gen/string) (gen/string)))
 
-(defn outer []
-  (text/->Outer (text)))
+(defn minibuffer []
+  (minibuffer/->Minibuffer (text)))
 
 (defn top []
-  (collection/->Top (gen/vec outer)))
+  (gen/vec text))
 
 (defn bottom []
-  (collection/->Bottom (into '() (gen/list outer))))
-
-(defn inner []
-  (text/->Inner (text)))
+  (list text))
 
 (defn collection []
-  (gen/rand-nth [(left) (right) (top) (bottom)]))
+  (gen/rand-nth [(list gen/anything) (gen/vec gen/anything)]))
 
 (defn buffer []
-  (buffer/->Buffer (gen/keyword) (inner) (top) (bottom)))
+  (buffer/->Buffer (gen/keyword) (text) (top) (bottom)))
 
 (defn edit []
   (gen/rand-nth [(text) (buffer)]))
-
-(defn minibuffer []
-  (text/->Minibuffer (text)))
 
 (defn group []
   (group/->Group (buffer) (minibuffer)))
 
 (defn node []
-  (rand-nth [(group) (buffer) (minibuffer) (inner)]))
+  (rand-nth [(group) (buffer) (minibuffer) (text)]))
 
 (defn editor []
   (gen/rand-nth [(vim/->Normal (group))]))
@@ -54,19 +45,20 @@
   (gen/rand-nth [:lefts :rights]))
 
 (defn serializable []
-  (letfn [(text [] (assoc (empty/empty felis.text.Text) :rights (right)))]
-    (gen/rand-nth [(text) (assoc (empty/empty felis.buffer.Buffer)
-                            :focus (text/->Inner (text))
-                            :rights (collection/->Right (into '() (gen/list (partial text/->Outer (text))))))])))
-
-(defn empty []
-  (gen/rand-nth [(edit) (collection)]))
+  (letfn [(text [] (assoc text/empty :rights (gen/string)))]
+    (gen/rand-nth [(text) (assoc buffer/empty
+                            :focus (text)
+                            :rights (list (text)))])))
 
 (defprotocol Container
   (element [edit]))
 
 (extend-protocol Container
   felis.buffer.Buffer
-  (element [edit] (outer))
+  (element [edit] (text))
   felis.text.Text
   (element [edit] (gen/char)))
+
+(defn collection*element []
+  (let [coll (collection)]
+    [coll (element coll)]))

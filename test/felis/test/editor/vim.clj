@@ -8,4 +8,4 @@
 (deftest helloworld
   (testing "type 'hello world'"
     (is (= (editor/emulate vim \i "helloworld" :escape)
-           (assoc-in vim [:buffer :row :lefts] (string/->Left "helloworld"))))))
+           (assoc-in vim [:buffer :focus :lefts] (string/->Left "helloworld"))))))

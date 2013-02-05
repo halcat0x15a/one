@@ -8,10 +8,10 @@
 (defn prev [edit]
   (edit/move edit :lefts))
 
-(defn insert [edit value]
+(defn insert [value edit]
   (edit/insert edit :rights value))
 
-(defn append [edit value]
+(defn append [value edit]
   (edit/insert edit :lefts value))
 
 (defn delete [edit]

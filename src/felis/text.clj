@@ -1,77 +1,59 @@
 (ns felis.text
-  (:require [felis.macros :as macros]
-            [felis.string :as string]
-            [felis.edit :as edit]
+  (:refer-clojure :exclude [peek pop conj read empty])
+  (:require [felis.string :as string]
             [felis.collection :as collection]
+            [felis.edit :as edit]
+            [felis.node :as node]
             [felis.serialization :as serialization]
-            [felis.empty :as empty]
-            [felis.node :as node]))
+            [felis.empty :as empty]))
+
+(defmulti peek (fn [feild string] feild))
+(defmethod peek :rights [_ string] (first string))
+(defmethod peek :lefts [_ string] (last string))
+
+(defmulti pop (fn [feild string] feild))
+(defmethod pop :rights [_ string] (string/rest string))
+(defmethod pop :lefts [_ string] (string/butlast string))
+
+(defmulti conj (fn [char feild string] feild))
+(defmethod conj :rights [char _ string] (str char string))
+(defmethod conj :lefts [char _ string] (str string char))
+
+(defn update [text field f]
+  (update-in text [field] (partial f field)))
+
+(defn move [text field]
+  (if-let [char (->> text field (peek field))]
+    (-> text
+        (update field pop)
+        (update (edit/opposite field) (partial conj char)))
+    text))
+
+(defn insert [text field char]
+  (update text field (partial conj char)))
+
+(defn delete [text field]
+  (update text field pop))
+
+(defn write [{:keys [lefts rights]}]
+  (str lefts rights))
 
 (defrecord Text [lefts rights]
   edit/Edit
-  (move [text field]
-    (if-let [value (-> text field collection/peek)]
-      (-> text
-          (update-in [field] collection/pop)
-          (update-in [(edit/opposite field)] #(collection/conj % value)))
-      text))
-  (insert [text field char]
-    (update-in text [field] #(collection/conj % char)))
-  (delete [text field]
-    (update-in text [field] collection/pop))
+  (move [text field] (move text field))
+  (insert [text field char] (insert text field char))
+  (delete [text field] (delete text field))
   serialization/Serializable
-  (write [_]
-    (str (serialization/write lefts) (serialization/write rights))))
+  (write [text] (write text)))
 
-(defprotocol Line
-  (text [line]))
+(def path [:root :buffer :focus])
 
-(extend-type felis.text.Line
-  serialization/Serializable
-  (write [line]
-    (-> line text serialization/write)))
+(def empty (Text. "" ""))
 
-(defrecord Inner [text]
-  Line
-  (text [_] text)
-  node/Node
-  (render [_]
-    (let [rights (-> text :rights :sequence)]
-      (str (-> text :lefts :sequence)
-           #tag[:span {:class :focus}
-                (get rights 0 "")]
-           (string/rest rights)))))
+(defn read [string] (Text. "" string))
 
-(defrecord Outer [text]
-  Line
-  (text [_] text)
-  node/Node
-  (render [_]
-    (-> text serialization/write string/nbsp)))
+(defmethod node/path Text [_] path)
 
-(defrecord Minibuffer [text]
-  Line
-  (text [_] text)
-  node/Node
-  (render [_] ""))
+(defmethod empty/empty Text [_] empty)
 
-(defmethod node/path Inner [_] [:root :buffer :focus])
-
-(defmethod node/path Minibuffer [_] [:root :minibuffer])
-
-(defmethod empty/empty Text [_]
-  (Text. (empty/empty felis.collection.Left)
-         (empty/empty felis.collection.Right)))
-
-(defmethod empty/empty Inner [_]
-  (Inner. (empty/empty felis.text.Text)))
-
-(defmethod empty/empty Minibuffer [_]
-  (Minibuffer. (empty/empty felis.text.Text)))
-
-(defmethod serialization/read Text [_ string]
-  (assoc (empty/empty Text)
-    :rights (serialization/read felis.collection.Right string)))
-
-(defmethod serialization/read Outer [_ string]
-  (->> string (serialization/read Text) Outer.))
+(defmethod serialization/read Text [_ string] (read string))

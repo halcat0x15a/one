@@ -14,14 +14,17 @@
       (subs string 0 (dec length))
       string)))
 
+(defn make-string [sep coll]
+  (->> coll (interpose sep) string/join))
+
 (defn split-lines [string]
-  (loop [src string acc "" xs (transient [])]
-    (if-let [char (first src)]
-      (let [src' (core/rest src)]
+  (loop [source string chunk "" strings (transient [])]
+    (if-let [char (first source)]
+      (let [source' (core/rest source)]
         (if (identical? char \newline)
-          (recur src' "" (conj! xs acc))
-          (recur src' (str acc char) xs)))
-      (persistent! (conj! xs acc)))))
+          (recur source' "" (conj! strings chunk))
+          (recur source' (str chunk char) strings)))
+      (persistent! (conj! strings chunk)))))
 
 (defn nbsp [string]
   (string/replace string #" " "&nbsp;"))

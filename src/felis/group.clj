@@ -1,24 +1,37 @@
 (ns felis.group
+  (:refer-clojure :exclude [empty])
+;*CLJSBUILD-REMOVE*;  (:use-macros [felis.macros :only (tag)])
   (:require [clojure.string :as string]
             [felis.style :as style]
+            [felis.buffer :as buffer]
             [felis.node :as node]
+            [felis.minibuffer :as minibuffer]
             [felis.empty :as empty]))
+
+;*CLJSBUILD-REMOVE*;(comment
+(use '[felis.macros :only (tag)])
+;*CLJSBUILD-REMOVE*;)
+
+(defn render [buffer minibuffer]
+  (tag :html {}
+       (tag :head {}
+            (tag :style {:type "text/css"}
+                 "<!-- "
+                 (->> style/all (interpose \space) string/join)
+                 " -->"))
+       (tag :body {}
+            (tag :div {:class "editor"}
+                 (node/render buffer)
+                 (node/render minibuffer)))))
 
 (defrecord Group [buffer minibuffer]
   node/Node
-  (render [group]
-    #tag[:html {}
-         #tag[:head {}
-              #tag[:style {:type "text/css"}
-                   "<!-- "
-                   (->> style/all (interpose \space) string/join)
-                   " -->"]]
-         #tag[:body {}
-              #tag[:div {:class "editor"}
-                   (node/render buffer)
-                   (node/render minibuffer)]]]))
+  (render [_] (render buffer minibuffer)))
 
-(defmethod node/path Group [_] [:root])
+(def path [:root])
 
-(defmethod empty/empty Group [_]
-  (Group. (empty/empty felis.buffer.Buffer) (empty/empty felis.text.Minibuffer)))
+(def empty (Group. buffer/empty minibuffer/empty))
+
+(defmethod node/path Group [_] path)
+
+(defmethod empty/empty Group [_] empty)

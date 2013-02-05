@@ -5,7 +5,7 @@
             [felis.editor.edit :as edit]))
 
 (defn update [f editor]
-  (update-in editor (node/path felis.text.Inner) f))
+  (update-in editor text/path f))
 
 (def left
   (partial update edit/prev))
@@ -20,10 +20,10 @@
   (partial update edit/end))
 
 (defn insert [editor char]
-  (update #(edit/insert % char) editor))
+  (update (partial edit/insert char) editor))
 
 (defn append [editor char]
-  (update #(edit/append % char) editor))
+  (update (partial edit/append char) editor))
 
 (defn replace [editor char]
   (-> editor

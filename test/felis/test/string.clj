@@ -5,22 +5,22 @@
             [felis.test :as test]
             [felis.string :refer :all]))
 
-(defspec not_empty_split-lines_string
+(defspec not-empty-split-lines
   split-lines
-  [^string string]
+  [^string _]
   (is (not (empty? %))))
 
-(defspec not_nil_rest_string
+(defspec not-nil-rest
   rest
-  [^string string]
+  [^string _]
   (is (not (nil? %))))
 
-(defspec not_nil_butlast_string
+(defspec not-nil-butlast
   butlast
-  [^string string]
+  [^string _]
   (is (not (nil? %))))
 
-(defspec not_contains_set_nbsp_string
+(defspec not-contains-space
   (comp set nbsp)
-  [^string string]
+  [^string _]
   (is (not (contains? % \space))))

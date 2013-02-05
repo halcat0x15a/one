@@ -1,6 +1,7 @@
 (ns felis.buffer
-  (:require [clojure.string :as string]
-            [felis.string :as felis-string]
+  (:refer-clojure :exclude [read empty])
+;*CLJSBUILD-REMOVE*;(:use-macros [felis.macros :only (tag)])
+  (:require [felis.string :as string]
             [felis.collection :as collection]
             [felis.edit :as edit]
             [felis.text :as text]
@@ -8,49 +9,72 @@
             [felis.node :as node]
             [felis.empty :as empty]))
 
-(defn make-string [{:keys [focus lefts rights]} show string]
-  (->> (concat (:sequence lefts)
-               (list focus)
-               (:sequence rights))
-       (map show)
-       (interpose string)
-       string/join))
+;*CLJSBUILD-REMOVE*;(comment
+(use '[felis.macros :only (tag)])
+;*CLJSBUILD-REMOVE*;)
+
+(defn move [{:keys [focus] :as buffer} field]
+  (if-let [focus' (-> buffer field peek)]
+    (-> buffer
+        (assoc :focus focus')
+        (update-in [field] collection/pop)
+        (update-in [(edit/opposite field)] #(conj % focus)))
+    buffer))
+
+(defn insert [{:keys [focus] :as buffer} field focus']
+  (-> buffer
+      (assoc :focus focus')
+      (update-in [field] #(conj % focus))))
+
+(defn delete [buffer field]
+  (if-let [focus' (-> buffer field peek)]
+    (-> buffer
+        (assoc :focus focus')
+        (update-in [field] collection/pop))
+    buffer))
+
+(defn inside [{:keys [lefts rights]}]
+  (str lefts
+       (tag :span {:class :focus}
+            (get rights 0 ""))
+       (string/rest rights)))
+
+(def outside (comp string/nbsp serialization/write))
+
+(defn render [{:keys [lefts focus rights]}]
+  (tag :div {:class "buffer"}
+       (->> (concat (map outside lefts)
+                    (-> focus inside list)
+                    (map outside rights))
+            (string/make-string "<br>"))))
+
+(defn write [{:keys [lefts focus rights]}]
+  (->> (concat lefts (list focus) rights)
+       (map serialization/write)
+       (string/make-string \newline)))
 
 (defrecord Buffer [name focus lefts rights]
   edit/Edit
-  (move [buffer field]
-    (if-let [focus' (-> buffer field collection/peek)]
-      (-> buffer
-          (assoc :focus (text/map->Inner focus'))
-          (update-in [field] collection/pop)
-          (update-in [(edit/opposite field)] #(collection/conj % (text/map->Outer focus))))
-      buffer))
-  (insert [buffer field focus']
-    (-> buffer
-        (assoc :focus (text/map->Inner focus'))
-        (update-in [field] #(collection/conj % (text/map->Outer focus)))))
-  (delete [buffer field]
-    (if-let [focus' (-> buffer field collection/peek)]
-      (-> buffer
-          (assoc :focus (text/map->Inner focus'))
-          (update-in [field] collection/pop))
-      buffer))
+  (move [buffer field] (move buffer field))
+  (insert [buffer field focus] (insert buffer field focus))
+  (delete [buffer field] (delete buffer field))
   node/Node
-  (render [buffer] (make-string buffer node/render "<br>"))
+  (render [buffer] (render buffer))
   serialization/Serializable
-  (write [buffer] (make-string buffer serialization/write \newline)))
+  (write [buffer] (write buffer)))
 
-(defmethod node/path Buffer [_] [:root :buffer])
+(def path [:root :buffer])
 
-(defmethod empty/empty Buffer [_]
-  (Buffer. :*scratch*
-           (empty/empty felis.text.Inner)
-           (empty/empty felis.collection.Top)
-           (empty/empty felis.collection.Bottom)))
+(def empty (Buffer. :*scratch* text/empty [] '()))
 
-(defmethod serialization/read Buffer [_ string]
-  (let [read (partial map (partial serialization/read felis.text.Outer))
-        lines (-> string felis-string/split-lines read)]
-    (assoc (empty/empty Buffer)
-      :focus (-> lines first text/map->Inner)
-      :rights (-> lines rest collection/->Right))))
+(defn read [string]
+  (let [lines (->> string string/split-lines (map text/read))]
+    (assoc empty
+      :focus (first lines)
+      :rights (->> lines rest (apply list)))))
+
+(defmethod node/path Buffer [_] path)
+
+(defmethod empty/empty Buffer [_] empty)
+
+(defmethod serialization/read Buffer [_ string] (read string))
