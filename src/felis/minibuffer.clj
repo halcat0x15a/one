@@ -1,8 +1,7 @@
 (ns felis.minibuffer
   (:require [felis.text :as text]
             [felis.node :as node]
-            [felis.default :as default]
-            [felis.serialization :as serialization]))
+            [felis.default :as default]))
 
 (defn render [text]
   (node/tag :pre {:class :minibuffer}

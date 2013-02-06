@@ -1,21 +1,26 @@
 (ns felis.test
   (:refer-clojure :exclude [list])
-  (:require [clojure.data.generators :as gen]
+  (:require [clojure.core :as core]
+            [clojure.data.generators :as gen]
+            [felis.edit :as edit]
             [felis.text :as text]
             [felis.minibuffer :as minibuffer]
             [felis.buffer :as buffer]
             [felis.root :as root]
             [felis.default :as default]
-            [felis.editor.normal :as normal]))
+            [felis.editor.normal :as normal]
+            [felis.editor.insert :as insert]
+            [felis.editor.delete :as delete]))
 
 (defn list [f]
-  (into '() (gen/list f)))
+  (apply core/list (gen/list f)))
 
 (defn text []
   (text/->Text (gen/string) (gen/string)))
 
 (defn minibuffer []
-  (minibuffer/->Minibuffer (text) {}))
+  (assoc minibuffer/default
+    :text (text)))
 
 (defn top []
   (gen/vec text))
@@ -27,7 +32,11 @@
   (gen/rand-nth [(list gen/anything) (gen/vec gen/anything)]))
 
 (defn buffer []
-  (buffer/->Buffer (gen/keyword) (text) (top) (bottom) identity))
+  (assoc buffer/default
+    :name (gen/keyword)
+    :focus (text)
+    :lefts (top)
+    :rights (bottom)))
 
 (defn edit []
   (gen/rand-nth [(text) (buffer)]))
@@ -41,10 +50,12 @@
   (rand-nth [(root) (buffer) (minibuffer) (text)]))
 
 (defn editor []
-  (gen/rand-nth [(normal/->Normal (root))]))
+  (gen/rand-nth [(normal/->Normal (root))
+                 (insert/->Insert (root))
+                 (delete/->Delete (root))]))
 
 (defn field []
-  (gen/rand-nth [:lefts :rights]))
+  (gen/rand-nth [edit/lefts edit/rights]))
 
 (defn serializable []
   (letfn [(text [] (assoc text/default :rights (gen/string)))]
@@ -60,7 +71,3 @@
   (element [edit] (text))
   felis.text.Text
   (element [edit] (gen/char)))
-
-(defn collection*element []
-  (let [coll (collection)]
-    [coll (element coll)]))

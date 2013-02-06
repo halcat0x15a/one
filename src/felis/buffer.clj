@@ -1,5 +1,4 @@
 (ns felis.buffer
-  (:refer-clojure :exclude [read])
   (:require [felis.string :as string]
             [felis.collection :as collection]
             [felis.edit :as edit]
@@ -31,16 +30,16 @@
 
 (defn render [{:keys [lefts focus rights syntax]}]
   (letfn [(outside [text]
-            (->> text text/write (syntax/highlight syntax)))]
+            (->> text text/serialize (syntax/highlight syntax)))]
     (node/tag :pre {:class "buffer"}
               (->> (concat (map outside lefts)
                            (->> focus text/focus (syntax/highlight syntax) list)
                            (map outside rights))
                    (string/make-string "<br>")))))
 
-(defn write [{:keys [lefts focus rights]}]
+(defn serialize [{:keys [lefts focus rights]}]
   (->> (concat lefts (list focus) rights)
-       (map serialization/write)
+       (map text/serialize)
        (string/make-string \newline)))
 
 (defrecord Buffer [name focus lefts rights syntax]
@@ -51,7 +50,7 @@
   node/Node
   (render [buffer] (render buffer))
   serialization/Serializable
-  (write [buffer] (write buffer)))
+  (serialize [buffer] (serialize buffer)))
 
 (def path [:root :buffer])
 
@@ -60,8 +59,8 @@
 
 (def default (Buffer. :*scratch* text/default [] '() syntax/default))
 
-(defn read [string]
-  (let [lines (->> string string/split-lines (map text/read))]
+(defn deserialize [string]
+  (let [lines (->> string string/split-lines (map text/deserialize))]
     (assoc default
       :focus (first lines)
       :rights (->> lines rest (apply list)))))
@@ -70,4 +69,4 @@
 
 (defmethod default/default Buffer [_] default)
 
-(defmethod serialization/read Buffer [_ string] (read string))
+(defmethod serialization/deserialize Buffer [_ string] (deserialize string))

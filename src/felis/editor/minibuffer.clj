@@ -3,12 +3,16 @@
   (:require [clojure.string :as string]
             [felis.key :as key]
             [felis.minibuffer :as minibuffer]
+            [felis.text :as text]
             [felis.editor :as editor]
-            [felis.editor.edit :as edit]
-            [felis.serialization :as serialization]))
+            [felis.editor.edit :as edit]))
 
 (defn run [editor]
-  (let [[command & args] (-> editor (get-in minibuffer/text) serialization/write (string/split #" "))]
+  (let [[command & args]
+        (-> editor
+            (get-in minibuffer/text)
+            text/serialize
+            (string/split #" "))]
     (if-let [f (-> editor (get-in minibuffer/commands) (get command))]
       (apply f editor args)
       editor)))

@@ -1,7 +1,6 @@
-(ns felis.serialization
-  (:refer-clojure :exclude [read]))
+(ns felis.serialization)
 
 (defprotocol Serializable
-  (write [this]))
+  (serialize [this]))
 
-(defmulti read (fn [reader string] reader))
+(defmulti deserialize (fn [serializable string] serializable))

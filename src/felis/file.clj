@@ -15,7 +15,7 @@
 
 (defn open [editor path string]
   (root/update (partial root/buffer
-                        (assoc (buffer/read string)
+                        (assoc (buffer/deserialize string)
                           :name path
                           :syntax (syntax path)))
                 editor))

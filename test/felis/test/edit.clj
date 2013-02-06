@@ -17,17 +17,17 @@
         (move field)
         (move (opposite field))
         (delete field)))
-  [^test/edit edit ^test/field _]
+  [^test/edit edit ^test/field field]
   (is (= % edit)))
 
 (defspec default-move
   (fn [edit field]
     (-> edit type default/default (move field)))
-  [^test/edit edit ^test/field _]
+  [^test/edit edit ^test/field field]
   (is (default/default? %)))
 
 (defspec default-delete
   (fn [edit field]
     (-> edit type default/default (delete field)))
-  [^test/edit edit ^test/field _]
+  [^test/edit edit ^test/field field]
   (is (default/default? %)))

@@ -1,17 +1,16 @@
 (ns felis.test.serialization
-  (:refer-clojure :exclude [read])
   (:require [clojure.test.generative :refer :all]
             [felis.test :as test]
             [felis.serialization :refer :all]))
 
-(defspec write-read
+(defspec serialize-deserialize
   (fn [string serializable]
-    (->> string (read (type serializable)) write))
-  [^string string ^test/serializable _]
+    (->> string (deserialize (type serializable)) serialize))
+  [^string string ^test/serializable serializable]
   (is (= % string)))
 
-(defspec read-write
+(defspec deserialize-serialize
   (fn [serializable]
-    (->> serializable write (read (type serializable))))
+    (->> serializable serialize (deserialize (type serializable))))
   [^test/serializable serializable]
   (is (= % serializable)))

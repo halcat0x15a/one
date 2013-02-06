@@ -1,5 +1,5 @@
 (ns felis.text
-  (:refer-clojure :exclude [peek pop conj update-in read])
+  (:refer-clojure :exclude [peek pop conj update-in])
   (:require [clojure.core :as core]
             [felis.string :as string]
             [felis.collection :as collection]
@@ -36,7 +36,7 @@
 (defn delete [text field]
   (update-in text field pop))
 
-(defn write [{:keys [lefts rights]}]
+(defn serialize [{:keys [lefts rights]}]
   (str lefts rights))
 
 (defrecord Text [lefts rights]
@@ -45,7 +45,7 @@
   (insert [text field char] (insert text field char))
   (delete [text field] (delete text field))
   serialization/Serializable
-  (write [text] (write text)))
+  (serialize [text] (serialize text)))
 
 (def path [:root :buffer :focus])
 
@@ -58,13 +58,14 @@
 
 (def default (Text. "" ""))
 
-(defn read [string] (Text. "" string))
+(defn deserialize [string] (Text. "" string))
 
 (defmethod node/path Text [_] path)
 
 (defmethod default/default Text [_] default)
 
-(defmethod serialization/read Text [_ string] (read string))
+(defmethod serialization/deserialize Text [_ string]
+  (deserialize string))
 
 (defn focus [{:keys [lefts rights]}]
   (str lefts "\u20DE" rights))
