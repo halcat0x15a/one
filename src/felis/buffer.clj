@@ -55,6 +55,9 @@
 
 (def path [:root :buffer])
 
+(defn update [update editor]
+  (update-in editor path update))
+
 (def default (Buffer. :*scratch* text/default [] '() syntax/default))
 
 (defn read [string]

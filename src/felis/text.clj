@@ -1,5 +1,5 @@
 (ns felis.text
-  (:refer-clojure :exclude [peek pop conj read])
+  (:refer-clojure :exclude [peek pop conj update-in read])
   (:require [clojure.core :as core]
             [felis.string :as string]
             [felis.collection :as collection]
@@ -20,21 +20,21 @@
 (defmethod conj :rights [char _ string] (str char string))
 (defmethod conj :lefts [char _ string] (str string char))
 
-(defn update [text field f]
-  (update-in text [field] (partial f field)))
+(defn update-in [text field f]
+  (core/update-in text [field] (partial f field)))
 
 (defn move [text field]
   (if-let [char (->> text field (peek field))]
     (-> text
-        (update field pop)
-        (update (edit/opposite field) (partial conj char)))
+        (update-in field pop)
+        (update-in (edit/opposite field) (partial conj char)))
     text))
 
 (defn insert [text field char]
-  (update text field (partial conj char)))
+  (update-in text field (partial conj char)))
 
 (defn delete [text field]
-  (update text field pop))
+  (update-in text field pop))
 
 (defn write [{:keys [lefts rights]}]
   (str lefts rights))
@@ -48,6 +48,9 @@
   (write [text] (write text)))
 
 (def path [:root :buffer :focus])
+
+(defn update [update editor]
+  (core/update-in editor path update))
 
 (def lefts (core/conj path edit/lefts))
 

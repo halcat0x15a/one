@@ -1,10 +1,15 @@
-(ns felis.group
+(ns felis.root
   (:require [clojure.string :as string]
             [felis.style :as style]
             [felis.buffer :as buffer]
             [felis.node :as node]
             [felis.minibuffer :as minibuffer]
             [felis.default :as default]))
+
+(defn buffer [buffer' {:keys [buffer buffers] :as root}]
+  (assoc root
+    :buffer buffer'
+    :buffers (conj buffers buffer)))
 
 (defn render [{:keys [buffer minibuffer style]}]
   (node/tag :html {}
@@ -18,15 +23,18 @@
                                 (node/render buffer)
                                 (node/render minibuffer)))))
 
-(defrecord Group [buffer buffers minibuffer style]
+(defrecord Root [buffer buffers minibuffer style]
   node/Node
-  (render [group] (render group)))
+  (render [root] (render root)))
 
 (def path [:root])
 
+(defn update [update editor]
+  (update-in editor path update))
+
 (def default
-  (Group. buffer/default [] minibuffer/default style/default))
+  (Root. buffer/default #{} minibuffer/default style/default))
 
-(defmethod node/path Group [_] path)
+(defmethod node/path Root [_] path)
 
-(defmethod default/default Group [_] default)
+(defmethod default/default Root [_] default)

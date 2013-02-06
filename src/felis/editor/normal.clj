@@ -1,6 +1,6 @@
 (ns felis.editor.normal
   (:require [felis.key :as key]
-            [felis.group :as group]
+            [felis.root :as root]
             [felis.editor :as editor]
             [felis.editor.text :as text]
             [felis.editor.buffer :as buffer]
@@ -35,4 +35,4 @@
   (keymap [editor] keymap)
   (input [editor char] editor))
 
-(def default (Normal. group/default))
+(def default (Normal. root/default))

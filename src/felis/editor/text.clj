@@ -4,34 +4,26 @@
             [felis.node :as node]
             [felis.editor.edit :as edit]))
 
-(defn update [f editor]
-  (update-in editor text/path f))
-
 (def left
-  (partial update edit/prev))
+  (partial text/update edit/prev))
 
 (def right
-  (partial update edit/next))
+  (partial text/update edit/next))
 
 (def start
-  (partial update edit/start))
+  (partial text/update edit/start))
 
 (def end
-  (partial update edit/end))
+  (partial text/update edit/end))
 
 (defn insert [editor char]
-  (update (partial edit/insert char) editor))
+  (text/update (partial edit/insert char) editor))
 
 (defn append [editor char]
-  (update (partial edit/append char) editor))
-
-(defn replace [editor char]
-  (-> editor
-      edit/delete
-      (edit/insert char)))
+  (text/update (partial edit/append char) editor))
 
 (def delete
-  (partial update edit/delete))
+  (partial text/update edit/delete))
 
 (def backspace
-  (partial update edit/backspace))
+  (partial text/update edit/backspace))

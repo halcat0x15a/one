@@ -1,5 +1,6 @@
 (ns felis.file
   (:require [felis.buffer :as buffer]
+            [felis.root :as root]
             [felis.syntax :as syntax]
             [felis.syntax.clojure :as clojure]))
 
@@ -13,7 +14,8 @@
       (-> syntaxes first second))))
 
 (defn open [editor path string]
-  (assoc-in editor buffer/path
-            (assoc (buffer/read string)
-              :name path
-              :syntax (syntax path))))
+  (root/update (partial root/buffer
+                        (assoc (buffer/read string)
+                          :name path
+                          :syntax (syntax path)))
+                editor))

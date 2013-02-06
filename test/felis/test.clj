@@ -4,7 +4,7 @@
             [felis.text :as text]
             [felis.minibuffer :as minibuffer]
             [felis.buffer :as buffer]
-            [felis.group :as group]
+            [felis.root :as root]
             [felis.default :as default]
             [felis.editor.normal :as normal]))
 
@@ -32,16 +32,16 @@
 (defn edit []
   (gen/rand-nth [(text) (buffer)]))
 
-(defn group []
-  (assoc group/default
+(defn root []
+  (assoc root/default
     :buffer (buffer)
     :minibuffer (minibuffer)))
 
 (defn node []
-  (rand-nth [(group) (buffer) (minibuffer) (text)]))
+  (rand-nth [(root) (buffer) (minibuffer) (text)]))
 
 (defn editor []
-  (gen/rand-nth [(normal/->Normal (group))]))
+  (gen/rand-nth [(normal/->Normal (root))]))
 
 (defn field []
   (gen/rand-nth [:lefts :rights]))
