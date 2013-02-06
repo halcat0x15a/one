@@ -33,5 +33,5 @@
 
 (deftest helloworld
   (testing "type 'hello world'"
-    (is (= (emulate normal/empty \i "helloworld" key/escape)
-           (assoc-in normal/empty text/lefts "helloworld")))))
+    (is (= (emulate normal/default \i "helloworld" key/escape)
+           (assoc-in normal/default text/lefts "helloworld")))))

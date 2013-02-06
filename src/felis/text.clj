@@ -1,5 +1,5 @@
 (ns felis.text
-  (:refer-clojure :exclude [peek pop conj read empty])
+  (:refer-clojure :exclude [peek pop conj read])
 ;*CLJSBUILD-REMOVE*;(:use-macros [felis.macros :only (tag)])
   (:require [clojure.core :as core]
             [felis.string :as string]
@@ -7,7 +7,7 @@
             [felis.edit :as edit]
             [felis.node :as node]
             [felis.serialization :as serialization]
-            [felis.empty :as empty]))
+            [felis.default :as default]))
 
 ;*CLJSBUILD-REMOVE*;(comment
 (use '[felis.macros :only (tag)])
@@ -58,22 +58,15 @@
 
 (def rights (core/conj path edit/rights))
 
-(def empty (Text. "" ""))
+(def default (Text. "" ""))
 
 (defn read [string] (Text. "" string))
 
 (defmethod node/path Text [_] path)
 
-(defmethod empty/empty Text [_] empty)
+(defmethod default/default Text [_] default)
 
 (defmethod serialization/read Text [_ string] (read string))
 
-(defn inside [{:keys [lefts rights]}]
-  (let [lefts (string/nbsp lefts)
-        rights (string/nbsp rights)]
-    (str lefts
-         (tag :span {:class :focus}
-              (get rights 0 ""))
-         (string/rest rights))))
-
-(def outside (comp string/nbsp serialization/write))
+(defn focus [{:keys [lefts rights]}]
+  (str lefts "\u20DE" rights))

@@ -19,8 +19,3 @@
   butlast
   [^string _]
   (is (not (nil? %))))
-
-(defspec not-contains-space
-  (comp set nbsp)
-  [^string _]
-  (is (not (contains? % \space))))

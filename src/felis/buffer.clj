@@ -1,5 +1,5 @@
 (ns felis.buffer
-  (:refer-clojure :exclude [read empty])
+  (:refer-clojure :exclude [read])
 ;*CLJSBUILD-REMOVE*;  (:use-macros [felis.macros :only (tag)])
   (:require [felis.string :as string]
             [felis.collection :as collection]
@@ -7,7 +7,8 @@
             [felis.text :as text]
             [felis.serialization :as serialization]
             [felis.node :as node]
-            [felis.empty :as empty]))
+            [felis.default :as default]
+            [felis.syntax :as syntax]))
 
 ;*CLJSBUILD-REMOVE*;(comment
 (use '[felis.macros :only (tag)])
@@ -33,19 +34,21 @@
         (update-in [field] collection/pop))
     buffer))
 
-(defn render [{:keys [lefts focus rights]}]
-  (tag :div {:class "buffer"}
-       (->> (concat (map text/outside lefts)
-                    (-> focus text/inside list)
-                    (map text/outside rights))
-            (string/make-string "<br>"))))
+(defn render [{:keys [lefts focus rights syntax]}]
+  (letfn [(outside [text]
+            (->> text text/write (syntax/highlight syntax)))]
+    (tag :pre {:class "buffer"}
+         (->> (concat (map outside lefts)
+                      (->> focus text/focus (syntax/highlight syntax) list)
+                      (map outside rights))
+              (string/make-string "<br>")))))
 
 (defn write [{:keys [lefts focus rights]}]
   (->> (concat lefts (list focus) rights)
        (map serialization/write)
        (string/make-string \newline)))
 
-(defrecord Buffer [name focus lefts rights]
+(defrecord Buffer [name focus lefts rights syntax]
   edit/Edit
   (move [buffer field] (move buffer field))
   (insert [buffer field focus] (insert buffer field focus))
@@ -57,16 +60,16 @@
 
 (def path [:root :buffer])
 
-(def empty (Buffer. :*scratch* text/empty [] '()))
+(def default (Buffer. :*scratch* text/default [] '() syntax/default))
 
 (defn read [string]
   (let [lines (->> string string/split-lines (map text/read))]
-    (assoc empty
+    (assoc default
       :focus (first lines)
       :rights (->> lines rest (apply list)))))
 
 (defmethod node/path Buffer [_] path)
 
-(defmethod empty/empty Buffer [_] empty)
+(defmethod default/default Buffer [_] default)
 
 (defmethod serialization/read Buffer [_ string] (read string))

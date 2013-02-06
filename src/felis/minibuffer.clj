@@ -1,10 +1,9 @@
 (ns felis.minibuffer
-  (:refer-clojure :exclude [empty])
 ;*CLJSBUILD-REMOVE*;(:use-macros [felis.macros :only (tag)])
   (:require [felis.macros :as macros]
             [felis.text :as text]
             [felis.node :as node]
-            [felis.empty :as empty]
+            [felis.default :as default]
             [felis.serialization :as serialization]))
 
 ;*CLJSBUILD-REMOVE*;(comment
@@ -12,8 +11,8 @@
 ;*CLJSBUILD-REMOVE*;)
 
 (defn render [text]
-  (tag :div {:class "minibuffer"}
-       (text/inside text)))
+  (tag :pre {:class "minibuffer"}
+       (text/focus text)))
 
 (defrecord Minibuffer [text commands]
   node/Node
@@ -25,8 +24,8 @@
 
 (def commands (conj path :commands))
 
-(def empty (Minibuffer. text/empty {}))
+(def default (Minibuffer. text/default {}))
 
 (defmethod node/path Minibuffer [_] path)
 
-(defmethod empty/empty Minibuffer [_] empty)
+(defmethod default/default Minibuffer [_] default)

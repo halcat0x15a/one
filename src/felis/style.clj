@@ -26,4 +26,16 @@
        {:position "absolute"
         :bottom "0px"}))
 
-(def all [editor focus minibuffer])
+(def special
+  (css :.special
+       {:color "fuchsia"}))
+
+(def string
+  (css :.string
+       {:color "red"}))
+
+(def keyword
+  (css :.keyword
+       {:color "aqua"}))
+
+(def all [editor focus minibuffer special string keyword])

@@ -25,6 +25,3 @@
           (recur source' "" (conj! strings chunk))
           (recur source' (str chunk char) strings)))
       (persistent! (conj! strings chunk)))))
-
-(defn nbsp [string]
-  (string/replace string #" " "&nbsp;"))

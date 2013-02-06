@@ -5,7 +5,6 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [org.clojure/tools.nrepl "0.2.0-RC1"]
-                 [org.clojure/core.match "0.2.0-alpha11"]
                  [org.clojure/test.generative "0.3.0"]]
   :plugins [[lein-cljsbuild "0.3.0"]]
   :cljsbuild {:crossovers [felis]

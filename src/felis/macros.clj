@@ -6,7 +6,7 @@
   (let [open (str \<
                   (name tag)
                   (reduce-kv (fn [attrs key value]
-                               (str attrs \space (name key) \= \" (name value) \"))
+                               (str attrs \space (name key) \= \" value \"))
                              ""
                              attrs)
                   \>)

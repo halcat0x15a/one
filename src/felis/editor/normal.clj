@@ -1,5 +1,4 @@
 (ns felis.editor.normal
-  (:refer-clojure :exclude [empty])
   (:require [felis.key :as key]
             [felis.group :as group]
             [felis.editor :as editor]
@@ -36,4 +35,4 @@
   (keymap [editor] keymap)
   (input [editor char] editor))
 
-(def empty (Normal. group/empty))
+(def default (Normal. group/default))

@@ -1,12 +1,11 @@
 (ns felis.group
-  (:refer-clojure :exclude [empty])
 ;*CLJSBUILD-REMOVE*;  (:use-macros [felis.macros :only (tag)])
   (:require [clojure.string :as string]
             [felis.style :as style]
             [felis.buffer :as buffer]
             [felis.node :as node]
             [felis.minibuffer :as minibuffer]
-            [felis.empty :as empty]))
+            [felis.default :as default]))
 
 ;*CLJSBUILD-REMOVE*;(comment
 (use '[felis.macros :only (tag)])
@@ -30,8 +29,8 @@
 
 (def path [:root])
 
-(def empty (Group. buffer/empty minibuffer/empty))
+(def default (Group. buffer/default minibuffer/default))
 
 (defmethod node/path Group [_] path)
 
-(defmethod empty/empty Group [_] empty)
+(defmethod default/default Group [_] default)

@@ -2,7 +2,7 @@
   (:require [clojure.test.generative :refer :all]
             [clojure.data.generators :as gen]
             [felis.test :as test]
-            [felis.empty :as empty]
+            [felis.default :as default]
             [felis.edit :refer :all]))
 
 (defspec opposite-opposite
@@ -20,14 +20,14 @@
   [^test/edit edit ^test/field _]
   (is (= % edit)))
 
-(defspec empty-move
+(defspec default-move
   (fn [edit field]
-    (-> edit type empty/empty (move field)))
+    (-> edit type default/default (move field)))
   [^test/edit edit ^test/field _]
-  (is (empty/empty? %)))
+  (is (default/default? %)))
 
-(defspec empty-delete
+(defspec default-delete
   (fn [edit field]
-    (-> edit type empty/empty (delete field)))
+    (-> edit type default/default (delete field)))
   [^test/edit edit ^test/field _]
-  (is (empty/empty? %)))
+  (is (default/default? %)))

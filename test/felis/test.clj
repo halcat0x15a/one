@@ -1,11 +1,11 @@
 (ns felis.test
-  (:refer-clojure :exclude [list empty])
+  (:refer-clojure :exclude [list])
   (:require [clojure.data.generators :as gen]
             [felis.text :as text]
             [felis.minibuffer :as minibuffer]
             [felis.buffer :as buffer]
             [felis.group :as group]
-            [felis.empty :as empty]
+            [felis.default :as default]
             [felis.editor.normal :as normal]))
 
 (defn list [f]
@@ -27,7 +27,7 @@
   (gen/rand-nth [(list gen/anything) (gen/vec gen/anything)]))
 
 (defn buffer []
-  (buffer/->Buffer (gen/keyword) (text) (top) (bottom)))
+  (buffer/->Buffer (gen/keyword) (text) (top) (bottom) identity))
 
 (defn edit []
   (gen/rand-nth [(text) (buffer)]))
@@ -45,8 +45,8 @@
   (gen/rand-nth [:lefts :rights]))
 
 (defn serializable []
-  (letfn [(text [] (assoc text/empty :rights (gen/string)))]
-    (gen/rand-nth [(text) (assoc buffer/empty
+  (letfn [(text [] (assoc text/default :rights (gen/string)))]
+    (gen/rand-nth [(text) (assoc buffer/default
                             :focus (text)
                             :rights (list (text)))])))
 
