@@ -33,7 +33,9 @@
   (gen/rand-nth [(text) (buffer)]))
 
 (defn group []
-  (group/->Group (buffer) (minibuffer)))
+  (assoc group/default
+    :buffer (buffer)
+    :minibuffer (minibuffer)))
 
 (defn node []
   (rand-nth [(group) (buffer) (minibuffer) (text)]))

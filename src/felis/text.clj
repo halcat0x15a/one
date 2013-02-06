@@ -1,6 +1,5 @@
 (ns felis.text
   (:refer-clojure :exclude [peek pop conj read])
-;*CLJSBUILD-REMOVE*;(:use-macros [felis.macros :only (tag)])
   (:require [clojure.core :as core]
             [felis.string :as string]
             [felis.collection :as collection]
@@ -8,10 +7,6 @@
             [felis.node :as node]
             [felis.serialization :as serialization]
             [felis.default :as default]))
-
-;*CLJSBUILD-REMOVE*;(comment
-(use '[felis.macros :only (tag)])
-;*CLJSBUILD-REMOVE*;)
 
 (defmulti peek (fn [feild string] feild))
 (defmethod peek :rights [_ string] (first string))

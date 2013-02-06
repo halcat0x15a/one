@@ -1,41 +1,34 @@
-(ns felis.style
-;*CLJSBUILD-REMOVE*;  (:use-macros [felis.macros :only (css)])
-  )
+(ns felis.style)
 
-;*CLJSBUILD-REMOVE*;(comment
-(use '[felis.macros :only (css)])
-;*CLJSBUILD-REMOVE*;)
+(def default
+  {:.editor
+   {:color :black
+    :background-color :white
+    :font-size :16px
+    :font-family :monospace}
+   :.focus
+   {:display :inline-block
+    :width :1ex
+    :height :1em
+    :color :white
+    :background-color :black}
+   :.minibuffer
+   {:position :absolute
+    :bottom :0px}
+   :.special
+   {:color :fuchsia}
+   :.string
+   {:color :red}
+   :.keyword
+   {:color :aqua}})
 
-(def editor
-  (css :.editor
-       {:color "black"
-        :background-color "white"
-        :font-size "16px"
-        :font-family "monospace"}))
-
-(def focus
-  (css :.focus
-       {:display "inline-block"
-        :width "1ex"
-        :height "1em"
-        :color "white"
-        :background-color "black"}))
-
-(def minibuffer
-  (css :.minibuffer
-       {:position "absolute"
-        :bottom "0px"}))
-
-(def special
-  (css :.special
-       {:color "fuchsia"}))
-
-(def string
-  (css :.string
-       {:color "red"}))
-
-(def keyword
-  (css :.keyword
-       {:color "aqua"}))
-
-(def all [editor focus minibuffer special string keyword])
+(defn css [style]
+  (reduce-kv (fn [string selector block]
+               (let [selector (name selector)
+                     block (reduce-kv (fn [block property value]
+                                        (str block \space (name property) \: \space (name value) \;))
+                                      ""
+                                      block)]
+                 (str string \space selector \space \{ block \space \})))
+             ""
+             style))

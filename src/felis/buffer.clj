@@ -1,6 +1,5 @@
 (ns felis.buffer
   (:refer-clojure :exclude [read])
-;*CLJSBUILD-REMOVE*;  (:use-macros [felis.macros :only (tag)])
   (:require [felis.string :as string]
             [felis.collection :as collection]
             [felis.edit :as edit]
@@ -9,10 +8,6 @@
             [felis.node :as node]
             [felis.default :as default]
             [felis.syntax :as syntax]))
-
-;*CLJSBUILD-REMOVE*;(comment
-(use '[felis.macros :only (tag)])
-;*CLJSBUILD-REMOVE*;)
 
 (defn move [{:keys [focus] :as buffer} field]
   (if-let [focus' (-> buffer field peek)]
@@ -37,11 +32,11 @@
 (defn render [{:keys [lefts focus rights syntax]}]
   (letfn [(outside [text]
             (->> text text/write (syntax/highlight syntax)))]
-    (tag :pre {:class "buffer"}
-         (->> (concat (map outside lefts)
-                      (->> focus text/focus (syntax/highlight syntax) list)
-                      (map outside rights))
-              (string/make-string "<br>")))))
+    (node/tag :pre {:class "buffer"}
+              (->> (concat (map outside lefts)
+                           (->> focus text/focus (syntax/highlight syntax) list)
+                           (map outside rights))
+                   (string/make-string "<br>")))))
 
 (defn write [{:keys [lefts focus rights]}]
   (->> (concat lefts (list focus) rights)

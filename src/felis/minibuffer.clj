@@ -1,18 +1,12 @@
 (ns felis.minibuffer
-;*CLJSBUILD-REMOVE*;(:use-macros [felis.macros :only (tag)])
-  (:require [felis.macros :as macros]
-            [felis.text :as text]
+  (:require [felis.text :as text]
             [felis.node :as node]
             [felis.default :as default]
             [felis.serialization :as serialization]))
 
-;*CLJSBUILD-REMOVE*;(comment
-(use '[felis.macros :only (tag)])
-;*CLJSBUILD-REMOVE*;)
-
 (defn render [text]
-  (tag :pre {:class "minibuffer"}
-       (text/focus text)))
+  (node/tag :pre {:class :minibuffer}
+            (text/focus text)))
 
 (defrecord Minibuffer [text commands]
   node/Node
