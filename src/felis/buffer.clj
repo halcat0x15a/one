@@ -1,6 +1,6 @@
 (ns felis.buffer
   (:refer-clojure :exclude [read empty])
-;*CLJSBUILD-REMOVE*;(:use-macros [felis.macros :only (tag)])
+;*CLJSBUILD-REMOVE*;  (:use-macros [felis.macros :only (tag)])
   (:require [felis.string :as string]
             [felis.collection :as collection]
             [felis.edit :as edit]
